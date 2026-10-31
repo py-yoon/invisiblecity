@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/site';
+
+// 옛 '링크'(/link/)와 '참고 사이트'(/page/) 페이지를 합친 소개 페이지
+const maps = [
+  ['/am/', '우리나라에서 꼭 가볼 만한 건축 (건축지도)'],
+  ['/am/#world', '세계문화유산으로 남은 르 코르뷔지에의 건축 (세계 건축지도)'],
+  ['/대한민국에-있는-프리츠커상-수상-건축가의-작품/', '우리나라에서 볼 수 있는 프리츠커상 수상자 작품'],
+  ['/한국-공공하수처리시설-공공폐수처리시설-현황/', '공공하수처리시설, 공공폐수처리시설 지도'],
+  ['/한국-지식산업센터-현황-지도2023년-6월말-기준/', '지식산업센터 지도'],
+  ['/한국-아파트-단지-세대수-순위-top-2000/', '아파트 단지 세대수 TOP 2000'],
+  ['/한국에서-가장-큰-공장-2000개/', '한국에서 가장 큰 공장 2000'],
+  ['/유현준-인문-건축-기행-지도30곳/', '유현준 교수 추천 건축 30선'],
+];
+const refs = [
+  ['https://ecos.bok.or.kr/#/', '한국은행 - 경제통계시스템'],
+  ['https://www.molit.go.kr/USR/NEWS/m_71/lst.jsp', '국토교통부 보도자료'],
+  ['https://www.reb.or.kr/r-one/statistics/statisticsViewer.do?menuId=TSPIA_43100', '한국부동산원 - 주간아파트 매매가격지수'],
+  ['https://kbland.kr/', 'KB부동산 - KB통계 > 주간아파트'],
+  ['https://www.google.com/finance/quote/USD-KRW?window=MAX', '환율 - USD/KRW'],
+  ['https://asil.kr/asil/index.jsp?device=computer', '아실 - 아파트 가격 순위·입주물량'],
+  ['https://www.aptgin.com/home/gin04/gin0403', '부동산지인 - 미분양 통계'],
+  ['https://www.bdsplanet.com/map/realprice_map/YUGvBcQLSUB/N/F/1/32.01.ytp', '부동산플래닛 - 실거래가 조회'],
+  ['https://www.disco.re/', '디스코 - 실거래가 조회'],
+];
+---
+<Base title="소개" description="보이지 않는 도시연구소(invisiblecity) 소개, 대표 지도와 글, 참고 사이트">
+  <article class="single">
+    <h1 class="entry-title">소개</h1>
+    <div class="entry-content">
+      <p>보이지 않는 도시연구소는 도시를 바꾸는 개발사업, 건축, 부동산 제도와 통계를 기록하는 블로그입니다. 글을 쓰다 모은 자료로 지도와 사이트도 만들고 있습니다.</p>
+      <p>
+        <a class="button" href="https://www.youtube.com/@_wanbo">유튜브</a>
+        <a class="button" href="https://www.instagram.com/__wanbo/">인스타그램</a>
+      </p>
+
+      <h2 id="maps">대표 지도와 글</h2>
+      <ul>{maps.map(([href, label]) => <li><a href={url(href)}>{label}</a></li>)}</ul>
+
+      <h2 id="refs">참고 사이트</h2>
+      <p>글을 쓸 때 자주 보는 통계와 시세 사이트입니다.</p>
+      <ul>{refs.map(([href, label]) => <li><a href={href}>{label}</a></li>)}</ul>
+    </div>
+  </article>
+</Base>

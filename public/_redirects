@@ -1,4 +1,14 @@
-# 옛 워드프레스 주소 → 새 주소 (Cloudflare Pages 규칙, GitHub Pages는 무시)
+# 옛 워드프레스 주소 → 새 주소 (Cloudflare 규칙)
+
+# 2026-10-31 메뉴 정리로 합친 페이지
+/wm/ /am/#world 301
+/wm /am/#world 301
+/link/ /about/ 301
+/link /about/ 301
+/page/ /about/ 301
+/page /about/ 301
+/tools/ /tools-2/ 301
+/tools /tools-2/ 301
 
 /wp-content/uploads/2024/03/image-1-150x150.png /uploads/2024/03/image-1-1024x481.png 301
 /wp-content/uploads/2024/03/image-1-1536x721.png /uploads/2024/03/image-1-1024x481.png 301
