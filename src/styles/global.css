@@ -138,12 +138,13 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 /* 첫 화면 '만든 사이트' 카드 */
 .apps { margin: 0.6em 0 1.6em; }
 .apps h2 { font-size: 32px; font-weight: 600; text-transform: uppercase; line-height: 1.2; margin: 0 0 16px; padding-top: 1rem; }
-.apps ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.apps ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .app a { display: flex; flex-direction: column; gap: 8px; height: 100%; padding: 18px 20px 16px; border: 1px solid #000; text-decoration: none; transition: transform 0.15s, box-shadow 0.15s; }
 .app a:hover { color: #000; transform: translate(-3px, -3px); box-shadow: 4px 4px 0 #000; }
 .app.pink a { background: var(--pink); }
 .app.purple a { background: var(--purple); }
 .app.yellow a { background: var(--yellow); }
+.app.white a { background: #fff; }
 .app-name { font-size: 28px; font-weight: 900; text-transform: uppercase; line-height: 1; letter-spacing: 0.01em; }
 .app-title { font-size: 19px; font-weight: 700; }
 .app-desc { font-size: 16px; line-height: 1.45; flex: 1; }
