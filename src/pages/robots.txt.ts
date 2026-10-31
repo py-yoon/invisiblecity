@@ -5,6 +5,6 @@ export function GET({ site }: APIContext) {
   const preview = site?.origin !== 'https://invisiblecity.co.kr';
   const body = preview
     ? 'User-agent: *\nDisallow: /\n'
-    : `User-agent: *\nAllow: /\n\nSitemap: ${new URL('sitemap-index.xml', site).href}\n`;
+    : `User-agent: *\nAllow: /\n\nSitemap: ${new URL('sitemap-index.xml', site).href}\nSitemap: ${new URL('spire/sitemap.xml', site).href}\n`;
   return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
 }
