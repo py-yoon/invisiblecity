@@ -72,7 +72,7 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 .post-list li { padding-top: 0.8em; margin-bottom: 1.5em; }
 .post-list h2 { font-size: 30px; font-weight: 600; line-height: 1.2; margin: 0; padding: 1rem 0; }
 .post-list p { margin: 0 0 0.9em; }
-.post-list .excerpt { margin-top: 0.3em; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.post-list .excerpt { overflow-wrap: anywhere; margin-top: 0.3em; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .post-list .date { font-weight: 500; }
 .pagination { display: flex; justify-content: space-between; gap: 1em; margin-top: 1em; }
 .pagination a:only-child { margin-right: auto; }
@@ -153,7 +153,7 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 .apps { margin: 0.6em 0 1.6em; }
 .apps h2 { font-size: 32px; font-weight: 600; text-transform: uppercase; line-height: 1.2; margin: 0 0 16px; padding-top: 1rem; }
 .apps ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.app a { display: flex; flex-direction: column; gap: 8px; height: 100%; padding: 18px 20px 16px; border: 1px solid #000; text-decoration: none; transition: transform 0.15s, box-shadow 0.15s; }
+.app a { display: flex; flex-direction: column; gap: 6px; height: 100%; padding: 16px 20px; border: 1px solid #000; text-decoration: none; transition: transform 0.15s, box-shadow 0.15s; }
 .app a:hover { color: #000; transform: translate(-3px, -3px); box-shadow: 4px 4px 0 #000; }
 .app.pink a { background: var(--pink); }
 .app.purple a { background: var(--purple); }
@@ -162,7 +162,9 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 .app-name { font-size: 28px; font-weight: 900; text-transform: uppercase; line-height: 1; letter-spacing: 0.01em; }
 .app-title { font-size: 19px; font-weight: 700; }
 .app-desc { font-size: 16px; line-height: 1.45; flex: 1; }
-.app-go { font-size: 16px; font-weight: 700; text-decoration: underline; text-underline-offset: 0.15em; }
+.app-top { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+.app-go { margin-left: auto; font-size: 24px; font-weight: 900; line-height: 1; transition: transform 0.15s; }
+.app a:hover .app-go { transform: translateX(4px); }
 
 /* 꼬리말: 노랑 위젯 + 분홍 저작권 띠 */
 .site-footer { border-top: 2px solid var(--rule); font-size: 18px; }
@@ -226,13 +228,13 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
   nav > a.menu-top { font-size: 17px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,.15); width: 100%; }
   .menu-search-label { display: inline; text-transform: none; }
   body { font-size: 18px; }
-  .post-list { grid-template-columns: 1fr; }
+  .post-list { grid-template-columns: minmax(0, 1fr); }
   .apps h2 { font-size: 25px; }
   .apps ul { grid-template-columns: 1fr; gap: 12px; }
-  .app a { padding: 14px 16px; gap: 6px; }
+  .app a { padding: 12px 14px; gap: 4px; }
   .app-name { font-size: 22px; }
   .app-title { font-size: 17px; }
-  .app-desc { font-size: 15px; }
+  .app-desc { font-size: 15px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
   .post-list h2 { font-size: 24px; }
   .entry-title { font-size: 30px; }
   .single:not(.wide) .entry-content { font-size: 18px; }
@@ -245,4 +247,12 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
   .copyright { display: flex; flex-wrap: wrap; gap: 0 0.4em; padding-right: 72px; }
   .search-form button { padding: 10px 16px; font-size: 16px; }
   .footer-widgets h2 { font-size: 32px; }
+}
+
+/* 아주 좁은 화면: 사이트 카드 제목을 한 줄에 */
+@media (max-width: 360px) {
+  .app-name { font-size: 19px; }
+  .app-title { font-size: 15px; }
+  .app-top { gap: 4px 8px; }
+  .app-go { font-size: 20px; }
 }

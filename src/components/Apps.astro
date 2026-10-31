@@ -2,11 +2,11 @@
 import { url } from '../lib/site';
 // 첫 화면의 '만든 사이트' 카드. 블로그 밖 주소는 절대 주소로 둔다.
 const apps = [
-  { href: url('/factory/'), name: 'FACTORY MAP', title: '공장용지 지도', desc: '전국 산업단지 1,476곳의 분양 상태·미분양 면적·분양가·유치업종을 지도에서 찾습니다. 매주 갱신.', tone: 'pink' },
-  { href: 'https://retrack.invisiblecity.co.kr/', name: 'RETRACK', title: '서울 재개발·재건축 현황', desc: '서울 정비사업 진행 단계와 민간개발, 인구·시세 흐름을 지도와 표로 한눈에 봅니다.', tone: 'purple' },
-  { href: url('/architect'), name: 'ARCHITECT', title: '건축, 걷다', desc: '한국과 일본의 근대·현대 건축 772곳을 지도에서 찾고, 답사 코스를 따라 걸어 봅니다.', tone: 'yellow' },
-  { href: url('/nimby/'), name: 'NIMBY MAP', title: '전국 기피시설 지도', desc: '소각장·하수처리장·화장장·변전소 등 1만여 곳. 우리 동네 반경 안의 시설을 찾아봅니다.', tone: 'white' },
-  { href: url('/spire/'), name: 'SPIRE', title: '세계 최고층 빌딩 도감', desc: '300m 이상 초고층 108동을 같은 축척으로 세워 비교합니다. 측정 기준별 순위·지도·연표.', tone: 'pink' },
+  { href: url('/factory/'), name: 'FACTORY MAP', title: '공장용지 지도', desc: '전국 산업단지 1,476곳의 분양 상태·미분양 면적·분양가. 매주 갱신.', tone: 'pink' },
+  { href: 'https://retrack.invisiblecity.co.kr/', name: 'RETRACK', title: '서울 재개발·재건축', desc: '서울 재개발·재건축 874곳의 진행단계, 민간개발과 시세 흐름.', tone: 'purple' },
+  { href: url('/architect'), name: 'ARCHITECT', title: '건축, 걷다', desc: '한국·일본 근대·현대 건축 772곳과 걸어서 도는 답사 코스.', tone: 'yellow' },
+  { href: url('/nimby/'), name: 'NIMBY MAP', title: '전국 기피시설 지도', desc: '소각장·하수처리장·화장장 등 1만여 곳을 우리 동네 반경으로 검색.', tone: 'white' },
+  { href: url('/spire/'), name: 'SPIRE', title: '세계 최고층 빌딩 도감', desc: '300m 이상 초고층 108동을 같은 축척으로 세워 비교합니다.', tone: 'pink' },
 ];
 ---
 <section class="apps" aria-labelledby="apps-title">
@@ -15,10 +15,12 @@ const apps = [
     {apps.map((a) => (
       <li class={`app ${a.tone}`}>
         <a href={a.href}>
-          <span class="app-name">{a.name}</span>
-          <span class="app-title">{a.title}</span>
+          <span class="app-top">
+            <span class="app-name">{a.name}</span>
+            <span class="app-title">{a.title}</span>
+            <span class="app-go" aria-hidden="true">→</span>
+          </span>
           <span class="app-desc">{a.desc}</span>
-          <span class="app-go">바로가기 →</span>
         </a>
       </li>
     ))}
