@@ -3,13 +3,16 @@ import '../styles/global.css';
 import SearchForm from '../components/SearchForm.astro';
 import { SITE_TITLE, SITE_DESC, url, getPosts, groupBy, postUrl, categoryUrl, fmtShortDate } from '../lib/site';
 
-interface Props { title?: string; description?: string; image?: string; type?: 'website' | 'article' }
-const { title, description = SITE_DESC, image, type = 'website' } = Astro.props;
+interface Article { published: Date; modified?: Date; section?: string; tags: string[] }
+interface Props { title?: string; description?: string; image?: string; type?: 'website' | 'article'; article?: Article; jsonld?: object[] }
+const { title, description = SITE_DESC, image, type = 'website', article, jsonld = [] } = Astro.props;
 const fullTitle = title ? `${title} - ${SITE_TITLE}` : `${SITE_TITLE} - ${SITE_DESC}`;
 // 미리보기(github.io)는 검색에 안 잡히게 하고, 대표 주소는 항상 실제 도메인으로
 const REAL_SITE = 'https://invisiblecity.co.kr';
 const isPreview = Astro.site?.origin !== REAL_SITE;
-const canonical = new URL(Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/', REAL_SITE);
+// 워드프레스와 똑같이 퍼센트 인코딩은 소문자(%eb…)로
+const canonical = new URL(Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/', REAL_SITE)
+  .href.replace(/%[0-9A-F]{2}/g, (m) => m.toLowerCase());
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
 const nav = [
   ['/am/', '건축지도'],
@@ -30,7 +33,7 @@ const categories = groupBy(posts, 'categories').map(([n]) => n).sort((a, b) => a
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {isPreview && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="robots" content={isPreview ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large'} />
     {!isPreview && (
       <>
         <meta name="naver-site-verification" content="9c751a75167a24abd8cd503ceabd5d2edac50c72" />
@@ -53,12 +56,26 @@ const categories = groupBy(posts, 'categories').map(([n]) => n).sort((a, b) => a
     <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href={url('/rss.xml')} />
     <link rel="sitemap" href={url('/sitemap-index.xml')} />
     <link rel="preload" href={url('/fonts/Poppins-Regular.woff2')} as="font" type="font/woff2" crossorigin />
-    <meta property="og:site_name" content={SITE_TITLE} />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:site_name" content="보이지않는도시연구소" />
     <meta property="og:type" content={type} />
-    <meta property="og:title" content={title ?? SITE_TITLE} />
+    <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     {ogImage && <meta property="og:image" content={ogImage} />}
+    {article && (
+      <>
+        {article.tags.map((t) => <meta property="article:tag" content={t} />)}
+        {article.section && <meta property="article:section" content={article.section} />}
+        <meta property="article:published_time" content={article.published.toISOString()} />
+        {article.modified && <meta property="article:modified_time" content={article.modified.toISOString()} />}
+      </>
+    )}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    {jsonld.length > 0 && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonld.length === 1 ? jsonld[0] : { '@context': 'https://schema.org', '@graph': jsonld })} />}
     <style is:inline set:html={['Regular:400', 'Medium:500', 'SemiBold:600', 'Bold:700', 'Black:900'].map((f) => {
       const [name, weight] = f.split(':');
       return `@font-face{font-family:Poppins;font-weight:${weight};font-style:normal;font-display:swap;src:url('${url(`/fonts/Poppins-${name}.woff2`)}') format('woff2')}`;

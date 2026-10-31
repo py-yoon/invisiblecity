@@ -4,8 +4,18 @@ import PostList from '../components/PostList.astro';
 import Sidebar from '../components/Sidebar.astro';
 import { getPosts, PER_PAGE } from '../lib/site';
 const posts = await getPosts();
+const SITE = 'https://invisiblecity.co.kr';
+const jsonld = [{
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'invisiblecity',
+  alternateName: '보이지 않는 도시연구소',
+  url: `${SITE}/`,
+  inLanguage: 'ko-KR',
+  potentialAction: { '@type': 'SearchAction', target: `${SITE}/search/?q={search_term_string}`, 'query-input': 'required name=search_term_string' },
+}];
 ---
-<Base>
+<Base jsonld={jsonld}>
   <div class="with-sidebar">
     <div class="content"><PostList posts={posts.slice(0, PER_PAGE)} pages={Math.ceil(posts.length / PER_PAGE)} /></div>
     <Sidebar />

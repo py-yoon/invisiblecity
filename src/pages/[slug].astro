@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import { getPosts, postSlug, postUrl, categoryUrl, tagUrl, fmtDate, withBase, url, tocOf } from '../lib/site';
+import { getPosts, postSlug, postUrl, categoryUrl, categorySlug, tagUrl, fmtDate, withBase, url, tocOf } from '../lib/site';
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -17,11 +17,45 @@ export async function getStaticPaths() {
 const props = Astro.props;
 const html = props.kind === 'post' ? withBase(props.post.rendered?.html ?? '') : '';
 const toc = tocOf(html);
+
+// 검색엔진용 구조화 데이터 (Rank Math가 넣던 BlogPosting·BreadcrumbList)
+const SITE = 'https://invisiblecity.co.kr';
+let jsonld: object[] = [];
+let article;
+if (props.kind === 'post') {
+  const d = props.post.data;
+  const pageUrl = `${SITE}/${encodeURI(postSlug(props.post))}/`;
+  article = { published: d.date, modified: d.updated, section: d.categories[0], tags: d.tags };
+  jsonld = [
+    {
+      '@type': 'BlogPosting',
+      headline: d.title,
+      description: d.description,
+      datePublished: d.date.toISOString(),
+      dateModified: (d.updated ?? d.date).toISOString(),
+      author: { '@type': 'Person', name: 'Wanbo', url: SITE },
+      publisher: { '@type': 'Organization', name: '보이지않는도시연구소', url: SITE, logo: { '@type': 'ImageObject', url: `${SITE}/favicon.png` } },
+      mainEntityOfPage: pageUrl,
+      inLanguage: 'ko-KR',
+      ...(d.cover ? { image: `${SITE}${d.cover}` } : {}),
+      ...(d.categories[0] ? { articleSection: d.categories[0] } : {}),
+      ...(d.tags.length ? { keywords: d.tags.join(', ') } : {}),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` },
+        ...(d.categories[0] ? [{ '@type': 'ListItem', position: 2, name: d.categories[0], item: `${SITE}/category/${encodeURI(categorySlug(d.categories[0]))}/` }] : []),
+        { '@type': 'ListItem', position: d.categories[0] ? 3 : 2, name: d.title, item: pageUrl },
+      ],
+    },
+  ];
+}
 const updated = props.kind === 'post' && props.post.data.updated && fmtDate(props.post.data.updated) !== fmtDate(props.post.data.date)
   ? fmtDate(props.post.data.updated) : null;
 ---
 {props.kind === 'post' ? (
-  <Base title={props.post.data.title} description={props.post.data.description} image={props.post.data.cover && url(props.post.data.cover)} type="article">
+  <Base title={props.post.data.title} description={props.post.data.description} image={props.post.data.cover && url(props.post.data.cover)} type="article" article={article} jsonld={jsonld}>
     <article class="single">
       <h1 class="entry-title">{props.post.data.title}</h1>
       <p class="entry-dateline">

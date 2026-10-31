@@ -391,12 +391,15 @@
 /wp-content/uploads/2023/12/image-768x422.png /uploads/2023/12/image-1024x562.png 301
 /wp-content/uploads/2023/12/image.png /uploads/2023/12/image-1024x562.png 301
 
+/wp-content/uploads/2023/07/image-150x150.png /uploads/2023/07/image.png 301
+/wp-content/uploads/2023/07/image-300x191.png /uploads/2023/07/image.png 301
 /wp-content/uploads/* /uploads/:splat 301
 /feed/ /rss.xml 301
 /feed /rss.xml 301
 /sitemap_index.xml /sitemap-index.xml 301
 /post-sitemap.xml /sitemap-index.xml 301
 /page-sitemap.xml /sitemap-index.xml 301
+/category-sitemap.xml /sitemap-index.xml 301
 /category/:slug/page/* /category/:slug/ 301
 /tag/:slug/page/* /tag/:slug/ 301
 /category/:slug/feed/ /rss.xml 301

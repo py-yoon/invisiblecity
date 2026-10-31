@@ -28,7 +28,8 @@ const warnings = [];
 
 // 옛 주소(https://invisiblecity.co.kr/...)를 사이트 안 경로로 바꾼다.
 function localize(url) {
-  const m = url.match(/^(?:https?:)?\/\/(?:www\.)?invisiblecity\.co\.kr(\/[^"'\s]*)?$/i);
+  // 카페24 임시 주소(yoonzin.mycafe24.com)로 넣은 이미지도 같은 사이트로 본다
+  const m = url.match(/^(?:https?:)?\/\/(?:www\.)?(?:invisiblecity\.co\.kr|yoonzin\.mycafe24\.com)(\/[^"'\s]*)?$/i);
   if (!m) return url;
   let p = m[1] || '/';
   const up = p.match(/^\/wp-content\/uploads\/([^?#]+)/);
