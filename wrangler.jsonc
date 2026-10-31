@@ -4,7 +4,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "invisiblecity",
   "compatibility_date": "2026-10-01",
-  // /spire·/nimby 요청만 Worker 코드(worker/index.js)가 받아 각 Vercel 사이트로 넘긴다.
+  // /spire·/nimby·/factory 요청만 Worker 코드(worker/index.js)가 받아 각 Vercel 사이트로 넘긴다.
   "main": "worker/index.js",
   // 실제 도메인 연결. 배포할 때 Cloudflare가 DNS 기록과 인증서를 자동으로 만든다.
   "routes": [
@@ -14,7 +14,7 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "run_worker_first": ["/spire", "/spire/*", "/nimby", "/nimby/*"],
+    "run_worker_first": ["/spire", "/spire/*", "/nimby", "/nimby/*", "/factory", "/factory/*"],
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
   }

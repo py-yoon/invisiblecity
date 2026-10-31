@@ -1,10 +1,12 @@
 // invisiblecity.co.kr Worker: 블로그 정적 파일은 그대로 내보내고(ASSETS),
-// /spire/·/nimby/ 아래 요청만 각 Vercel 프로젝트로 넘겨 같은 도메인에서 보이게 한다.
+// /spire/·/nimby/·/factory/ 아래 요청만 각 Vercel 프로젝트로 넘겨 같은 도메인에서 보이게 한다.
 const APPS = [
   // SPIRE(worlds-tallest)는 Next.js basePath가 /spire 라서 경로를 그대로 넘긴다.
   { prefix: '/spire', origin: 'https://worlds-tallest.vercel.app', keepPrefix: true },
   // 기피시설 지도(ghmun-nimby-map)는 루트에서 도는 정적 사이트라 /nimby 를 떼고 넘긴다.
   { prefix: '/nimby', origin: 'https://ghmun-nimby-map.vercel.app', keepPrefix: false },
+  // 공장용지 지도(factory-map)도 루트에서 도는 정적 사이트다.
+  { prefix: '/factory', origin: 'https://factory-map.vercel.app', keepPrefix: false },
 ];
 
 export default {
