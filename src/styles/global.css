@@ -58,7 +58,7 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 .post-list li { padding-top: 0.8em; margin-bottom: 1.5em; }
 .post-list h2 { font-size: 30px; font-weight: 600; line-height: 1.2; margin: 0; padding: 1rem 0; }
 .post-list p { margin: 0 0 0.9em; }
-.post-list .excerpt { margin-top: 0.3em; }
+.post-list .excerpt { margin-top: 0.3em; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .post-list .date { font-weight: 500; }
 .pagination { display: flex; justify-content: space-between; gap: 1em; margin-top: 1em; }
 .pagination a:only-child { margin-right: auto; }
@@ -109,6 +109,26 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 .entry-content .button { display: inline-block; padding: 10px 20px; border: 1px solid #000; border-radius: 30px; background: var(--pink); text-decoration: none; font-weight: 700; margin: 0 8px 8px 0; }
 .entry-content .button:hover { background: var(--yellow); color: #000; }
 .page-raw iframe { max-width: 100%; border: 0; }
+
+/* 글 화면: 읽기 좋은 폭과 줄 간격 (도구·지도 페이지는 넓게 둔다) */
+.single:not(.wide) { max-width: 820px; margin: 0 auto; }
+.single:not(.wide) .entry-content { font-size: 20px; line-height: 1.75; }
+.single:not(.wide) .entry-content h2, .single:not(.wide) .entry-content h3 { line-height: 1.35; scroll-margin-top: 1em; }
+.single:not(.wide) .entry-content .verse { line-height: 1.75; }
+.single:not(.wide) .entry-content table { line-height: 1.5; }
+.entry-content picture { display: block; }
+.entry-title + .entry-dateline { margin-top: -0.2em; }
+.entry-dateline { margin: 0 0 1.6em; font-size: 18px; font-weight: 500; }
+.entry-dateline .updated { color: #555; }
+.entry-dateline .draft-badge { margin: 0 0 0 0.6em; vertical-align: 2px; }
+.toc { margin: 0 0 2em; padding: 18px 22px; background: var(--yellow); border: 1px solid #000; font-size: 17px; line-height: 1.5; }
+.toc p { margin: 0 0 0.5em; font-weight: 700; text-transform: uppercase; }
+.toc ol { margin: 0; padding-left: 1.3em; }
+.toc li { margin: 0.2em 0; }
+.toc li.l3 { list-style: none; margin-left: 1em; font-size: 0.94em; }
+.toc li.l3::before { content: '– '; }
+.toc a { text-decoration: none; }
+.toc a:hover { text-decoration: underline; color: #000; }
 
 .entry-meta { display: grid; grid-template-columns: 30% 1fr; gap: 1em; padding: 1.5em 0 1em; }
 .entry-meta .author { font-weight: 600; margin: 0; }
@@ -166,6 +186,9 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
   .post-list { grid-template-columns: 1fr; }
   .post-list h2 { font-size: 24px; }
   .entry-title { font-size: 30px; }
+  .single:not(.wide) .entry-content { font-size: 18px; }
+  .entry-dateline { font-size: 15px; }
+  .toc { font-size: 16px; padding: 14px 16px; }
   .entry-content h2, .sidebar h2, .archive-title { font-size: 25px; }
   .entry-content .verse { padding: 14px; }
   .entry-meta { grid-template-columns: 1fr; }

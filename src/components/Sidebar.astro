@@ -2,12 +2,12 @@
 import SearchForm from './SearchForm.astro';
 import { getPosts, groupBy, postUrl, tagUrl, fmtDate } from '../lib/site';
 const posts = await getPosts();
-// 워드프레스 태그 구름: 많이 쓴 45개를 이름순으로, 8pt~22pt
+// 워드프레스 태그 구름: 많이 쓴 45개를 이름순으로, 13px~29px
 const top = groupBy(posts, 'tags').slice(0, 45);
 const counts = top.map(([, ps]) => ps.length);
 const min = Math.min(...counts), max = Math.max(...counts);
 const tags = top.sort((a, b) => a[0].localeCompare(b[0], 'ko'))
-  .map(([name, ps]) => ({ name, size: max === min ? 12 : 8 + ((ps.length - min) / (max - min)) * 14 }));
+  .map(([name, ps]) => ({ name, size: max === min ? 16 : 13 + ((ps.length - min) / (max - min)) * 16 }));
 ---
 <aside class="sidebar">
   <h2>Recent Posts</h2>
@@ -18,7 +18,7 @@ const tags = top.sort((a, b) => a[0].localeCompare(b[0], 'ko'))
   </ul>
   <h2>Tags</h2>
   <p class="tag-cloud">
-    {tags.map((t) => <a href={tagUrl(t.name)} style={`font-size:${t.size.toFixed(1)}pt`}>{t.name}</a>)}
+    {tags.map((t) => <a href={tagUrl(t.name)} style={`font-size:${t.size.toFixed(1)}px`}>{t.name}</a>)}
   </p>
   <SearchForm />
 </aside>

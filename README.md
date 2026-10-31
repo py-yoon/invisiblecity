@@ -11,7 +11,7 @@
 
 ```sh
 pnpm dev                 # 로컬 미리보기
-pnpm build               # dist/ 생성 + 검색 색인
+pnpm build               # dist/ 생성 + 이미지 WebP 변환 + 검색 색인
 pnpm convert [백업폴더]   # 워드프레스 백업에서 글·이미지 다시 생성 (기존 글을 덮어씀)
 ```
 

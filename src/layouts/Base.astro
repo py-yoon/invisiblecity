@@ -9,12 +9,12 @@ const fullTitle = title ? `${title} - ${SITE_TITLE}` : `${SITE_TITLE} - ${SITE_D
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
 const nav = [
-  ['/link/', 'Link'],
-  ['/page/', 'PAGE'],
-  ['/tools/', 'Tools'],
-  ['/tools-2/', 'Tools'],
   ['/am/', '건축지도'],
   ['/wm/', '세계 건축지도'],
+  ['/tools-2/', '부동산 계산기'],
+  ['/tools/', '평 환산기'],
+  ['/page/', '참고 사이트'],
+  ['/link/', '링크'],
 ];
 const posts = await getPosts();
 const categories = groupBy(posts, 'categories').map(([n]) => n).sort((a, b) => a.localeCompare(b, 'ko'));

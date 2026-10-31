@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import { getPosts, postSlug, postUrl, categoryUrl, tagUrl, fmtDate, withBase, url } from '../lib/site';
+import { getPosts, postSlug, postUrl, categoryUrl, tagUrl, fmtDate, withBase, url, tocOf } from '../lib/site';
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -15,13 +15,28 @@ export async function getStaticPaths() {
   ];
 }
 const props = Astro.props;
+const html = props.kind === 'post' ? withBase(props.post.rendered?.html ?? '') : '';
+const toc = tocOf(html);
+const updated = props.kind === 'post' && props.post.data.updated && fmtDate(props.post.data.updated) !== fmtDate(props.post.data.date)
+  ? fmtDate(props.post.data.updated) : null;
 ---
 {props.kind === 'post' ? (
   <Base title={props.post.data.title} description={props.post.data.description} image={props.post.data.cover && url(props.post.data.cover)} type="article">
     <article class="single">
       <h1 class="entry-title">{props.post.data.title}</h1>
-      {props.post.data.draft && <p class="draft-badge">초안</p>}
-      <div class="entry-content" data-pagefind-body set:html={withBase(props.post.rendered?.html ?? '')} />
+      <p class="entry-dateline">
+        <time datetime={props.post.data.date.toISOString()}>{fmtDate(props.post.data.date)}</time>
+        {props.post.data.categories.map((c) => <> · <a href={categoryUrl(c)}>{c}</a></>)}
+        {updated && <span class="updated"> · 수정 {updated}</span>}
+        {props.post.data.draft && <span class="draft-badge">초안</span>}
+      </p>
+      {toc.length > 0 && (
+        <nav class="toc" aria-label="목차">
+          <p>목차</p>
+          <ol>{toc.map((h) => <li class={`l${h.level}`}><a href={`#${h.id}`}>{h.text}</a></li>)}</ol>
+        </nav>
+      )}
+      <div class="entry-content" data-pagefind-body set:html={html} />
       <hr />
       <div class="entry-meta">
         <p class="author">Wanbo</p>
@@ -45,7 +60,7 @@ const props = Astro.props;
   </Base>
 ) : (
   <Base title={props.page.data.title}>
-    <article class="single">
+    <article class="single wide">
       <h1 class="entry-title">{props.page.data.title}</h1>
       <div class="entry-content page-raw" data-pagefind-body set:html={withBase(props.page.body ?? '')} />
     </article>

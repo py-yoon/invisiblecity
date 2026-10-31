@@ -131,13 +131,16 @@ function plainText(md) {
     .replace(/^>\s?/gm, '').replace(/[#*_|`]+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+// 'Tools'가 둘이던 메뉴를 알아보기 쉬운 이름으로
+const PAGE_TITLES = { tools: '평 환산기', 'tools-2': '부동산 계산기', page: '참고 사이트', link: '링크' };
+
 let counts = { post: 0, page: 0, draft: 0 };
 for (const it of items) {
   if (it.type === 'page' && it.status !== 'publish') continue;
   const html = prepare(it.content);
   if (it.type === 'page') {
     // 페이지는 도구·지도 같은 HTML이 많아 원본 HTML을 그대로 둔다.
-    const fm = ['---', `title: ${yamlStr(decode(it.title))}`, `slug: ${yamlStr(it.slug)}`, `date: ${kst(it.date)}`, '---', ''];
+    const fm = ['---', `title: ${yamlStr(PAGE_TITLES[it.slug] ?? decode(it.title))}`, `slug: ${yamlStr(it.slug)}`, `date: ${kst(it.date)}`, '---', ''];
     fs.writeFileSync(path.join(PAGES_DIR, fileName(it.slug) + '.html'), fm.join('\n') + html.trim() + '\n');
     counts.page++;
     continue;

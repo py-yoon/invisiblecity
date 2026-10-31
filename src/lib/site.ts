@@ -62,3 +62,13 @@ export function excerptOf(p: Post) {
 export const fmtDate = (d: Date) => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(d);
 export const fmtShortDate = (d: Date) =>
   new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', year: 'numeric' }).format(d);
+
+/** 소제목(h2·h3)이 3개 이상인 글의 목차 */
+export function tocOf(html: string) {
+  const items = [...html.matchAll(/<h([23]) id="([^"]+)">([\s\S]*?)<\/h\1>/g)].map(([, level, id, inner]) => ({
+    level: Number(level),
+    id,
+    text: decodeEntities(inner.replace(/<[^>]+>/g, '')).trim(),
+  })).filter((h) => h.text);
+  return items.length >= 3 ? items : [];
+}
