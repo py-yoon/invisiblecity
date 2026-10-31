@@ -131,8 +131,18 @@ const menu: [string, MenuItem[]][] = [
       <div class="footer-widgets">
         <section>
           <h2>About</h2>
-          <p>보이지 않는 도시연구소<br /><a class="footer-about" href={url('/about/')}>소개 · 참고 사이트 →</a></p>
+          <p class="footer-intro">보이지 않는 도시연구소는 도시를 바꾸는 개발사업, 건축, 부동산 제도와 통계를 기록합니다.<br /><a class="footer-about" href={url('/about/')}>소개 · 참고 사이트 →</a></p>
           <SearchForm />
+          <h3 class="footer-sub">Sites</h3>
+          <ul class="footer-sites">
+            {SITES.map(([href, label]) => <li><a href={href}>{label}</a></li>)}
+          </ul>
+          <h3 class="footer-sub">Follow</h3>
+          <p class="footer-follow">
+            <a href="https://www.youtube.com/@_wanbo">YouTube</a>
+            <a href="https://www.instagram.com/__wanbo/">Instagram</a>
+            <a href={url('/rss.xml')}>RSS</a>
+          </p>
         </section>
         <section>
           <h2>Posts</h2>
