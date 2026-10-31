@@ -15,5 +15,6 @@ pnpm build               # dist/ 생성 + 이미지 WebP 변환 + 검색 색인
 pnpm convert [백업폴더]   # 워드프레스 백업에서 글·이미지 다시 생성 (기존 글을 덮어씀)
 ```
 
-GitHub Pages 미리보기는 `BASE=/invisiblecity/`로 빌드한다(`.github/workflows/pages.yml`).
-실제 도메인으로 옮길 때는 BASE 없이 빌드하면 된다.
+배포: Cloudflare Workers(`wrangler.jsonc`)가 main에 푸시될 때마다 `pnpm build` 후 dist/를 올린다.
+invisiblecity.co.kr·www가 이 Worker에 연결되어 있다. `_redirects`가 옛 워드프레스 주소를 넘겨준다.
+(2026-10-31까지 쓰던 GitHub Pages 미리보기는 BASE=/invisiblecity/ 로 빌드했고, 지금은 껐다.)
