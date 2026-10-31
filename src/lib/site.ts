@@ -35,7 +35,7 @@ export async function getPosts() {
     const body = p.body ?? '';
     p.data.description ||= body.replace(/<[^>]+>|!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
       .replace(/[#>*_|`]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
-    p.data.cover ??= body.match(/!\[[^\]]*\]\((\/uploads\/[^)\s]+)/)?.[1];
+    p.data.cover ||= body.match(/!\[[^\]]*\]\((\/uploads\/[^)\s]+)/)?.[1];
   }
   return all.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 }
