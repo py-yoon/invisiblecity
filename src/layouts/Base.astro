@@ -6,7 +6,10 @@ import { SITE_TITLE, SITE_DESC, url, getPosts, groupBy, postUrl, categoryUrl, fm
 interface Props { title?: string; description?: string; image?: string; type?: 'website' | 'article' }
 const { title, description = SITE_DESC, image, type = 'website' } = Astro.props;
 const fullTitle = title ? `${title} - ${SITE_TITLE}` : `${SITE_TITLE} - ${SITE_DESC}`;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+// 미리보기(github.io)는 검색에 안 잡히게 하고, 대표 주소는 항상 실제 도메인으로
+const REAL_SITE = 'https://invisiblecity.co.kr';
+const isPreview = Astro.site?.origin !== REAL_SITE;
+const canonical = new URL(Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/', REAL_SITE);
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
 const nav = [
   ['/am/', '건축지도'],
@@ -27,6 +30,7 @@ const categories = groupBy(posts, 'categories').map(([n]) => n).sort((a, b) => a
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {isPreview && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" href={url('/favicon.png')} />
     <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href={url('/rss.xml')} />
     <link rel="sitemap" href={url('/sitemap-index.xml')} />
