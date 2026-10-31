@@ -137,7 +137,7 @@ const menu: [string, MenuItem[]][] = [
         <section>
           <h2>Posts</h2>
           <ul class="footer-posts">
-            {posts.slice(0, 3).map((p) => (
+            {posts.slice(0, 10).map((p) => (
               <li><a href={postUrl(p)}>{p.data.title}</a><time datetime={p.data.date.toISOString()}>{fmtShortDate(p.data.date)}</time></li>
             ))}
           </ul>
