@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PostList from '../../components/PostList.astro';
-import CategoryChips from '../../components/CategoryChips.astro';
+import Sidebar from '../../components/Sidebar.astro';
 import { getPosts, PER_PAGE } from '../../lib/site';
 
 export async function getStaticPaths() {
@@ -14,11 +14,9 @@ export async function getStaticPaths() {
 }
 const { page, pages, posts } = Astro.props;
 ---
-<Base title={`글 목록 ${page}쪽`}>
-  <div class="wrap list-head">
-    <CategoryChips />
-  </div>
-  <div class="wrap">
-    <PostList posts={posts} page={page} pages={pages} />
+<Base title={`페이지 ${page}`}>
+  <div class="with-sidebar">
+    <div class="content"><PostList posts={posts} page={page} pages={pages} /></div>
+    <Sidebar />
   </div>
 </Base>

@@ -1,7 +1,8 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PostList from '../../components/PostList.astro';
-import { getPosts, groupBy, tagSlug, url } from '../../lib/site';
+import Sidebar from '../../components/Sidebar.astro';
+import { getPosts, groupBy, tagSlug } from '../../lib/site';
 
 export async function getStaticPaths() {
   return groupBy(await getPosts(), 'tags').map(([name, posts]) => ({
@@ -11,10 +12,12 @@ export async function getStaticPaths() {
 }
 const { name, posts } = Astro.props;
 ---
-<Base title={`#${name}`} description={`${name} 태그가 붙은 글 ${posts.length}편`}>
-  <div class="wrap list-head">
-    <p class="intro-kicker"><a href={url('/tags/')}>태그</a></p>
-    <h1>#{name}</h1>
+<Base title={name} description={`${name}  글 ${posts.length}편`}>
+  <div class="with-sidebar">
+    <div class="content">
+      <h1 class="archive-title">태그: {name}</h1>
+      <PostList posts={posts} />
+    </div>
+    <Sidebar />
   </div>
-  <div class="wrap"><PostList posts={posts} /></div>
 </Base>

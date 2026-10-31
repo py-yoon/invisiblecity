@@ -1,0 +1,8 @@
+---
+import { url } from '../lib/site';
+---
+<form class="search-form" action={url('/search/')} method="get" role="search">
+  <label class="sr-only" for={`s-${Math.random().toString(36).slice(2, 7)}`}>검색</label>
+  <input type="search" name="q" aria-label="검색" />
+  <button type="submit">Search</button>
+</form>

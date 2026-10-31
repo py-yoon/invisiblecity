@@ -3,7 +3,7 @@ import taxonomy from '../data/taxonomy.json';
 
 export const SITE_TITLE = 'invisiblecity';
 export const SITE_DESC = '보이지 않는 도시연구소';
-export const PER_PAGE = 12;
+export const PER_PAGE = 10;
 
 export type Post = CollectionEntry<'posts'>;
 
@@ -46,5 +46,19 @@ export function groupBy(posts: Post[], key: 'categories' | 'tags') {
   return [...map.entries()].sort((a, b) => b[1].length - a[1].length);
 }
 
-export const fmtDate = (d: Date) =>
-  new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' }).format(d);
+// 워드프레스 테마와 같은 날짜 형식: 본문 2026-10-04, 꼬리말 10/4/2026
+const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', nbsp: ' ', '#39': "'", '#039': "'" };
+const decodeEntities = (s: string) => s.replace(/&(#?\w+);/g, (m, e) => ENTITIES[e] ?? m);
+/** 워드프레스 기본 요약처럼 본문 앞 55단어. 요약을 직접 쓴 글은 그것을 쓴다. */
+export function excerptOf(p: Post) {
+  const custom = p.data.description;
+  if (custom && !p.data.wpId) return decodeEntities(custom);
+  const text = decodeEntities((p.rendered?.html ?? '').replace(/<(style|script)[\s\S]*?<\/\1>/g, '').replace(/<[^>]+>/g, ' '))
+    .replace(/\s+/g, ' ').trim();
+  const words = text.split(' ');
+  return words.length > 55 ? words.slice(0, 55).join(' ') + '…' : text;
+}
+
+export const fmtDate = (d: Date) => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(d);
+export const fmtShortDate = (d: Date) =>
+  new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', year: 'numeric' }).format(d);

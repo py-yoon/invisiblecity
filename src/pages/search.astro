@@ -4,8 +4,10 @@ import { url } from '../lib/site';
 ---
 <Base title="검색">
   <link slot="head" rel="stylesheet" href={url('/pagefind/pagefind-ui.css')} />
-  <div class="wrap-narrow list-head"><h1>검색</h1></div>
-  <div class="wrap-narrow"><div id="search"></div></div>
+  <article class="single">
+    <h1 class="entry-title">검색</h1>
+    <div id="search"></div>
+  </article>
   <script is:inline define:vars={{ src: url('/pagefind/pagefind-ui.js') }}>
     const s = document.createElement('script');
     s.src = src;

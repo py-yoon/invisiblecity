@@ -3,9 +3,9 @@ import Base from '../layouts/Base.astro';
 import { getPosts, groupBy, tagUrl } from '../lib/site';
 const tags = groupBy(await getPosts(), 'tags').sort((a, b) => a[0].localeCompare(b[0], 'ko'));
 ---
-<Base title="태그">
-  <div class="wrap-narrow list-head"><h1>태그 <small>{tags.length}</small></h1></div>
-  <div class="wrap-narrow tag-cloud">
-    {tags.map(([name, ps]) => <a href={tagUrl(name)} style={`--w:${Math.min(ps.length, 6)}`}>#{name}<small>{ps.length}</small></a>)}
-  </div>
+<Base title="Tags">
+  <article class="single">
+    <h1 class="entry-title">Tags</h1>
+    <p class="tag-cloud">{tags.map(([name, ps]) => <a href={tagUrl(name)} style={`font-size:${Math.min(8 + ps.length * 2, 22)}pt`}>{name}</a>)}</p>
+  </article>
 </Base>

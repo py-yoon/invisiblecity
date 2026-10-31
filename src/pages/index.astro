@@ -1,18 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
-import CategoryChips from '../components/CategoryChips.astro';
+import Sidebar from '../components/Sidebar.astro';
 import { getPosts, PER_PAGE } from '../lib/site';
 const posts = await getPosts();
 ---
 <Base>
-  <section class="wrap intro">
-    <p class="intro-kicker">보이지 않는 도시연구소</p>
-    <h1>도시는 눈에 보이지 않는 제도와 숫자로 만들어집니다.</h1>
-    <p class="intro-sub">개발사업, 건축가, 부동산 제도와 통계를 정리합니다. 글 {posts.length}편.</p>
-  </section>
-  <div class="wrap">
-    <CategoryChips />
-    <PostList posts={posts.slice(0, PER_PAGE)} pages={Math.ceil(posts.length / PER_PAGE)} featureFirst />
+  <div class="with-sidebar">
+    <div class="content"><PostList posts={posts.slice(0, PER_PAGE)} pages={Math.ceil(posts.length / PER_PAGE)} /></div>
+    <Sidebar />
   </div>
 </Base>

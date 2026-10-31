@@ -1,20 +1,23 @@
 ---
 import '../styles/global.css';
-import { SITE_TITLE, SITE_DESC, url } from '../lib/site';
+import SearchForm from '../components/SearchForm.astro';
+import { SITE_TITLE, SITE_DESC, url, getPosts, groupBy, postUrl, categoryUrl, fmtShortDate } from '../lib/site';
 
 interface Props { title?: string; description?: string; image?: string; type?: 'website' | 'article' }
 const { title, description = SITE_DESC, image, type = 'website' } = Astro.props;
 const fullTitle = title ? `${title} - ${SITE_TITLE}` : `${SITE_TITLE} - ${SITE_DESC}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
-const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '');
 const nav = [
-  ['/', '글'],
+  ['/link/', 'Link'],
+  ['/page/', 'PAGE'],
+  ['/tools/', 'Tools'],
+  ['/tools-2/', 'Tools'],
   ['/am/', '건축지도'],
   ['/wm/', '세계 건축지도'],
-  ['/tools-2/', '도구'],
-  ['/link/', '링크'],
 ];
+const posts = await getPosts();
+const categories = groupBy(posts, 'categories').map(([n]) => n).sort((a, b) => a.localeCompare(b, 'ko'));
 ---
 <!doctype html>
 <html lang="ko">
@@ -27,50 +30,64 @@ const nav = [
     <link rel="icon" href={url('/favicon.png')} />
     <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href={url('/rss.xml')} />
     <link rel="sitemap" href={url('/sitemap-index.xml')} />
+    <link rel="preload" href={url('/fonts/Poppins-Regular.woff2')} as="font" type="font/woff2" crossorigin />
     <meta property="og:site_name" content={SITE_TITLE} />
     <meta property="og:type" content={type} />
     <meta property="og:title" content={title ?? SITE_TITLE} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     {ogImage && <meta property="og:image" content={ogImage} />}
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+    <style is:inline set:html={['Regular:400', 'Medium:500', 'SemiBold:600', 'Bold:700', 'Black:900'].map((f) => {
+      const [name, weight] = f.split(':');
+      return `@font-face{font-family:Poppins;font-weight:${weight};font-style:normal;font-display:swap;src:url('${url(`/fonts/Poppins-${name}.woff2`)}') format('woff2')}`;
+    }).join('')} />
     <slot name="head" />
   </head>
   <body>
+    <div class="top-bar"><p>보이지않는도시연구소</p></div>
     <header class="site-header">
-      <div class="wrap header-inner">
-        <a class="brand" href={url('/')}>
-          <img class="brand-mark" src={url("/favicon.png")} alt="" width="40" height="40" />
-          <span class="brand-text"><strong>invisiblecity</strong><span>보이지 않는 도시연구소</span></span>
-        </a>
-        <nav class="nav" aria-label="주 메뉴">
-          {nav.map(([href, label]) => (
-            <a href={url(href)} aria-current={(href === '/' ? path === '/' || path.startsWith('/page/') : path.startsWith(href)) ? 'page' : undefined}>{label}</a>
-          ))}
-          <a class="nav-search" href={url('/search/')} aria-label="검색">
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          </a>
+      <div class="site-title"><a href={url('/')}>invisiblecity</a></div>
+      <div class="nav-wrap">
+        <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+        <label for="nav-toggle" class="nav-button" aria-label="메뉴 열기"><span></span><span></span><span></span></label>
+        <nav aria-label="메뉴">
+          {nav.map(([href, label]) => <a href={url(href)} aria-current={Astro.url.pathname === url(href) ? 'page' : undefined}>{label}</a>)}
         </nav>
       </div>
     </header>
-    <main>
+    <main class="site-main">
       <slot />
     </main>
     <footer class="site-footer">
-      <div class="wrap footer-inner">
-        <div>
-          <strong>invisiblecity</strong>
-          <p>도시를 바꾸는 개발사업, 건축, 부동산 제도를 기록합니다.</p>
-        </div>
-        <div class="footer-links">
-          <a href={url('/categories/')}>카테고리</a>
-          <a href={url('/tags/')}>태그</a>
-          <a href={url('/rss.xml')}>RSS</a>
-          <a href="https://www.youtube.com/@_wanbo">유튜브</a>
-        </div>
+      <div class="footer-widgets">
+        <section>
+          <h2>About</h2>
+          <p>보이지 않는 도시연구소</p>
+          <SearchForm />
+        </section>
+        <section>
+          <h2>Posts</h2>
+          <ul class="footer-posts">
+            {posts.slice(0, 3).map((p) => (
+              <li><a href={postUrl(p)}>{p.data.title}</a><time datetime={p.data.date.toISOString()}>{fmtShortDate(p.data.date)}</time></li>
+            ))}
+          </ul>
+        </section>
+        <section>
+          <h2>Category</h2>
+          <ul class="footer-cats">
+            {categories.map((c) => <li><a href={categoryUrl(c)}>{c}</a></li>)}
+          </ul>
+        </section>
       </div>
-      <div class="wrap copyright">© {new Date().getFullYear()} invisiblecity.co.kr</div>
+      <div class="copyright">© {new Date().getFullYear()} invisiblecity</div>
     </footer>
+    <a class="back-to-top" href="#" aria-label="맨 위로">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <script is:inline>
+      const btn = document.querySelector('.back-to-top');
+      addEventListener('scroll', () => btn.classList.toggle('show', scrollY > 300), { passive: true });
+    </script>
   </body>
 </html>

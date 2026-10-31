@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PostList from '../../components/PostList.astro';
-import CategoryChips from '../../components/CategoryChips.astro';
+import Sidebar from '../../components/Sidebar.astro';
 import { getPosts, groupBy, categorySlug } from '../../lib/site';
 
 export async function getStaticPaths() {
@@ -12,11 +12,12 @@ export async function getStaticPaths() {
 }
 const { name, posts } = Astro.props;
 ---
-<Base title={name} description={`${name} 카테고리의 글 ${posts.length}편`}>
-  <div class="wrap list-head">
-    <p class="intro-kicker">카테고리</p>
-    <h1>{name}</h1>
-    <CategoryChips current={name} />
+<Base title={name} description={`${name}  글 ${posts.length}편`}>
+  <div class="with-sidebar">
+    <div class="content">
+      <h1 class="archive-title">카테고리: {name}</h1>
+      <PostList posts={posts} />
+    </div>
+    <Sidebar />
   </div>
-  <div class="wrap"><PostList posts={posts} /></div>
 </Base>
