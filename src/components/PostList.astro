@@ -1,0 +1,21 @@
+---
+import PostCard from './PostCard.astro';
+import type { Post } from '../lib/site';
+import { url } from '../lib/site';
+interface Props { posts: Post[]; page?: number; pages?: number; basePath?: string; featureFirst?: boolean }
+const { posts, page = 1, pages = 1, basePath = '/', featureFirst = false } = Astro.props;
+const pageHref = (n: number) => url(n === 1 ? basePath : `${basePath}page/${n}/`);
+---
+<div class="grid">
+  {posts.map((p, i) => <PostCard post={p} feature={featureFirst && i === 0} />)}
+</div>
+{pages > 1 && (
+  <nav class="pager" aria-label="페이지">
+    {page > 1 ? <a href={pageHref(page - 1)}>← 이전</a> : <span />}
+    <span class="pager-nums">
+      {Array.from({ length: pages }, (_, i) => i + 1).map((n) =>
+        n === page ? <span aria-current="page">{n}</span> : <a href={pageHref(n)}>{n}</a>)}
+    </span>
+    {page < pages ? <a href={pageHref(page + 1)}>다음 →</a> : <span />}
+  </nav>
+)}

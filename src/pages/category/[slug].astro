@@ -1,0 +1,22 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import CategoryChips from '../../components/CategoryChips.astro';
+import { getPosts, groupBy, categorySlug } from '../../lib/site';
+
+export async function getStaticPaths() {
+  return groupBy(await getPosts(), 'categories').map(([name, posts]) => ({
+    params: { slug: categorySlug(name) },
+    props: { name, posts },
+  }));
+}
+const { name, posts } = Astro.props;
+---
+<Base title={name} description={`${name} 카테고리의 글 ${posts.length}편`}>
+  <div class="wrap list-head">
+    <p class="intro-kicker">카테고리</p>
+    <h1>{name}</h1>
+    <CategoryChips current={name} />
+  </div>
+  <div class="wrap"><PostList posts={posts} /></div>
+</Base>

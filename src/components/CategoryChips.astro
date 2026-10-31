@@ -1,0 +1,12 @@
+---
+import { getPosts, groupBy, categoryUrl, url } from '../lib/site';
+interface Props { current?: string }
+const { current } = Astro.props;
+const cats = groupBy(await getPosts(), 'categories');
+---
+<nav class="chips" aria-label="카테고리">
+  <a href={url('/')} aria-current={!current ? 'page' : undefined}>전체</a>
+  {cats.map(([name, ps]) => (
+    <a href={categoryUrl(name)} aria-current={current === name ? 'page' : undefined}>{name}<small>{ps.length}</small></a>
+  ))}
+</nav>

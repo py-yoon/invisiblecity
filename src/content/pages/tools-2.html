@@ -1,0 +1,1366 @@
+---
+title: "Tools"
+slug: "tools-2"
+date: 2026-07-14T21:16:24+09:00
+---
+<!-- ═══════════════════════════════════════════════════════
+     부동산 통합 계산기 — 워드프레스 임베드용
+     · 워드프레스 편집기에서 "사용자 정의 HTML" 블록에 통째로 붙여넣으세요.
+     · 스크립트가 제거되는 환경이면 WPCode 같은 코드 삽입 플러그인을 쓰세요.
+     · 모든 CSS는 #rec-app 안으로만 적용되고, JS는 전역을 오염시키지 않습니다.
+     ═══════════════════════════════════════════════════════ -->
+
+<div id="rec-app">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+#rec-app{
+  --rec-ink:#14201c;
+  --rec-paper:#f1f2ed;
+  --rec-surface:#ffffff;
+  --rec-line:#d9dbd3;
+  --rec-line-soft:#e8eae3;
+  --rec-muted:#6e756c;
+  --rec-pine:#17453a;
+  --rec-pine-soft:#e6eeea;
+  --rec-brass:#9a6f1c;
+  --rec-brick:#9c3b2a;
+  --rec-mono:'JetBrains Mono',ui-monospace,'Courier New',monospace;
+  --rec-body:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',sans-serif;
+  --rec-display:'Gowun Batang','Nanum Myeongjo',serif;
+
+  all:initial;
+  display:block;
+  font-family:var(--rec-body);
+  font-size:15px;
+  line-height:1.55;
+  color:var(--rec-ink);
+  background:var(--rec-paper);
+  text-align:left;
+  padding:0 0 28px;
+}
+#rec-app *,#rec-app *::before,#rec-app *::after{box-sizing:border-box;margin:0;padding:0;font-family:inherit}
+
+/* 헤더 */
+#rec-app .rec-head{border-bottom:1px solid var(--rec-ink);padding:22px 22px 16px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+#rec-app .rec-head h2{font-family:var(--rec-display);font-weight:700;font-size:25px;letter-spacing:-.02em;line-height:1.3;color:var(--rec-ink);border:0}
+#rec-app .rec-head .rec-sub{font-size:12.5px;color:var(--rec-muted)}
+#rec-app .rec-head .rec-stamp{margin-left:auto;font-family:var(--rec-mono);font-size:10.5px;letter-spacing:.06em;color:var(--rec-pine);border:1px solid var(--rec-pine);padding:3px 9px;white-space:nowrap}
+
+/* 레이아웃 */
+#rec-app .rec-layout{display:grid;grid-template-columns:200px 1fr;gap:32px;padding:26px 22px 0}
+
+/* 좌측 목록 */
+#rec-app .rec-rail{align-self:start}
+#rec-app .rec-grp{margin-bottom:20px}
+#rec-app .rec-grp-lb{font-family:var(--rec-mono);font-size:10px;letter-spacing:.14em;color:var(--rec-muted);text-transform:uppercase;padding-bottom:7px;margin-bottom:7px;border-bottom:1px solid var(--rec-line)}
+#rec-app .rec-rail button{display:block;width:100%;text-align:left;background:none;border:0;border-left:2px solid transparent;border-radius:0;cursor:pointer;font-size:14px;font-weight:400;color:var(--rec-ink);padding:6px 0 6px 12px;line-height:1.5;text-transform:none;letter-spacing:normal;box-shadow:none;transition:border-color .12s,color .12s}
+#rec-app .rec-rail button:hover{color:var(--rec-pine);background:none}
+#rec-app .rec-rail button[aria-current="true"]{border-left-color:var(--rec-pine);color:var(--rec-pine);font-weight:600}
+#rec-app .rec-rail button:focus-visible{outline:2px solid var(--rec-pine);outline-offset:2px}
+
+/* 본문 */
+#rec-app .rec-panel{display:none}
+#rec-app .rec-panel.rec-on{display:block}
+#rec-app .rec-panel > .rec-ttl{margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--rec-ink)}
+#rec-app .rec-panel > .rec-ttl h3{font-family:var(--rec-display);font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.35;color:var(--rec-ink);border:0}
+#rec-app .rec-panel > .rec-ttl p{font-size:13px;color:var(--rec-muted);margin-top:5px;max-width:62ch;line-height:1.6}
+#rec-app .rec-panel > .rec-ttl strong{color:var(--rec-ink);font-weight:600}
+
+#rec-app .rec-cols{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+
+/* 입력 */
+#rec-app .rec-card{background:var(--rec-surface);border:1px solid var(--rec-line);padding:22px}
+#rec-app .rec-f{margin-bottom:17px}
+#rec-app .rec-f:last-child{margin-bottom:0}
+#rec-app .rec-card label{display:block;font-size:12.5px;font-weight:600;color:var(--rec-ink);margin-bottom:6px;line-height:1.4;text-transform:none}
+#rec-app .rec-hint{font-weight:400;color:var(--rec-muted);font-size:11.5px;margin-left:5px}
+#rec-app .rec-card input[type=number],#rec-app .rec-card select{
+  display:block;width:100%;max-width:none;height:auto;min-height:0;
+  font-family:var(--rec-mono);font-size:14.5px;line-height:1.5;color:var(--rec-ink);
+  background:#fbfcfa;background-image:none;border:1px solid var(--rec-line);border-radius:2px;
+  padding:9px 11px;box-shadow:none;margin:0;
+  -webkit-appearance:none;appearance:none;
+  transition:border-color .12s,background .12s;
+}
+#rec-app .rec-card select{font-family:var(--rec-body);font-size:14px;background-image:linear-gradient(45deg,transparent 50%,var(--rec-muted) 50%),linear-gradient(135deg,var(--rec-muted) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:32px}
+#rec-app .rec-card input:focus,#rec-app .rec-card select:focus{outline:none;border-color:var(--rec-pine);background-color:#fff;box-shadow:none}
+#rec-app .rec-card input[type=number]{-moz-appearance:textfield}
+#rec-app .rec-card input[type=number]::-webkit-outer-spin-button,
+#rec-app .rec-card input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+/* 서명 요소: 한글 금액 실시간 표기 */
+#rec-app .rec-kread{font-family:var(--rec-mono);font-size:11.5px;color:var(--rec-brass);margin-top:5px;min-height:16px;letter-spacing:-.01em;line-height:1.4}
+
+#rec-app .rec-r2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+#rec-app .rec-r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+
+#rec-app .rec-chk{display:flex;align-items:center;gap:8px;margin-bottom:9px;font-size:13.5px;font-weight:400;cursor:pointer;line-height:1.4}
+#rec-app .rec-chk:last-child{margin-bottom:0}
+#rec-app .rec-card input[type=checkbox]{width:15px;height:15px;min-height:0;padding:0;margin:0;accent-color:var(--rec-pine);cursor:pointer;flex:none;-webkit-appearance:auto;appearance:auto;border:0;background:none}
+#rec-app .rec-fs{border:0;margin:0 0 17px;padding:0}
+#rec-app .rec-fs legend{font-size:12.5px;font-weight:600;margin-bottom:8px;padding:0;color:var(--rec-ink);float:none;width:auto}
+
+/* 결과 */
+#rec-app .rec-notice{background:var(--rec-surface);border:1px solid var(--rec-ink)}
+#rec-app .rec-nhd{padding:11px 18px;border-bottom:1px solid var(--rec-ink);display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+#rec-app .rec-nhd span:first-child{font-family:var(--rec-mono);font-size:10px;letter-spacing:.14em;color:var(--rec-muted)}
+#rec-app .rec-nhd span:last-child{font-family:var(--rec-mono);font-size:10.5px;color:var(--rec-pine);white-space:nowrap}
+#rec-app .rec-nbd{padding:18px}
+#rec-app .rec-tot{padding-bottom:15px;margin-bottom:14px;border-bottom:1px solid var(--rec-line)}
+#rec-app .rec-tot .rec-cap{font-size:12px;color:var(--rec-muted);margin-bottom:3px}
+#rec-app .rec-tot .rec-num{font-family:var(--rec-mono);font-weight:700;font-size:28px;letter-spacing:-.03em;line-height:1.2;word-break:break-all;color:var(--rec-ink)}
+#rec-app .rec-tot .rec-kor{font-family:var(--rec-mono);font-size:12px;color:var(--rec-brass);margin-top:3px;line-height:1.4}
+
+#rec-app table.rec-lg{width:100%;border-collapse:collapse;border:0;font-size:13px;margin:0;background:none;table-layout:auto}
+#rec-app table.rec-lg tr{border-bottom:1px dotted var(--rec-line);background:none}
+#rec-app table.rec-lg tr:last-child{border-bottom:0}
+#rec-app table.rec-lg tr.rec-sum{border-top:1px solid var(--rec-ink);border-bottom:0}
+#rec-app table.rec-lg tr.rec-sum td{padding-top:9px;font-weight:700}
+#rec-app table.rec-lg td{padding:6px 0;vertical-align:baseline;border:0;color:var(--rec-ink);background:none}
+#rec-app table.rec-lg td:first-child{color:var(--rec-muted);text-align:left}
+#rec-app table.rec-lg td:last-child{text-align:right;font-family:var(--rec-mono);white-space:nowrap;padding-left:12px}
+#rec-app table.rec-lg .rec-rt{font-family:var(--rec-mono);font-size:10.5px;color:var(--rec-muted);margin-left:5px}
+#rec-app table.rec-lg tr.rec-neg td:last-child{color:var(--rec-pine)}
+#rec-app table.rec-lg tr.rec-hot td:last-child{color:var(--rec-brick)}
+
+#rec-app .rec-flag{margin-top:14px;padding:9px 11px;background:#fdf6ec;border-left:2px solid var(--rec-brass);font-size:12px;color:#6b4d11;line-height:1.5}
+#rec-app .rec-flag.rec-warn{background:#fbefec;border-left-color:var(--rec-brick);color:#7a2e20}
+
+/* 보조 표 */
+#rec-app .rec-aux{margin-top:26px}
+#rec-app .rec-aux h4{font-family:var(--rec-display);font-size:16px;font-weight:700;margin-bottom:10px;color:var(--rec-ink);border:0}
+#rec-app .rec-scroll{overflow-x:auto;border:1px solid var(--rec-line);background:var(--rec-surface)}
+#rec-app table.rec-dt{width:100%;border-collapse:collapse;border:0;font-size:12.5px;margin:0;background:none}
+#rec-app table.rec-dt th{background:var(--rec-pine-soft);color:var(--rec-pine);font-weight:600;text-align:right;padding:8px 12px;white-space:nowrap;font-size:11.5px;border:0;border-bottom:1px solid var(--rec-line);position:sticky;top:0;text-transform:none}
+#rec-app table.rec-dt th:first-child{text-align:left}
+#rec-app table.rec-dt td{padding:7px 12px;text-align:right;font-family:var(--rec-mono);white-space:nowrap;border:0;border-bottom:1px solid var(--rec-line-soft);color:var(--rec-ink);background:none}
+#rec-app table.rec-dt td:first-child{text-align:left;font-family:var(--rec-body)}
+#rec-app table.rec-dt tr{background:none;border:0}
+#rec-app table.rec-dt tr:last-child td{border-bottom:0}
+#rec-app table.rec-dt tbody tr:hover{background:#fafbf9}
+#rec-app .rec-cap2{font-size:11.5px;color:var(--rec-muted);margin-top:7px;line-height:1.5}
+#rec-app button.rec-tg{background:none;border:1px solid var(--rec-line);border-radius:2px;font-size:12px;font-weight:400;color:var(--rec-muted);padding:5px 11px;cursor:pointer;margin-bottom:10px;box-shadow:none;text-transform:none;line-height:1.4}
+#rec-app button.rec-tg:hover{border-color:var(--rec-pine);color:var(--rec-pine);background:none}
+
+/* 하단 고지 */
+#rec-app .rec-foot{margin:40px 22px 0;padding-top:18px;border-top:1px solid var(--rec-line);font-size:11.5px;color:var(--rec-muted);line-height:1.7}
+#rec-app .rec-foot strong{color:var(--rec-ink);font-weight:600}
+#rec-app .rec-foot ul{margin:8px 0 0;padding:0 0 0 16px;list-style:disc}
+#rec-app .rec-foot li{margin-bottom:3px;color:var(--rec-muted)}
+
+@media(max-width:900px){
+  #rec-app .rec-head{padding:18px 14px 14px}
+  #rec-app .rec-head .rec-stamp{display:none}
+  #rec-app .rec-layout{grid-template-columns:1fr;gap:18px;padding:18px 14px 0}
+  #rec-app .rec-rail{display:flex;gap:18px;overflow-x:auto;padding-bottom:10px;border-bottom:1px solid var(--rec-line);-webkit-overflow-scrolling:touch}
+  #rec-app .rec-grp{margin-bottom:0;flex:none}
+  #rec-app .rec-grp-lb{border-bottom:0;padding-bottom:4px;margin-bottom:4px}
+  #rec-app .rec-btns{display:flex;gap:4px}
+  #rec-app .rec-rail button{width:auto;white-space:nowrap;border-left:0;border-bottom:2px solid transparent;padding:4px 8px}
+  #rec-app .rec-rail button[aria-current="true"]{border-left:0;border-bottom-color:var(--rec-pine)}
+  #rec-app .rec-cols{grid-template-columns:1fr;gap:18px}
+  #rec-app .rec-r3{grid-template-columns:1fr}
+  #rec-app .rec-tot .rec-num{font-size:24px}
+  #rec-app .rec-foot{margin:32px 14px 0}
+}
+@media(prefers-reduced-motion:reduce){#rec-app *{transition:none!important}}
+</style>
+
+<div class="rec-head">
+  <h2>부동산 통합 계산기</h2>
+  <span class="rec-sub">세금 · 대출 · 임대 · 환산</span>
+  <span class="rec-stamp">기준 2026.07</span>
+</div>
+
+<div class="rec-layout">
+
+  <nav class="rec-rail" id="rec-rail">
+    <div class="rec-grp">
+      <div class="rec-grp-lb">세금 · 거래</div>
+      <div class="rec-btns">
+        <button type="button" data-rt="acq" aria-current="true">취득세</button>
+        <button type="button" data-rt="hold">보유세</button>
+        <button type="button" data-rt="fee">중개보수</button>
+      </div>
+    </div>
+    <div class="rec-grp">
+      <div class="rec-grp-lb">대출</div>
+      <div class="rec-btns">
+        <button type="button" data-rt="loan">상환 계산</button>
+        <button type="button" data-rt="limit">한도 (LTV·DSR)</button>
+        <button type="button" data-rt="prepay">중도상환수수료</button>
+      </div>
+    </div>
+    <div class="rec-grp">
+      <div class="rec-grp-lb">임대 · 투자</div>
+      <div class="rec-btns">
+        <button type="button" data-rt="yield">임대수익률</button>
+        <button type="button" data-rt="conv">전월세 전환</button>
+        <button type="button" data-rt="gap">갭투자 실투자금</button>
+      </div>
+    </div>
+    <div class="rec-grp">
+      <div class="rec-grp-lb">환산</div>
+      <div class="rec-btns">
+        <button type="button" data-rt="area">평 ↔ ㎡</button>
+      </div>
+    </div>
+  </nav>
+
+  <div>
+
+  <!-- 취득세 -->
+  <section class="rec-panel rec-on" id="rec-p-acq">
+    <div class="rec-ttl">
+      <h3>취득세</h3>
+      <p>취득세 본세에 지방교육세와 농어촌특별세를 더한 실제 납부 총액을 계산합니다. 농어촌특별세는 전용면적 85㎡ 초과 주택에만 붙습니다.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-a_cause">취득 원인</label>
+          <select id="rec-a_cause">
+            <option value="buy">유상 매매</option>
+            <option value="gift">증여 (무상취득)</option>
+            <option value="inherit">상속</option>
+            <option value="etc">주택 외 (상가·토지·업무용 오피스텔)</option>
+          </select>
+        </div>
+        <div class="rec-f">
+          <label for="rec-a_price">과세표준 <span class="rec-hint" id="rec-a_hint">취득가액. 증여·상속은 시가표준액</span></label>
+          <input type="number" id="rec-a_price" value="800000000" data-kr="a_price_k">
+          <div class="rec-kread" id="rec-a_price_k"></div>
+        </div>
+        <div class="rec-f" id="rec-a_cnt_wrap">
+          <label for="rec-a_count">취득 후 보유 주택 수 <span class="rec-hint">1세대 전체 기준</span></label>
+          <select id="rec-a_count">
+            <option value="1">1주택 (일시적 2주택 포함)</option>
+            <option value="2">2주택</option>
+            <option value="3">3주택</option>
+            <option value="4">4주택 이상</option>
+            <option value="corp">법인</option>
+          </select>
+        </div>
+        <fieldset class="rec-fs">
+          <legend>적용 조건</legend>
+          <label class="rec-chk"><input type="checkbox" id="rec-a_adj"> 조정대상지역 소재</label>
+          <label class="rec-chk"><input type="checkbox" id="rec-a_big"> 전용면적 85㎡ 초과 <span class="rec-hint">농어촌특별세 부과</span></label>
+          <label class="rec-chk" id="rec-a_first_wrap"><input type="checkbox" id="rec-a_first"> 생애최초 주택 구입 <span class="rec-hint">12억 이하, 최대 200만원</span></label>
+        </fieldset>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>납부 예상액</span><span id="rec-a_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap">합계</div>
+            <div class="rec-num" id="rec-a_total">0원</div>
+            <div class="rec-kor" id="rec-a_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-a_lg"></table>
+          <div class="rec-flag" id="rec-a_flag"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 보유세 -->
+  <section class="rec-panel" id="rec-p-hold">
+    <div class="rec-ttl">
+      <h3>보유세 — 재산세 + 종합부동산세</h3>
+      <p>매년 6월 1일 소유자에게 부과됩니다. 실거래가가 아니라 공시가격 기준입니다.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-h_price">공시가격 합계 <span class="rec-hint">본인 지분 기준</span></label>
+          <input type="number" id="rec-h_price" value="1500000000" data-kr="h_price_k">
+          <div class="rec-kread" id="rec-h_price_k"></div>
+        </div>
+        <div class="rec-f">
+          <label for="rec-h_count">보유 주택 수</label>
+          <select id="rec-h_count">
+            <option value="1">1주택</option>
+            <option value="2">2주택</option>
+            <option value="3">3주택 이상</option>
+          </select>
+        </div>
+        <fieldset class="rec-fs">
+          <legend>적용 조건</legend>
+          <label class="rec-chk"><input type="checkbox" id="rec-h_single" checked> 1세대 1주택 단독명의 <span class="rec-hint">공제 12억 · 재산세 특례</span></label>
+          <label class="rec-chk"><input type="checkbox" id="rec-h_urban" checked> 도시지역분 부과 대상 <span class="rec-hint">과세표준의 0.14%</span></label>
+        </fieldset>
+        <div class="rec-r2" id="rec-h_credit_wrap">
+          <div class="rec-f">
+            <label for="rec-h_age">연령 <span class="rec-hint">고령자 공제</span></label>
+            <select id="rec-h_age">
+              <option value="0">60세 미만</option>
+              <option value="0.2">60~65세 (20%)</option>
+              <option value="0.3">65~70세 (30%)</option>
+              <option value="0.4">70세 이상 (40%)</option>
+            </select>
+          </div>
+          <div class="rec-f">
+            <label for="rec-h_hold">보유기간 <span class="rec-hint">장기보유 공제</span></label>
+            <select id="rec-h_hold">
+              <option value="0">5년 미만</option>
+              <option value="0.2">5~10년 (20%)</option>
+              <option value="0.4">10~15년 (40%)</option>
+              <option value="0.5">15년 이상 (50%)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>연간 보유세</span><span id="rec-h_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap">합계</div>
+            <div class="rec-num" id="rec-h_total">0원</div>
+            <div class="rec-kor" id="rec-h_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-h_lg"></table>
+          <div class="rec-flag" id="rec-h_flag"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 중개보수 -->
+  <section class="rec-panel" id="rec-p-fee">
+    <div class="rec-ttl">
+      <h3>중개보수</h3>
+      <p>요율표는 <strong>상한</strong>입니다. 그 범위 안에서 중개사와 협의해 낮출 수 있습니다. 매도인·매수인이 각각 부담합니다.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-f_type">거래 유형</label>
+          <select id="rec-f_type">
+            <option value="sale">주택 매매 · 교환</option>
+            <option value="rent">주택 임대차 (전세 · 월세)</option>
+            <option value="offi_sale">오피스텔 매매</option>
+            <option value="offi_rent">오피스텔 임대차</option>
+            <option value="etc">주택 외 (상가 · 토지)</option>
+          </select>
+        </div>
+        <div class="rec-f">
+          <label for="rec-f_dep">보증금 또는 매매가</label>
+          <input type="number" id="rec-f_dep" value="500000000" data-kr="f_dep_k">
+          <div class="rec-kread" id="rec-f_dep_k"></div>
+        </div>
+        <div class="rec-f" id="rec-f_mon_wrap">
+          <label for="rec-f_mon">월세 <span class="rec-hint">전세는 0으로 두세요</span></label>
+          <input type="number" id="rec-f_mon" value="0" data-kr="f_mon_k">
+          <div class="rec-kread" id="rec-f_mon_k"></div>
+        </div>
+        <fieldset class="rec-fs">
+          <legend>적용 조건</legend>
+          <label class="rec-chk" id="rec-f_offi_wrap"><input type="checkbox" id="rec-f_offi"> 전용 85㎡ 이하 + 주거설비 완비 <span class="rec-hint">오피스텔 우대요율</span></label>
+          <label class="rec-chk"><input type="checkbox" id="rec-f_vat"> 부가가치세 10% 별도 <span class="rec-hint">중개사가 일반과세자</span></label>
+        </fieldset>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>일방 부담액 (상한)</span><span id="rec-f_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap">중개보수 상한</div>
+            <div class="rec-num" id="rec-f_total">0원</div>
+            <div class="rec-kor" id="rec-f_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-f_lg"></table>
+          <div class="rec-flag" id="rec-f_flag"></div>
+        </div>
+      </div>
+    </div>
+    <div class="rec-aux">
+      <h4>서울시 요율표</h4>
+      <div class="rec-scroll">
+        <table class="rec-dt">
+          <thead><tr><th>거래금액</th><th>매매·교환</th><th>한도</th><th>임대차</th><th>한도</th></tr></thead>
+          <tbody>
+            <tr><td>5천만원 미만</td><td>0.6%</td><td>25만원</td><td>0.5%</td><td>20만원</td></tr>
+            <tr><td>5천만 ~ 1억</td><td>0.5%</td><td>80만원</td><td>0.4%</td><td>30만원</td></tr>
+            <tr><td>1억 ~ 2억</td><td>0.5%</td><td>80만원</td><td>0.3%</td><td>—</td></tr>
+            <tr><td>2억 ~ 6억</td><td>0.4%</td><td>—</td><td>0.3%</td><td>—</td></tr>
+            <tr><td>6억 ~ 9억</td><td>0.4%</td><td>—</td><td>0.4%</td><td>—</td></tr>
+            <tr><td>9억 ~ 12억</td><td>0.5%</td><td>—</td><td>0.4%</td><td>—</td></tr>
+            <tr><td>12억 ~ 15억</td><td>0.6%</td><td>—</td><td>0.5%</td><td>—</td></tr>
+            <tr><td>15억 이상</td><td>0.7%</td><td>—</td><td>0.6%</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="rec-cap2">요율은 시·도 조례로 정해 지역별로 다를 수 있습니다. 위 표와 계산기는 서울특별시 기준입니다.</p>
+    </div>
+  </section>
+
+  <!-- 대출 상환 -->
+  <section class="rec-panel" id="rec-p-loan">
+    <div class="rec-ttl">
+      <h3>대출 상환</h3>
+      <p>원리금균등·원금균등·만기일시 세 방식을 비교합니다. 거치기간에는 이자만 냅니다.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-l_amt">대출 원금</label>
+          <input type="number" id="rec-l_amt" value="400000000" data-kr="l_amt_k">
+          <div class="rec-kread" id="rec-l_amt_k"></div>
+        </div>
+        <div class="rec-r3">
+          <div class="rec-f">
+            <label for="rec-l_rate">연 이자율 <span class="rec-hint">%</span></label>
+            <input type="number" id="rec-l_rate" value="4.2" step="0.01">
+          </div>
+          <div class="rec-f">
+            <label for="rec-l_yrs">대출 기간 <span class="rec-hint">년</span></label>
+            <input type="number" id="rec-l_yrs" value="30">
+          </div>
+          <div class="rec-f">
+            <label for="rec-l_grace">거치 기간 <span class="rec-hint">년</span></label>
+            <input type="number" id="rec-l_grace" value="0">
+          </div>
+        </div>
+        <div class="rec-f">
+          <label for="rec-l_method">상환 방식</label>
+          <select id="rec-l_method">
+            <option value="equal">원리금균등 — 매월 같은 금액</option>
+            <option value="principal">원금균등 — 원금 고정, 이자 감소</option>
+            <option value="bullet">만기일시 — 이자만 내다 만기에 원금</option>
+          </select>
+        </div>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>상환 요약</span><span id="rec-l_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap" id="rec-l_cap">월 상환액</div>
+            <div class="rec-num" id="rec-l_total">0원</div>
+            <div class="rec-kor" id="rec-l_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-l_lg"></table>
+          <div class="rec-flag" id="rec-l_flag"></div>
+        </div>
+      </div>
+    </div>
+    <div class="rec-aux">
+      <h4>상환 스케줄</h4>
+      <button type="button" class="rec-tg" id="rec-l_tg">월별로 보기</button>
+      <div class="rec-scroll" style="max-height:420px;overflow-y:auto">
+        <table class="rec-dt" id="rec-l_sched">
+          <thead><tr><th id="rec-l_th0">연차</th><th>납입 원금</th><th>납입 이자</th><th>납입 합계</th><th>잔액</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="rec-cap2">월별 보기는 첫 360회차까지 표시합니다.</p>
+    </div>
+  </section>
+
+  <!-- 한도 -->
+  <section class="rec-panel" id="rec-p-limit">
+    <div class="rec-ttl">
+      <h3>대출 한도 — LTV · DSR</h3>
+      <p>담보 기준(LTV)과 소득 기준(DSR)을 각각 계산해 <strong>둘 중 낮은 쪽</strong>이 최종 한도가 됩니다. 규제지역 LTV 상한은 정책에 따라 바뀌므로 직접 입력합니다.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-d_price">주택 가격 <span class="rec-hint">KB시세 또는 감정가</span></label>
+          <input type="number" id="rec-d_price" value="900000000" data-kr="d_price_k">
+          <div class="rec-kread" id="rec-d_price_k"></div>
+        </div>
+        <div class="rec-r2">
+          <div class="rec-f">
+            <label for="rec-d_ltv">LTV 상한 <span class="rec-hint">%</span></label>
+            <input type="number" id="rec-d_ltv" value="70" step="1">
+          </div>
+          <div class="rec-f">
+            <label for="rec-d_dsr">DSR 상한 <span class="rec-hint">%</span></label>
+            <input type="number" id="rec-d_dsr" value="40" step="1">
+          </div>
+        </div>
+        <div class="rec-f">
+          <label for="rec-d_minus">선순위 채권 · 방공제 <span class="rec-hint">차감 항목</span></label>
+          <input type="number" id="rec-d_minus" value="0" data-kr="d_minus_k">
+          <div class="rec-kread" id="rec-d_minus_k"></div>
+        </div>
+        <div class="rec-f">
+          <label for="rec-d_income">연 소득 <span class="rec-hint">세전</span></label>
+          <input type="number" id="rec-d_income" value="80000000" data-kr="d_income_k">
+          <div class="rec-kread" id="rec-d_income_k"></div>
+        </div>
+        <div class="rec-f">
+          <label for="rec-d_exist">기존 대출 연간 원리금 <span class="rec-hint">없으면 0</span></label>
+          <input type="number" id="rec-d_exist" value="0" data-kr="d_exist_k">
+          <div class="rec-kread" id="rec-d_exist_k"></div>
+        </div>
+        <div class="rec-r2">
+          <div class="rec-f">
+            <label for="rec-d_irate">신규 대출 금리 <span class="rec-hint">%</span></label>
+            <input type="number" id="rec-d_irate" value="4.2" step="0.01">
+          </div>
+          <div class="rec-f">
+            <label for="rec-d_yrs">신규 대출 기간 <span class="rec-hint">년</span></label>
+            <input type="number" id="rec-d_yrs" value="30">
+          </div>
+        </div>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>최종 한도</span><span id="rec-d_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap">대출 가능액</div>
+            <div class="rec-num" id="rec-d_total">0원</div>
+            <div class="rec-kor" id="rec-d_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-d_lg"></table>
+          <div class="rec-flag" id="rec-d_flag"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 중도상환 -->
+  <section class="rec-panel" id="rec-p-prepay">
+    <div class="rec-ttl">
+      <h3>중도상환수수료</h3>
+      <p>수수료는 남은 감면기간에 비례해 줄어듭니다. 감면기간(보통 36개월)을 넘겨 상환하면 수수료가 없습니다.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-r_amt">중도 상환할 원금</label>
+          <input type="number" id="rec-r_amt" value="100000000" data-kr="r_amt_k">
+          <div class="rec-kread" id="rec-r_amt_k"></div>
+        </div>
+        <div class="rec-r3">
+          <div class="rec-f">
+            <label for="rec-r_rate">수수료율 <span class="rec-hint">%</span></label>
+            <input type="number" id="rec-r_rate" value="1.2" step="0.01">
+          </div>
+          <div class="rec-f">
+            <label for="rec-r_used">경과 개월</label>
+            <input type="number" id="rec-r_used" value="14">
+          </div>
+          <div class="rec-f">
+            <label for="rec-r_term">감면 기간 <span class="rec-hint">개월</span></label>
+            <input type="number" id="rec-r_term" value="36">
+          </div>
+        </div>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>수수료</span><span id="rec-r_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap">중도상환수수료</div>
+            <div class="rec-num" id="rec-r_total">0원</div>
+            <div class="rec-kor" id="rec-r_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-r_lg"></table>
+          <div class="rec-flag" id="rec-r_flag"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 수익률 -->
+  <section class="rec-panel" id="rec-p-yield">
+    <div class="rec-ttl">
+      <h3>임대수익률</h3>
+      <p>표면수익률은 대출과 비용을 무시한 값이고, 자기자본수익률은 실제로 넣은 돈 대비 손에 남는 돈입니다. 판단은 후자로 하세요.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-y_price">매매가</label>
+          <input type="number" id="rec-y_price" value="300000000" data-kr="y_price_k">
+          <div class="rec-kread" id="rec-y_price_k"></div>
+        </div>
+        <div class="rec-r2">
+          <div class="rec-f">
+            <label for="rec-y_cost">취득 부대비용 <span class="rec-hint">취득세·중개·등기</span></label>
+            <input type="number" id="rec-y_cost" value="12000000">
+          </div>
+          <div class="rec-f">
+            <label for="rec-y_dep">보증금</label>
+            <input type="number" id="rec-y_dep" value="20000000">
+          </div>
+        </div>
+        <div class="rec-r2">
+          <div class="rec-f">
+            <label for="rec-y_mon">월세</label>
+            <input type="number" id="rec-y_mon" value="1200000">
+          </div>
+          <div class="rec-f">
+            <label for="rec-y_opex">연간 운영비용 <span class="rec-hint">관리·수선</span></label>
+            <input type="number" id="rec-y_opex" value="1500000">
+          </div>
+        </div>
+        <div class="rec-r3">
+          <div class="rec-f">
+            <label for="rec-y_loan">대출금</label>
+            <input type="number" id="rec-y_loan" value="150000000">
+          </div>
+          <div class="rec-f">
+            <label for="rec-y_irate">대출 금리 <span class="rec-hint">%</span></label>
+            <input type="number" id="rec-y_irate" value="4.5" step="0.01">
+          </div>
+          <div class="rec-f">
+            <label for="rec-y_vac">공실률 <span class="rec-hint">%</span></label>
+            <input type="number" id="rec-y_vac" value="5" step="1">
+          </div>
+        </div>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>수익률</span><span id="rec-y_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap">자기자본수익률 (연)</div>
+            <div class="rec-num" id="rec-y_total">0%</div>
+            <div class="rec-kor" id="rec-y_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-y_lg"></table>
+          <div class="rec-flag" id="rec-y_flag"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 전월세 전환 -->
+  <section class="rec-panel" id="rec-p-conv">
+    <div class="rec-ttl">
+      <h3>전월세 전환</h3>
+      <p>법정 전환율 상한은 <strong>연 10%</strong>와 <strong>기준금리 + 2%p</strong> 중 낮은 값입니다. 기존 계약을 갱신하며 전환할 때 적용됩니다.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-c_dir">전환 방향</label>
+          <select id="rec-c_dir">
+            <option value="toMonthly">보증금 → 월세</option>
+            <option value="toDeposit">월세 → 보증금</option>
+          </select>
+        </div>
+        <div class="rec-r2">
+          <div class="rec-f">
+            <label for="rec-c_dep">현재 보증금</label>
+            <input type="number" id="rec-c_dep" value="500000000" data-kr="c_dep_k">
+            <div class="rec-kread" id="rec-c_dep_k"></div>
+          </div>
+          <div class="rec-f">
+            <label for="rec-c_mon">현재 월세 <span class="rec-hint">전세면 0</span></label>
+            <input type="number" id="rec-c_mon" value="0">
+          </div>
+        </div>
+        <div class="rec-f">
+          <label for="rec-c_new" id="rec-c_new_lb">변경할 보증금</label>
+          <input type="number" id="rec-c_new" value="200000000" data-kr="c_new_k">
+          <div class="rec-kread" id="rec-c_new_k"></div>
+        </div>
+        <div class="rec-r2">
+          <div class="rec-f">
+            <label for="rec-c_rate">전환율 <span class="rec-hint">연 %</span></label>
+            <input type="number" id="rec-c_rate" value="5.5" step="0.1">
+          </div>
+          <div class="rec-f">
+            <label for="rec-c_base">한국은행 기준금리 <span class="rec-hint">연 %</span></label>
+            <input type="number" id="rec-c_base" value="2.5" step="0.25">
+          </div>
+        </div>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>전환 결과</span><span id="rec-c_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap" id="rec-c_cap">전환 후 월세</div>
+            <div class="rec-num" id="rec-c_total">0원</div>
+            <div class="rec-kor" id="rec-c_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-c_lg"></table>
+          <div class="rec-flag" id="rec-c_flag"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 갭투자 -->
+  <section class="rec-panel" id="rec-p-gap">
+    <div class="rec-ttl">
+      <h3>갭투자 실투자금</h3>
+      <p>매매가에서 전세보증금을 뺀 차액에 취득 부대비용을 더한 금액이 실제로 필요한 현금입니다.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-g_price">매매가</label>
+          <input type="number" id="rec-g_price" value="600000000" data-kr="g_price_k">
+          <div class="rec-kread" id="rec-g_price_k"></div>
+        </div>
+        <div class="rec-f">
+          <label for="rec-g_jeonse">전세 보증금</label>
+          <input type="number" id="rec-g_jeonse" value="450000000" data-kr="g_jeonse_k">
+          <div class="rec-kread" id="rec-g_jeonse_k"></div>
+        </div>
+        <div class="rec-r3">
+          <div class="rec-f">
+            <label for="rec-g_tax">취득세 등</label>
+            <input type="number" id="rec-g_tax" value="7920000">
+          </div>
+          <div class="rec-f">
+            <label for="rec-g_fee">중개보수</label>
+            <input type="number" id="rec-g_fee" value="2400000">
+          </div>
+          <div class="rec-f">
+            <label for="rec-g_etc">기타 <span class="rec-hint">등기·수리</span></label>
+            <input type="number" id="rec-g_etc" value="1000000">
+          </div>
+        </div>
+        <div class="rec-f">
+          <label for="rec-g_sell">예상 매도가 <span class="rec-hint">수익률 시뮬레이션용</span></label>
+          <input type="number" id="rec-g_sell" value="700000000" data-kr="g_sell_k">
+          <div class="rec-kread" id="rec-g_sell_k"></div>
+        </div>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>필요 현금</span><span id="rec-g_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap">실투자금</div>
+            <div class="rec-num" id="rec-g_total">0원</div>
+            <div class="rec-kor" id="rec-g_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-g_lg"></table>
+          <div class="rec-flag" id="rec-g_flag"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 면적 -->
+  <section class="rec-panel" id="rec-p-area">
+    <div class="rec-ttl">
+      <h3>평 ↔ ㎡</h3>
+      <p>1평 = 3.305785㎡. 전용면적과 공급면적을 함께 넣으면 전용률이 나옵니다.</p>
+    </div>
+    <div class="rec-cols">
+      <div class="rec-card">
+        <div class="rec-f">
+          <label for="rec-s_net">전용면적 <span class="rec-hint">㎡</span></label>
+          <input type="number" id="rec-s_net" value="84.98" step="0.01">
+        </div>
+        <div class="rec-f">
+          <label for="rec-s_sup">공급면적 <span class="rec-hint">㎡ · 분양면적</span></label>
+          <input type="number" id="rec-s_sup" value="112.5" step="0.01">
+        </div>
+        <div class="rec-f">
+          <label for="rec-s_py">평 → ㎡ 역환산 <span class="rec-hint">평 단위</span></label>
+          <input type="number" id="rec-s_py" value="34" step="0.01">
+        </div>
+      </div>
+      <div class="rec-notice">
+        <div class="rec-nhd"><span>환산 결과</span><span id="rec-s_tag">—</span></div>
+        <div class="rec-nbd">
+          <div class="rec-tot">
+            <div class="rec-cap">공급면적 기준</div>
+            <div class="rec-num" id="rec-s_total">0평</div>
+            <div class="rec-kor" id="rec-s_total_k"></div>
+          </div>
+          <table class="rec-lg" id="rec-s_lg"></table>
+          <div class="rec-flag" id="rec-s_flag"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </div>
+</div>
+
+<div class="rec-foot">
+  <strong>계산 기준과 한계</strong>
+  <ul>
+    <li>세금 항목은 2026년 7월 기준 법령입니다. 세법과 규제는 자주 바뀌므로 계약 전 관할 지자체·세무서에 확인하세요.</li>
+    <li>취득세: 일시적 2주택, 지방 저가주택, 신생아 특례 등 개별 예외는 반영하지 않습니다.</li>
+    <li>보유세: 종부세의 재산세 공제액은 근사치입니다. 세부담 상한과 부부 공동명의 특례는 반영하지 않습니다.</li>
+    <li>중개보수: 서울시 조례 기준입니다. 다른 시·도는 요율이 다를 수 있습니다.</li>
+    <li>대출 한도: 금융기관 내규와 스트레스 DSR 가산금리에 따라 실제 한도는 더 낮아질 수 있습니다.</li>
+    <li>본 계산기는 참고용이며 법적 효력이 없습니다. 양도소득세는 예외 규정이 많아 세무사 상담을 권합니다.</li>
+  </ul>
+</div>
+</div>
+
+<script>
+(function(){
+  var ROOT = document.getElementById('rec-app');
+  if (!ROOT || ROOT.dataset.recInit) return;
+  ROOT.dataset.recInit = '1';
+
+  /* ───── 유틸 ───── */
+  function el(id){ return ROOT.querySelector('#rec-' + id); }
+  function num(id){ var v = parseFloat(el(id).value); return isNaN(v) ? 0 : v; }
+  function won(n){ return Math.round(n).toLocaleString('ko-KR') + '원'; }
+  function pct(n, d){ return n.toFixed(d === undefined ? 2 : d) + '%'; }
+
+  function korMoney(n){
+    n = Math.floor(Math.abs(n));
+    if (!n) return '';
+    var units = [[1e12,'조'],[1e8,'억'],[1e4,'만']], rest = n, out = [];
+    for (var i = 0; i < units.length; i++){
+      var q = Math.floor(rest / units[i][0]);
+      if (q > 0){ out.push(q.toLocaleString('ko-KR') + units[i][1]); rest -= q * units[i][0]; }
+    }
+    if (rest > 0) out.push(rest.toLocaleString('ko-KR'));
+    return out.join(' ') + '원';
+  }
+
+  function ledger(id, rows){
+    el(id).innerHTML = rows.map(function(r){
+      var cls = r.cls ? ' class="rec-' + r.cls + '"' : '';
+      var rt = r.rate ? '<span class="rec-rt">' + r.rate + '</span>' : '';
+      return '<tr' + cls + '><td>' + r.k + rt + '</td><td>' + r.v + '</td></tr>';
+    }).join('');
+  }
+
+  function flag(id, msg, warn){
+    var e = el(id);
+    if (!msg){ e.style.display = 'none'; return; }
+    e.style.display = 'block';
+    e.className = warn ? 'rec-flag rec-warn' : 'rec-flag';
+    e.textContent = msg;
+  }
+
+  function setTotal(id, main, korSrc){
+    el(id).textContent = main;
+    var k = el(id + '_k');
+    if (k) k.textContent = (typeof korSrc === 'number') ? korMoney(korSrc) : (korSrc || '');
+  }
+
+  /* ───── 세율표 ───── */
+  var PROP_STD = [[6e7,0.001,0],[1.5e8,0.0015,30000],[3e8,0.0025,180000],[Infinity,0.004,630000]];
+  var PROP_SPC = [[6e7,0.0005,0],[1.5e8,0.001,30000],[3e8,0.002,180000],[Infinity,0.0035,630000]];
+  var CTAX_GEN = [[3e8,0.005,0],[6e8,0.007,600000],[12e8,0.01,2400000],[25e8,0.013,6000000],
+                  [50e8,0.015,11000000],[94e8,0.02,36000000],[Infinity,0.027,101800000]];
+  var CTAX_MUL = [[3e8,0.005,0],[6e8,0.007,600000],[12e8,0.01,2400000],[25e8,0.02,14400000],
+                  [50e8,0.03,39400000],[94e8,0.04,89400000],[Infinity,0.05,183400000]];
+
+  function progressive(base, table){
+    if (base <= 0) return { tax: 0, rate: 0 };
+    for (var i = 0; i < table.length; i++){
+      if (base <= table[i][0]) return { tax: Math.max(0, base * table[i][1] - table[i][2]), rate: table[i][1] };
+    }
+    return { tax: 0, rate: 0 };
+  }
+
+  /* ───── 탭 ───── */
+  ROOT.querySelector('#rec-rail').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-rt]');
+    if (!b) return;
+    e.preventDefault();
+    var btns = ROOT.querySelectorAll('#rec-rail button');
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-current','false');
+    b.setAttribute('aria-current','true');
+    var ps = ROOT.querySelectorAll('.rec-panel');
+    for (var j = 0; j < ps.length; j++) ps[j].classList.remove('rec-on');
+    el('p-' + b.getAttribute('data-rt')).classList.add('rec-on');
+  });
+
+  /* ═════ 1. 취득세 ═════ */
+  function baseAcqRate(price){
+    if (price <= 6e8) return 1;
+    if (price <= 9e8) return Math.round((price * 2 / 3e8 - 3) * 10000) / 10000;
+    return 3;
+  }
+
+  function calcAcq(){
+    var cause = el('a_cause').value, price = num('a_price'), cnt = el('a_count').value;
+    var adj = el('a_adj').checked, big = el('a_big').checked, first = el('a_first').checked;
+
+    el('a_cnt_wrap').style.display = (cause === 'buy' || cause === 'inherit') ? 'block' : 'none';
+    el('a_first_wrap').style.display = (cause === 'buy') ? 'flex' : 'none';
+    el('a_hint').textContent = (cause !== 'etc') ? '취득가액. 증여·상속은 시가표준액' : '취득가액';
+
+    var rate = 0, edu = 0, rural = 0, note = '', warn = false;
+
+    if (cause === 'etc'){
+      rate = 4; edu = 0.4; rural = 0.2;
+      note = '주택 외 부동산은 면적과 무관하게 농어촌특별세 0.2%가 붙습니다.';
+    } else if (cause === 'gift'){
+      if (adj && price >= 3e8){
+        rate = 12; edu = 0.4; rural = big ? 1.0 : 0; warn = true;
+        note = '조정대상지역 + 시가표준액 3억 이상 증여는 12% 중과입니다. 다만 1세대 1주택자가 배우자·직계존비속에게 증여하면 3.5%입니다.';
+      } else { rate = 3.5; edu = 0.3; rural = big ? 0.2 : 0; }
+    } else if (cause === 'inherit'){
+      if (cnt === '1'){
+        rate = 0.8; edu = 0.16; rural = big ? 0.2 : 0;
+        note = '무주택 세대가 상속으로 1주택이 되는 경우 특례세율 0.8%입니다.';
+      } else { rate = 2.8; edu = 0.16; rural = big ? 0.2 : 0; }
+    } else {
+      if (cnt === 'corp'){
+        rate = 12; edu = 0.4; rural = big ? 1.0 : 0; warn = true;
+        note = '법인은 주택 수와 무관하게 12% 중과입니다.';
+      } else {
+        var n = parseInt(cnt, 10), base = baseAcqRate(price);
+        if (n === 1) rate = base;
+        else if (n === 2) rate = adj ? 8 : base;
+        else if (n === 3) rate = adj ? 12 : 8;
+        else rate = 12;
+
+        if (rate === 8){
+          edu = 0.4; rural = big ? 0.6 : 0; warn = true;
+          note = adj ? '조정대상지역 2주택은 8% 중과입니다.' : '비조정지역 3주택은 8% 중과입니다.';
+        } else if (rate === 12){
+          edu = 0.4; rural = big ? 1.0 : 0; warn = true;
+          note = adj ? '조정대상지역 3주택 이상은 12% 중과입니다.' : '비조정지역 4주택 이상은 12% 중과입니다.';
+        } else {
+          edu = Math.round(rate * 0.1 * 10000) / 10000;
+          rural = big ? 0.2 : 0;
+        }
+      }
+    }
+
+    var acqTax = price * rate / 100, eduTax = price * edu / 100, ruralTax = price * rural / 100;
+
+    var cut = 0;
+    if (cause === 'buy' && first && cnt === '1' && price <= 12e8) cut = Math.min(acqTax, 2000000);
+    else if (cause === 'buy' && first && price > 12e8) note = '생애최초 감면은 실거래가 12억원 이하 주택만 대상입니다.';
+
+    var total = acqTax - cut + eduTax + ruralTax;
+
+    var rows = [{ k: '취득세', rate: pct(rate, rate % 1 === 0 ? 0 : 2), v: won(acqTax), cls: warn ? 'hot' : '' }];
+    if (cut > 0) rows.push({ k: '생애최초 감면', v: '−' + won(cut), cls: 'neg' });
+    rows.push({ k: '지방교육세', rate: pct(edu, edu % 1 === 0 ? 0 : 2), v: won(eduTax) });
+    rows.push({ k: '농어촌특별세', rate: rural ? pct(rural, rural % 1 === 0 ? 0 : 1) : '비과세', v: won(ruralTax) });
+    rows.push({ k: '실효세율', v: price > 0 ? pct(total / price * 100) : '—', cls: 'sum' });
+
+    ledger('a_lg', rows);
+    setTotal('a_total', won(total), total);
+    el('a_tag').textContent = '적용 ' + pct(rate, rate % 1 === 0 ? 0 : 2);
+    flag('a_flag', note, warn);
+  }
+
+  /* ═════ 2. 보유세 ═════ */
+  function calcHold(){
+    var price = num('h_price'), cnt = parseInt(el('h_count').value, 10);
+    var single = el('h_single').checked, urban = el('h_urban').checked;
+    var ageC = parseFloat(el('h_age').value), holdC = parseFloat(el('h_hold').value);
+
+    el('h_credit_wrap').style.display = single ? 'grid' : 'none';
+
+    var fair = single ? (price <= 3e8 ? 0.43 : (price <= 6e8 ? 0.44 : 0.45)) : 0.60;
+    var pBase = price * fair;
+    var p = progressive(pBase, (single && price <= 9e8) ? PROP_SPC : PROP_STD);
+    var propTax = p.tax, propEdu = propTax * 0.2;
+    var propUrban = urban ? pBase * 0.0014 : 0;
+    var propTotal = propTax + propEdu + propUrban;
+
+    var deduct = single ? 12e8 : 9e8;
+    var cBase = Math.max(0, price - deduct) * 0.6;
+    var c = progressive(cBase, cnt >= 3 ? CTAX_MUL : CTAX_GEN);
+    var ctax = c.tax, overlap = 0, credit = 0;
+
+    if (ctax > 0){
+      overlap = Math.min(propTax, progressive(cBase * fair, PROP_STD).tax);
+      ctax = Math.max(0, ctax - overlap);
+    }
+    if (single && ctax > 0){
+      credit = ctax * Math.min(0.8, ageC + holdC);
+      ctax -= credit;
+    }
+    var ctaxRural = ctax * 0.2, ctaxTotal = ctax + ctaxRural;
+    var total = propTotal + ctaxTotal;
+
+    var rows = [
+      { k: '재산세 본세', rate: pct(p.rate * 100, 2), v: won(propTax) },
+      { k: '지방교육세', rate: '20%', v: won(propEdu) },
+      { k: '도시지역분', rate: urban ? '0.14%' : '—', v: won(propUrban) },
+      { k: '── 재산세 소계', v: won(propTotal) }
+    ];
+    if (cBase > 0){
+      rows.push({ k: '종부세 산출', rate: pct(c.rate * 100, 1), v: won(c.tax), cls: 'hot' });
+      rows.push({ k: '재산세 공제', v: '−' + won(overlap), cls: 'neg' });
+      if (credit > 0) rows.push({ k: '고령·장기보유 공제', v: '−' + won(credit), cls: 'neg' });
+      rows.push({ k: '농어촌특별세', rate: '20%', v: won(ctaxRural) });
+      rows.push({ k: '── 종부세 소계', v: won(ctaxTotal) });
+    } else {
+      rows.push({ k: '종합부동산세', v: '해당 없음' });
+    }
+    rows.push({ k: '실효세율', v: price > 0 ? pct(total / price * 100, 3) : '—', cls: 'sum' });
+
+    ledger('h_lg', rows);
+    setTotal('h_total', won(total), total);
+    el('h_tag').textContent = '공정비율 ' + (fair * 100).toFixed(0) + '% / 60%';
+
+    if (cBase <= 0) flag('h_flag', '공시가격이 공제금액(' + korMoney(deduct) + ')을 넘지 않아 종합부동산세는 발생하지 않습니다. 재산세만 부과됩니다.');
+    else flag('h_flag', '종부세의 재산세 공제액은 근사치입니다. 세부담 상한과 공동명의 특례는 반영하지 않았습니다.', true);
+  }
+
+  /* ═════ 3. 중개보수 ═════ */
+  var FEE_SALE = [[5e7,0.006,250000],[2e8,0.005,800000],[9e8,0.004,null],[12e8,0.005,null],[15e8,0.006,null],[Infinity,0.007,null]];
+  var FEE_RENT = [[5e7,0.005,200000],[1e8,0.004,300000],[6e8,0.003,null],[12e8,0.004,null],[15e8,0.005,null],[Infinity,0.006,null]];
+
+  function calcFee(){
+    var type = el('f_type').value, dep = num('f_dep'), mon = num('f_mon');
+    var offi = el('f_offi').checked, vat = el('f_vat').checked;
+    var isRent = (type === 'rent' || type === 'offi_rent');
+    var isOffi = (type === 'offi_sale' || type === 'offi_rent');
+
+    el('f_mon_wrap').style.display = (type === 'sale') ? 'none' : 'block';
+    el('f_offi_wrap').style.display = isOffi ? 'flex' : 'none';
+
+    var amount = dep, note = '';
+    if (type !== 'sale' && mon > 0){
+      amount = dep + mon * 100;
+      if (amount < 5e7){ amount = dep + mon * 70; note = '환산액이 5천만원 미만이라 월세 × 70으로 재계산했습니다.'; }
+    }
+
+    var fee = 0, rateLabel = '', cap = null;
+
+    if (type === 'etc' || (isOffi && !offi)){
+      fee = amount * 0.009; rateLabel = '0.9% 이내';
+      note = note || (isOffi ? '전용 85㎡ 초과이거나 주거설비 요건을 못 갖춘 오피스텔은 주택 외 요율(0.9% 이내)입니다.'
+                             : '주택 외 중개대상물은 0.9% 이내에서 협의합니다.');
+    } else if (isOffi && offi){
+      var r0 = (type === 'offi_sale') ? 0.005 : 0.004;
+      fee = amount * r0; rateLabel = (r0 * 100).toFixed(1) + '%';
+      note = note || '요건을 갖춘 오피스텔 우대요율입니다. 매매 0.5%, 임대차 0.4%.';
+    } else {
+      var table = isRent ? FEE_RENT : FEE_SALE;
+      for (var i = 0; i < table.length; i++){
+        if (amount < table[i][0] || table[i][0] === Infinity){
+          fee = amount * table[i][1];
+          rateLabel = (table[i][1] * 100).toFixed(1) + '%';
+          cap = table[i][2];
+          break;
+        }
+      }
+      if (cap !== null && fee > cap){ note = '구간 한도액 ' + won(cap) + '이 적용됐습니다.'; fee = cap; }
+    }
+
+    var vatAmt = vat ? fee * 0.1 : 0, total = fee + vatAmt;
+
+    ledger('f_lg', [
+      { k: '거래금액', v: won(amount) },
+      { k: '상한요율', v: rateLabel },
+      { k: '중개보수', v: won(fee) },
+      { k: '부가가치세', rate: vat ? '10%' : '—', v: won(vatAmt) },
+      { k: '쌍방 합계', v: won(total * 2), cls: 'sum' }
+    ]);
+    setTotal('f_total', won(total), total);
+    el('f_tag').textContent = rateLabel;
+    flag('f_flag', note || '요율표는 상한선입니다. 이 범위 안에서 협의해 낮출 수 있습니다.');
+  }
+
+  /* ═════ 4. 대출 상환 ═════ */
+  var schedData = [], schedMonthly = false;
+
+  function calcLoan(){
+    var P = num('l_amt'), yr = num('l_rate') / 100;
+    var yrs = Math.max(1, num('l_yrs'));
+    var grace = Math.max(0, Math.min(num('l_grace'), yrs - 1));
+    var method = el('l_method').value;
+
+    var r = yr / 12, nTotal = Math.round(yrs * 12), nGrace = Math.round(grace * 12), nPay = nTotal - nGrace;
+    var totalInt = 0, bal = P, first = 0, last = 0, i, int, prin;
+    schedData = [];
+
+    var graceInt = P * r;
+    for (i = 1; i <= nGrace; i++){ totalInt += graceInt; schedData.push({ m: i, prin: 0, int: graceInt, bal: P }); }
+
+    if (method === 'bullet'){
+      var mi = P * r;
+      for (i = nGrace + 1; i <= nTotal; i++){
+        prin = (i === nTotal) ? P : 0;
+        totalInt += mi;
+        schedData.push({ m: i, prin: prin, int: mi, bal: (i === nTotal) ? 0 : P });
+      }
+      first = mi; last = mi + P;
+    } else if (method === 'equal'){
+      var M = (r === 0) ? P / nPay : P * r / (1 - Math.pow(1 + r, -nPay));
+      bal = P;
+      for (i = nGrace + 1; i <= nTotal; i++){
+        int = bal * r;
+        prin = (i === nTotal) ? bal : M - int;
+        bal = Math.max(0, bal - prin);
+        totalInt += int;
+        schedData.push({ m: i, prin: prin, int: int, bal: bal });
+      }
+      first = M; last = M;
+    } else {
+      var pr = P / nPay;
+      bal = P;
+      for (i = nGrace + 1; i <= nTotal; i++){
+        int = bal * r;
+        bal = Math.max(0, bal - pr);
+        totalInt += int;
+        schedData.push({ m: i, prin: pr, int: int, bal: bal });
+        if (i === nGrace + 1) first = pr + int;
+        if (i === nTotal) last = pr + int;
+      }
+    }
+
+    var rows = [];
+    if (method === 'equal'){
+      el('l_cap').textContent = nGrace ? '거치 후 월 상환액' : '월 상환액';
+      setTotal('l_total', won(first), first);
+      rows.push({ k: '월 상환액', v: won(first) });
+    } else if (method === 'principal'){
+      el('l_cap').textContent = '첫 달 상환액';
+      setTotal('l_total', won(first), first);
+      rows.push({ k: '첫 달 → 마지막 달', v: won(first) + ' → ' + won(last) });
+    } else {
+      el('l_cap').textContent = '월 이자';
+      setTotal('l_total', won(first), first);
+      rows.push({ k: '만기 상환액', v: won(last), cls: 'hot' });
+    }
+    if (nGrace > 0) rows.push({ k: '거치기간 (' + grace + '년) 월 이자', v: won(graceInt), cls: 'neg' });
+    rows.push({ k: '총 이자', v: won(totalInt), cls: 'hot' });
+    rows.push({ k: '이자 부담률', v: P > 0 ? pct(totalInt / P * 100, 1) : '—' });
+    rows.push({ k: '총 상환액', v: won(P + totalInt), cls: 'sum' });
+
+    ledger('l_lg', rows);
+    el('l_tag').textContent = yrs + '년 · ' + num('l_rate') + '%';
+
+    var msg = {
+      equal: '매달 같은 금액이라 계획이 쉽습니다. 초반엔 이자 비중이 크고 원금이 천천히 줄어듭니다.',
+      principal: '초기 부담이 크지만 총이자가 가장 적습니다. 여유가 있다면 유리합니다.',
+      bullet: '이자만 내다 만기에 원금을 한 번에 갚습니다. 총이자가 가장 많고 만기 상환 위험이 있습니다.'
+    };
+    flag('l_flag', msg[method], method === 'bullet');
+    renderSched();
+  }
+
+  function renderSched(){
+    var tb = el('l_sched').querySelector('tbody');
+    el('l_th0').textContent = schedMonthly ? '회차' : '연차';
+    el('l_tg').textContent = schedMonthly ? '연차로 보기' : '월별로 보기';
+
+    var html = '', y, slice, prin, int, bal, k;
+    if (schedMonthly){
+      var lim = schedData.slice(0, 360);
+      for (k = 0; k < lim.length; k++){
+        var d = lim[k];
+        html += '<tr><td>' + d.m + '회</td><td>' + won(d.prin) + '</td><td>' + won(d.int) +
+                '</td><td>' + won(d.prin + d.int) + '</td><td>' + won(d.bal) + '</td></tr>';
+      }
+    } else {
+      var yrs = Math.ceil(schedData.length / 12);
+      for (y = 0; y < yrs; y++){
+        slice = schedData.slice(y * 12, y * 12 + 12);
+        if (!slice.length) continue;
+        prin = 0; int = 0;
+        for (k = 0; k < slice.length; k++){ prin += slice[k].prin; int += slice[k].int; }
+        bal = slice[slice.length - 1].bal;
+        html += '<tr><td>' + (y + 1) + '년차</td><td>' + won(prin) + '</td><td>' + won(int) +
+                '</td><td>' + won(prin + int) + '</td><td>' + won(bal) + '</td></tr>';
+      }
+    }
+    tb.innerHTML = html;
+  }
+
+  el('l_tg').addEventListener('click', function(){ schedMonthly = !schedMonthly; renderSched(); });
+
+  /* ═════ 5. 한도 ═════ */
+  function calcLimit(){
+    var price = num('d_price'), ltvR = num('d_ltv') / 100, dsrR = num('d_dsr') / 100;
+    var minus = num('d_minus'), income = num('d_income'), exist = num('d_exist');
+    var ir = num('d_irate') / 100 / 12, n = Math.round(Math.max(1, num('d_yrs')) * 12);
+
+    var ltvLimit = Math.max(0, price * ltvR - minus);
+    var availMonthly = Math.max(0, income * dsrR - exist) / 12;
+    var factor = (ir === 0) ? n : (1 - Math.pow(1 + ir, -n)) / ir;
+    var dsrLimit = availMonthly * factor;
+
+    var final = Math.min(ltvLimit, dsrLimit);
+    var binding = (dsrLimit < ltvLimit) ? 'DSR' : 'LTV';
+    var monthly = final * (ir === 0 ? 1 / n : ir / (1 - Math.pow(1 + ir, -n)));
+    var actualDsr = income > 0 ? (exist + monthly * 12) / income * 100 : 0;
+
+    ledger('d_lg', [
+      { k: 'LTV 한도', rate: (ltvR * 100).toFixed(0) + '%', v: won(ltvLimit) },
+      { k: 'DSR 한도', rate: (dsrR * 100).toFixed(0) + '%', v: won(dsrLimit) },
+      { k: '제약 요인', v: binding, cls: 'hot' },
+      { k: '예상 월 상환액', v: won(monthly) },
+      { k: '실제 DSR', v: pct(actualDsr, 1) },
+      { k: '필요 자기자금', v: won(Math.max(0, price - final)), cls: 'sum' }
+    ]);
+    setTotal('d_total', won(final), final);
+    el('d_tag').textContent = binding + ' 기준';
+    flag('d_flag',
+      binding === 'DSR' ? '소득이 한도를 제한하고 있습니다. 대출 기간을 늘리면 DSR 한도가 올라갑니다.'
+                        : '담보가 한도를 제한하고 있습니다. 소득 여력은 남아 있습니다.',
+      binding === 'DSR');
+  }
+
+  /* ═════ 6. 중도상환수수료 ═════ */
+  function calcPrepay(){
+    var amt = num('r_amt'), rate = num('r_rate') / 100;
+    var used = num('r_used'), term = Math.max(1, num('r_term'));
+    var remain = Math.max(0, term - used);
+    var fee = amt * rate * (remain / term);
+    var eff = amt > 0 ? fee / amt * 100 : 0;
+
+    ledger('r_lg', [
+      { k: '잔존 기간', v: remain + '개월 / ' + term + '개월' },
+      { k: '적용 비율', v: pct(remain / term * 100, 1) },
+      { k: '실효 수수료율', v: pct(eff, 3) },
+      { k: '판단 기준', v: remain === 0 ? '수수료 없음' : '이자 절감액과 비교', cls: 'sum' }
+    ]);
+    setTotal('r_total', won(fee), fee);
+    el('r_tag').textContent = pct(eff, 2);
+    flag('r_flag',
+      remain === 0 ? '감면기간이 지나 수수료가 발생하지 않습니다.'
+                   : '갈아타기를 검토한다면 이 수수료보다 이자 절감액이 커야 이득입니다.',
+      remain > 0 && eff > 0.8);
+  }
+
+  /* ═════ 7. 임대수익률 ═════ */
+  function calcYield(){
+    var price = num('y_price'), cost = num('y_cost'), dep = num('y_dep'), mon = num('y_mon');
+    var opex = num('y_opex'), loan = num('y_loan'), ir = num('y_irate') / 100, vac = num('y_vac') / 100;
+
+    var grossRent = mon * 12, netRent = grossRent * (1 - vac);
+    var interest = loan * ir, equity = price + cost - dep - loan;
+    var surfaceBase = price - dep;
+    var surface = surfaceBase > 0 ? grossRent / surfaceBase * 100 : 0;
+    var netIncome = netRent - opex - interest;
+    var roe = equity > 0 ? netIncome / equity * 100 : 0;
+
+    ledger('y_lg', [
+      { k: '실투자금 (자기자본)', v: won(equity), cls: 'hot' },
+      { k: '연 임대수입', rate: '공실 ' + (vac * 100).toFixed(0) + '%', v: won(netRent) },
+      { k: '연 운영비용', v: '−' + won(opex), cls: 'neg' },
+      { k: '연 대출이자', v: '−' + won(interest), cls: 'neg' },
+      { k: '연 순수익', v: won(netIncome) },
+      { k: '월 순현금흐름', v: won(netIncome / 12) },
+      { k: '표면수익률', v: pct(surface), cls: 'sum' }
+    ]);
+    setTotal('y_total', pct(roe), '연 순수익 ' + korMoney(Math.max(0, netIncome)));
+    el('y_tag').textContent = '표면 ' + pct(surface, 1);
+
+    if (equity <= 0) flag('y_flag', '보증금과 대출이 매입가를 넘어 자기자본이 0 이하입니다. 수익률 계산이 성립하지 않습니다.', true);
+    else if (netIncome < 0) flag('y_flag', '이자와 운영비가 임대수입을 넘습니다. 매달 현금이 빠져나가는 구조입니다.', true);
+    else flag('y_flag', '표면수익률은 대출과 비용을 무시한 값입니다. 실제 판단은 자기자본수익률로 하세요.');
+  }
+
+  /* ═════ 8. 전월세 전환 ═════ */
+  function calcConv(){
+    var dir = el('c_dir').value, dep = num('c_dep'), mon = num('c_mon');
+    var rate = num('c_rate') / 100, base = num('c_base') / 100, nv = num('c_new');
+    var legalCap = Math.min(0.10, base + 0.02);
+    var over = rate > legalCap + 1e-9;
+
+    el('c_new_lb').textContent = (dir === 'toMonthly') ? '변경할 보증금' : '변경할 월세';
+
+    var rows, mainTxt, mainKor;
+    if (dir === 'toMonthly'){
+      var diffD = dep - nv;
+      var addMon = rate > 0 ? diffD * rate / 12 : 0;
+      var newMon = mon + addMon;
+      el('c_cap').textContent = '전환 후 월세';
+      mainTxt = won(newMon); mainKor = newMon;
+      rows = [
+        { k: '보증금 감액', v: won(diffD) },
+        { k: '전환 월세 증가분', v: '+' + won(addMon), cls: 'hot' },
+        { k: '변경 후 보증금', v: won(nv) },
+        { k: '변경 후 월세', v: won(newMon) },
+        { k: '법정 전환율 상한', v: pct(legalCap * 100, 2), cls: 'sum' }
+      ];
+    } else {
+      var diffM = mon - nv;
+      var addDep = rate > 0 ? diffM * 12 / rate : 0;
+      var newDep = dep + addDep;
+      el('c_cap').textContent = '전환 후 보증금';
+      mainTxt = won(newDep); mainKor = newDep;
+      rows = [
+        { k: '월세 감액', v: won(diffM) },
+        { k: '보증금 증가분', v: '+' + won(addDep), cls: 'hot' },
+        { k: '변경 후 보증금', v: won(newDep) },
+        { k: '변경 후 월세', v: won(nv) },
+        { k: '법정 전환율 상한', v: pct(legalCap * 100, 2), cls: 'sum' }
+      ];
+    }
+
+    ledger('c_lg', rows);
+    setTotal('c_total', mainTxt, mainKor);
+    el('c_tag').textContent = '전환율 ' + pct(rate * 100, 2);
+    flag('c_flag',
+      over ? '입력한 전환율이 법정 상한(' + pct(legalCap * 100, 2) + ')을 넘습니다. 기존 계약 갱신 시 이 상한을 초과할 수 없습니다.'
+           : '법정 상한은 연 10%와 기준금리 + 2%p 중 낮은 값이므로 현재 ' + pct(legalCap * 100, 2) + '입니다. 신규 계약에는 적용되지 않습니다.',
+      over);
+  }
+
+  /* ═════ 9. 갭투자 ═════ */
+  function calcGap(){
+    var price = num('g_price'), jeonse = num('g_jeonse');
+    var tax = num('g_tax'), fee = num('g_fee'), etc = num('g_etc'), sell = num('g_sell');
+
+    var gap = price - jeonse, extra = tax + fee + etc, cash = gap + extra;
+    var ratio = price > 0 ? jeonse / price * 100 : 0;
+    var profit = sell - price;
+    var roe = cash > 0 ? profit / cash * 100 : 0;
+
+    ledger('g_lg', [
+      { k: '매매가 − 전세금', v: won(gap) },
+      { k: '취득 부대비용', v: '+' + won(extra) },
+      { k: '전세가율', v: pct(ratio, 1), cls: ratio >= 80 ? 'hot' : '' },
+      { k: '예상 매도 차익', v: won(profit), cls: profit < 0 ? 'hot' : '' },
+      { k: '자기자본 수익률', v: pct(roe, 1), cls: 'sum' }
+    ]);
+    setTotal('g_total', won(cash), cash);
+    el('g_tag').textContent = '전세가율 ' + pct(ratio, 0);
+
+    if (gap < 0) flag('g_flag', '전세금이 매매가보다 높습니다. 입력값을 확인하세요.', true);
+    else if (ratio >= 80) flag('g_flag', '전세가율이 80%를 넘습니다. 집값이 조금만 떨어져도 보증금 반환이 어려워지는 구간입니다. 역전세 위험을 반드시 계산에 넣으세요.', true);
+    else flag('g_flag', '전세 만기 시 보증금을 돌려줄 현금 또는 대체 세입자가 필요합니다. 매도 차익에 양도세는 포함되지 않았습니다.');
+  }
+
+  /* ═════ 10. 면적 ═════ */
+  var PY = 3.305785;
+  function calcArea(){
+    var net = num('s_net'), sup = num('s_sup'), py = num('s_py');
+    var netPy = net / PY, supPy = sup / PY, pyToM2 = py * PY;
+    var eff = sup > 0 ? net / sup * 100 : 0;
+
+    ledger('s_lg', [
+      { k: '전용면적', v: net.toFixed(2) + '㎡ = ' + netPy.toFixed(2) + '평' },
+      { k: '공급면적', v: sup.toFixed(2) + '㎡ = ' + supPy.toFixed(2) + '평' },
+      { k: '전용률', v: pct(eff, 1), cls: eff < 70 ? 'hot' : '' },
+      { k: py.toFixed(1) + '평 → ㎡', v: pyToM2.toFixed(2) + '㎡' },
+      { k: '1평', v: '3.305785㎡', cls: 'sum' }
+    ]);
+    setTotal('s_total', supPy.toFixed(1) + '평', '전용 ' + netPy.toFixed(1) + '평');
+    el('s_tag').textContent = '전용률 ' + pct(eff, 0);
+    flag('s_flag',
+      (eff < 70 && sup > 0)
+        ? '전용률이 70% 미만입니다. 같은 평수라도 실제 쓰는 면적이 좁습니다. 오피스텔·주상복합에서 흔합니다.'
+        : '아파트 전용률은 보통 70~80%입니다. 광고의 "몇 평"은 대개 공급면적 기준입니다.');
+  }
+
+  /* ───── 바인딩 ───── */
+  var CALCS = [calcAcq, calcHold, calcFee, calcLoan, calcLimit, calcPrepay, calcYield, calcConv, calcGap, calcArea];
+  function runAll(){
+    for (var i = 0; i < CALCS.length; i++){
+      try { CALCS[i](); } catch (err) { if (window.console) console.error('[rec]', err); }
+    }
+  }
+
+  var fields = ROOT.querySelectorAll('input, select');
+  for (var i = 0; i < fields.length; i++){
+    (function(f){
+      function sync(){
+        var t = f.getAttribute('data-kr');
+        if (t) el(t).textContent = korMoney(parseFloat(f.value) || 0);
+        runAll();
+      }
+      f.addEventListener('input', sync);
+      f.addEventListener('change', sync);
+    })(fields[i]);
+  }
+
+  var kr = ROOT.querySelectorAll('[data-kr]');
+  for (var j = 0; j < kr.length; j++){
+    el(kr[j].getAttribute('data-kr')).textContent = korMoney(parseFloat(kr[j].value) || 0);
+  }
+
+  runAll();
+})();
+</script>

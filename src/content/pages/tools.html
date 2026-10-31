@@ -1,0 +1,103 @@
+---
+title: "Tools"
+slug: "tools"
+date: 2023-07-13T15:38:39+09:00
+---
+<head>
+  <title>평과 제곱미터 환산기</title>
+  <style>
+    input[type="number"] {
+      width: 300px;
+      background-color: #FFD700;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>1. 평과 제곱미터 환산기</h1>
+
+  <!-- 평을 제곱미터로 환산하는 부분 -->
+  <h2>평을 제곱미터로 환산</h2>
+  <label for="pyeong">평:</label>
+  <input type="number" id="pyeong" step="0.01" oninput="changeTextColor(event)"  placeholder="환산할 값 입력">
+  <button onclick="pyeongToSquareMeter()">계산</button>
+  <p id="resultPyeongToSquareMeter"></p>
+
+  <!-- 제곱미터를 평으로 환산하는 부분 -->
+  <h2>제곱미터를 평으로 환산</h2>
+  <label for="squareMeter">제곱미터:</label>
+  <input type="number" id="squareMeter" step="0.01" oninput="changeTextColor(event)"  placeholder="환산할 값 입력">
+  <button onclick="squareMeterToPyeong()">계산</button>
+  <p id="resultSquareMeterToPyeong"></p>
+
+  <script>
+    function changeTextColor(event) {
+      const input = event.target;
+      const inputValue = input.value;
+      const isNumber = !isNaN(inputValue);
+
+      if (isNumber) {
+        input.style.color = "blue";
+      } else {
+        input.style.color = "black";
+      }
+    }
+
+    function formatNumber(event) {
+      const input = event.target;
+      const inputValue = input.value.replace(/,/g, ''); // 쉼표 제거
+      const formattedValue = parseFloat(inputValue).toLocaleString(); // 세 자리마다 쉼표 추가
+      input.value = formattedValue;
+    }
+
+    function pyeongToSquareMeter() {
+      const pyeong = parseFloat(document.getElementById('pyeong').value.replace(/,/g, '')); // 쉼표 제거
+      const squareMeter = pyeong * 3.30579;
+      document.getElementById('resultPyeongToSquareMeter').textContent = `${pyeong.toFixed(2).toLocaleString()} 평은 ${squareMeter.toFixed(2).toLocaleString()} 제곱미터입니다.`;
+    }
+
+    function squareMeterToPyeong() {
+      const squareMeter = parseFloat(document.getElementById('squareMeter').value.replace(/,/g, '')); // 쉼표 제거
+      const pyeong = squareMeter / 3.30579;
+      document.getElementById('resultSquareMeterToPyeong').textContent = `${squareMeter.toFixed(2).toLocaleString()} 제곱미터는 ${pyeong.toFixed(2).toLocaleString()} 평입니다.`;
+    }
+  </script>
+</body>
+
+
+
+<h2 class="wp-block-heading"></h2>
+
+
+
+<!-- 실시간 환율 블록 시작 -->
+<div id="exchange-rate-block">
+  <h3>실시간 환율</h3>
+  <div id="exchange-rate"></div>
+</div>
+
+<script>
+  // 환율 API 엔드포인트 URL
+  const apiUrl = 'https://api.exchangeratesapi.io/latest?base=USD';
+
+  // 환율 데이터 가져오기
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      const rateElement = document.getElementById('exchange-rate');
+      rateElement.textContent = `1 USD = ${data.rates.KRW} KRW`;
+    })
+    .catch(error => console.error(error));
+
+  // 1분마다 환율 업데이트
+  setInterval(() => {
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        const rateElement = document.getElementById('exchange-rate');
+        rateElement.textContent = `1 USD = ${data.rates.KRW} KRW`;
+      })
+      .catch(error => console.error(error));
+  }, 60000);
+</script>
+<!-- 실시간 환율 블록 종료 -->

@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import CategoryChips from '../../components/CategoryChips.astro';
+import { getPosts, PER_PAGE } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const pages = Math.ceil(posts.length / PER_PAGE);
+  return Array.from({ length: pages - 1 }, (_, i) => i + 2).map((n) => ({
+    params: { page: String(n) },
+    props: { page: n, pages, posts: posts.slice((n - 1) * PER_PAGE, n * PER_PAGE) },
+  }));
+}
+const { page, pages, posts } = Astro.props;
+---
+<Base title={`글 목록 ${page}쪽`}>
+  <div class="wrap list-head">
+    <CategoryChips />
+  </div>
+  <div class="wrap">
+    <PostList posts={posts} page={page} pages={pages} />
+  </div>
+</Base>

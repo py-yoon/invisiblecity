@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import { getPosts, groupBy, categoryUrl } from '../lib/site';
+const cats = groupBy(await getPosts(), 'categories');
+---
+<Base title="카테고리">
+  <div class="wrap-narrow list-head"><h1>카테고리</h1></div>
+  <ul class="wrap-narrow index-list">
+    {cats.map(([name, ps]) => <li><a href={categoryUrl(name)}>{name}</a><span>{ps.length}</span></li>)}
+  </ul>
+</Base>

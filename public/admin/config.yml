@@ -1,0 +1,77 @@
+# Sveltia CMS 설정. /admin 에서 GitHub 계정으로 로그인해 글을 쓰면 저장소에 바로 커밋된다.
+backend:
+  name: github
+  repo: py-yoon/invisiblecity
+  branch: main
+  commit_messages:
+    create: "글 추가: {{slug}}"
+    update: "글 수정: {{slug}}"
+    delete: "글 삭제: {{slug}}"
+    uploadMedia: "이미지 올림: {{path}}"
+    deleteMedia: "이미지 삭제: {{path}}"
+
+locale: ko
+site_url: https://invisiblecity.co.kr
+media_folder: public/uploads/cms
+public_folder: /uploads/cms
+
+slug:
+  encoding: unicode
+  clean_accents: false
+  sanitize_replacement: "-"
+
+collections:
+  - name: posts
+    label: 글
+    label_singular: 글
+    folder: src/content/posts
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: title
+    summary: "{{title}}"
+    sortable_fields: [date, title]
+    view_filters:
+      - { label: 초안, field: draft, pattern: true }
+    fields:
+      - { name: title, label: 제목, widget: string }
+      - name: slug
+        label: 주소
+        widget: string
+        hint: "글 주소가 됩니다. 예) 도시개발사업-조성-토지-공급-방법 (띄어쓰기 대신 -)"
+      - { name: date, label: 발행일, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
+      - { name: updated, label: 수정일, widget: datetime, required: false, format: "YYYY-MM-DDTHH:mm:ssZ" }
+      - name: categories
+        label: 카테고리
+        widget: select
+        multiple: true
+        required: false
+        options:
+          - "산업단지"
+          - "주택사업"
+          - "도시개발사업"
+          - "지구단위계획"
+          - "오피스/리테일"
+          - "물류/데이터센터"
+          - "부담금/세금"
+          - "인프라시설"
+          - "관광시설"
+          - "해외건축가"
+          - "국내건축가"
+          - "부동산"
+          - "도시를 바꾸는 개발사업"
+          - "도시기반시설"
+          - "지식산업센터"
+          - "도시정책/통계"
+          - "자전거"
+          - "도시산책"
+          - "대장아파트"
+          - "노인복지주택"
+          - "도시정비사업"
+      - { name: tags, label: 태그, widget: list, required: false, hint: "쉼표로 구분" }
+      - { name: description, label: 요약, widget: text, required: false, hint: "목록과 검색 결과에 보이는 설명. 비우면 본문 앞부분을 씁니다." }
+      - { name: cover, label: 대표 이미지, widget: image, required: false }
+      - { name: draft, label: 초안, widget: boolean, default: false, required: false }
+      - { name: wpId, label: 워드프레스 ID, widget: hidden, required: false }
+      - { name: body, label: 본문, widget: markdown }
