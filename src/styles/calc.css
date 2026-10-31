@@ -1,0 +1,117 @@
+/* 부동산 계산기 (/tools-2/). 블로그의 검은 테두리·분홍·보라·노랑을 그대로 쓴다. */
+.calc-page { max-width: 1180px; margin: 0 auto; font-size: 17px; line-height: 1.5; }
+.calc-page [hidden] { display: none !important; }
+.calc-head { margin-bottom: 1.4em; }
+.calc-head .entry-title { margin-bottom: 0.2em; }
+.calc-lead { font-size: 20px; margin: 0 0 0.6em; max-width: 46em; }
+.calc-stamp { display: inline-block; margin: 0; padding: 2px 12px; border: 1px solid #000; border-radius: 30px; background: var(--yellow); font-size: 14px; font-weight: 700; }
+
+/* 탭: 묶음 이름 + 알약 단추 */
+.calc-tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px 22px; padding: 18px 20px; margin-bottom: 28px; border: 1px solid #000; background: var(--verse); }
+.calc-tabgroup-name { display: block; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.calc-tablist { display: flex; flex-wrap: wrap; gap: 6px; }
+.calc-tab { padding: 5px 14px; border: 1px solid #000; border-radius: 30px; background: #fff; font-size: 15px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: transform 0.12s, box-shadow 0.12s; }
+.calc-tab:hover { color: #000; background: var(--yellow); }
+.calc-tab[aria-current] { background: var(--pink); box-shadow: 3px 3px 0 #000; transform: translate(-2px, -2px); }
+
+.calc-intro h2 { font-size: 32px; font-weight: 700; line-height: 1.2; margin: 0 0 0.3em; }
+.calc-intro p { margin: 0 0 1.2em; max-width: 46em; }
+
+.calc-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 32px; align-items: start; }
+
+/* 입력 */
+.calc-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 18px; }
+.calc-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.calc-field.is-seg, .calc-field.is-check { grid-column: 1 / -1; }
+.calc-field > label, .calc-field legend { font-size: 15px; font-weight: 700; padding: 0; }
+.calc-field fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.calc-input { display: flex; align-items: stretch; border: 1px solid #000; background: #fff; }
+.calc-input:focus-within { box-shadow: 3px 3px 0 #000; }
+.calc-input input { flex: 1; min-width: 0; border: 0; padding: 10px 12px; font: inherit; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; background: transparent; outline: none; -moz-appearance: textfield; }
+.calc-input input::-webkit-inner-spin-button, .calc-input input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.calc-input input::placeholder { color: #888; font-weight: 500; }
+.calc-unit { display: flex; align-items: center; padding: 0 12px; border-left: 1px solid #000; background: var(--verse); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.calc-readout { min-height: 1.2em; font-size: 13px; font-weight: 600; text-align: right; color: #444; }
+.calc-hint { font-size: 13px; color: #555; line-height: 1.4; }
+
+/* 선택 단추: 칸 사이 1px 검은 선은 gap으로 낸다(폭이 좁으면 줄이 바뀐다) */
+.calc-seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 1px; border: 1px solid #000; background: #000; }
+.calc-seg label { position: relative; display: flex; background: #fff; }
+.calc-seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.calc-seg span { flex: 1; display: flex; align-items: center; justify-content: center; padding: 9px 10px; font-size: 15px; font-weight: 600; line-height: 1.25; text-align: center; cursor: pointer; }
+.calc-seg input:checked + span { background: var(--yellow); box-shadow: inset 0 -3px 0 #000; }
+.calc-seg input:focus-visible + span { outline: 2px solid #000; outline-offset: -4px; }
+.calc-seg label:hover span { background: #fdfed8; }
+.calc-seg label:hover input:checked + span { background: var(--yellow); }
+
+.calc-checkbox { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+.calc-checkbox input { appearance: none; flex: none; width: 22px; height: 22px; margin: 0; border: 1px solid #000; background: #fff; display: grid; place-items: center; cursor: pointer; }
+.calc-checkbox input:checked { background: var(--pink); }
+.calc-checkbox input:checked::after { content: ''; width: 6px; height: 11px; border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+.calc-checkbox input:focus-visible { outline: 2px solid #000; outline-offset: 2px; }
+
+/* 결과 카드 */
+.calc-result { position: sticky; top: 16px; border: 1px solid #000; background: #fff; box-shadow: 6px 6px 0 #000; scroll-margin-top: 16px; }
+.calc-result-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 18px; background: var(--purple); border-bottom: 1px solid #000; }
+.calc-result-label { font-size: 15px; font-weight: 700; text-transform: uppercase; }
+.calc-result-tag { padding: 1px 10px; border: 1px solid #000; border-radius: 30px; background: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.calc-result-value { margin: 0; padding: 16px 18px 0; font-size: clamp(30px, 4vw, 44px); font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.calc-result-sub { margin: 4px 0 0; padding: 0 18px 14px; font-size: 16px; font-weight: 600; color: #444; border-bottom: 1px solid #000; }
+.calc-result-sub:empty { padding-bottom: 6px; }
+
+.calc-ledger { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+.calc-ledger th, .calc-ledger td { padding: 8px 18px; border-bottom: 1px dashed #bbb; vertical-align: top; }
+.calc-ledger th { text-align: left; font-weight: 600; }
+.calc-ledger th span { display: block; font-size: 12px; font-weight: 500; color: #555; }
+.calc-ledger td { text-align: right; font-weight: 700; white-space: nowrap; }
+.calc-ledger tr.is-hot td { color: #c4004a; }
+.calc-ledger tr.is-neg td { color: #1d5fbf; }
+.calc-ledger tr.is-sub th, .calc-ledger tr.is-sub td { background: var(--verse); }
+.calc-ledger tr.is-sum th, .calc-ledger tr.is-sum td { background: var(--yellow); border-top: 2px solid #000; border-bottom: 1px solid #000; font-weight: 800; }
+
+.calc-notes { padding: 12px 18px 0; }
+.calc-note { margin: 0 0 8px; padding: 8px 12px; border-left: 4px solid #000; background: var(--verse); font-size: 14px; line-height: 1.5; }
+.calc-note.is-warn { background: #ffe3ee; border-left-color: #c4004a; }
+.calc-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 18px 16px; }
+.calc-btn { padding: 8px 16px; border: 1px solid #000; border-radius: 30px; background: var(--pink); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.calc-btn:hover { background: var(--yellow); }
+.calc-btn-plain { background: #fff; }
+
+/* 상환표 */
+.calc-table-wrap { margin-top: 28px; max-height: 420px; overflow: auto; border: 1px solid #000; }
+.calc-sched { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.calc-sched caption { caption-side: top; text-align: left; padding: 10px 14px; font-weight: 700; background: var(--yellow); border-bottom: 1px solid #000; }
+.calc-sched th, .calc-sched td { padding: 6px 14px; border-bottom: 1px solid #ddd; text-align: right; white-space: nowrap; }
+.calc-sched thead th { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #000; }
+.calc-sched tbody th { text-align: left; font-weight: 600; }
+
+.calc-basis { margin-top: 28px; padding: 14px 20px; border: 1px solid #000; background: #fff; }
+.calc-basis h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.calc-basis ul, .calc-disclaimer ul { margin: 0; padding-left: 1.2em; font-size: 15px; }
+.calc-basis li, .calc-disclaimer li { margin: 0.25em 0; }
+.calc-disclaimer { margin-top: 40px; padding: 18px 22px; background: var(--yellow); border: 1px solid #000; }
+.calc-disclaimer h2 { margin: 0 0 8px; font-size: 20px; font-weight: 800; }
+
+.calc-peek { display: none; }
+
+@media (max-width: 900px) {
+  .calc-body { grid-template-columns: 1fr; gap: 24px; }
+  .calc-result { position: static; }
+}
+@media (max-width: 600px) {
+  .calc-page { font-size: 16px; }
+  .calc-lead { font-size: 17px; }
+  .calc-tabs { padding: 14px; gap: 12px; }
+  .calc-intro h2 { font-size: 25px; }
+  .calc-form { grid-template-columns: 1fr; gap: 14px; }
+  .calc-seg { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
+  .calc-seg span { padding: 9px 6px; font-size: 14px; }
+  .calc-result { box-shadow: 4px 4px 0 #000; }
+  .calc-ledger th, .calc-ledger td { padding: 7px 12px; }
+  .calc-ledger td { white-space: normal; overflow-wrap: anywhere; }
+  .calc-result-head, .calc-result-value, .calc-result-sub, .calc-notes, .calc-actions { padding-left: 12px; padding-right: 12px; }
+  /* 결과가 화면 밖이면 아래에 결과 띠를 띄운다 */
+  .calc-peek:not([hidden]) { display: flex; position: fixed; left: 12px; right: 76px; bottom: 16px; z-index: 40; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid #000; background: var(--purple); box-shadow: 3px 3px 0 #000; font-size: 14px; cursor: pointer; }
+  .calc-peek-label { font-weight: 700; white-space: nowrap; }
+  .calc-peek-value { flex: 1; font-size: 17px; font-weight: 900; text-align: right; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}

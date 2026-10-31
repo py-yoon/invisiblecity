@@ -1,0 +1,251 @@
+---
+// 부동산 계산기. 입력란은 calculators.ts 정의로 여기서 그리고, 계산은 아래 스크립트가 브라우저에서 한다.
+import Base from '../layouts/Base.astro';
+import { CALCS, GROUPS, type Field } from '../lib/calc/calculators';
+import { BASIS_DATE } from '../lib/calc/core';
+import '../styles/calc.css';
+
+const desc = '취득세·보유세·양도세, 대출 한도(LTV·DSR·스트레스 DSR)와 상환, 중개보수, 전월세 전환, 임대수익률, 갭투자, 청약 가점, 평 환산까지. 집 살 때 필요한 현금을 한 번에 계산합니다.';
+const jsonld = [{
+  '@context': 'https://schema.org', '@type': 'WebApplication', name: '부동산 계산기', url: 'https://invisiblecity.co.kr/tools-2/',
+  applicationCategory: 'FinanceApplication', operatingSystem: 'Any', inLanguage: 'ko-KR', description: desc,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
+}];
+const fid = (c: string, f: Field) => `${c}-${f.k}`;
+---
+<Base title="부동산 계산기" description={desc} jsonld={jsonld}>
+  <article class="single wide calc-page">
+    <header class="calc-head">
+      <h1 class="entry-title">부동산 계산기</h1>
+      <p class="calc-lead">세금, 대출, 거래 비용을 한곳에서 계산합니다. 입력하는 대로 바로 결과가 바뀌고, 결과는 링크로 공유할 수 있습니다.</p>
+      <p class="calc-stamp">세법·대출 규제 기준 {BASIS_DATE}</p>
+    </header>
+
+    <nav class="calc-tabs" aria-label="계산기 목록">
+      {GROUPS.map((g) => (
+        <div class="calc-tabgroup">
+          <span class="calc-tabgroup-name">{g}</span>
+          <div class="calc-tablist">
+            {CALCS.filter((c) => c.group === g).map((c, i) => (
+              <a href={`#${c.id}`} class="calc-tab" data-tab={c.id} aria-current={g === GROUPS[0] && i === 0 ? 'page' : undefined}>{c.name}</a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </nav>
+
+    {CALCS.map((c, idx) => (
+      <section class="calc-panel" id={`p-${c.id}`} data-calc={c.id} hidden={idx !== 0} aria-labelledby={`h-${c.id}`}>
+        <div class="calc-intro" data-pagefind-body>
+          <h2 id={`h-${c.id}`}>{c.title}</h2>
+          <p>{c.lead}</p>
+        </div>
+        <div class="calc-body">
+          <form class="calc-form" autocomplete="off" onsubmit="return false">
+            {c.fields.map((f) => (
+              <div class={`calc-field is-${f.type}`} data-field={f.k}>
+                {f.type === 'check' ? (
+                  <label class="calc-checkbox">
+                    <input type="checkbox" id={fid(c.id, f)} name={f.k} checked={!!f.def} />
+                    <span>{f.label}</span>
+                  </label>
+                ) : f.type === 'seg' ? (
+                  <fieldset>
+                    <legend>{f.label}</legend>
+                    <div class="calc-seg">
+                      {f.options!.map(([val, lab]) => (
+                        <label><input type="radio" name={`${c.id}-${f.k}`} value={val} checked={val === f.def} /><span>{lab}</span></label>
+                      ))}
+                    </div>
+                  </fieldset>
+                ) : (
+                  <>
+                    <label for={fid(c.id, f)}>{f.label}</label>
+                    <div class="calc-input">
+                      {f.type === 'money' ? (
+                        <input type="text" inputmode="numeric" id={fid(c.id, f)} name={f.k} value={Number(f.def).toLocaleString('ko-KR')} />
+                      ) : (
+                        <input type="number" inputmode="decimal" id={fid(c.id, f)} name={f.k} step={f.step ?? 'any'} value={f.def ?? ''} />
+                      )}
+                      <span class="calc-unit">{f.type === 'money' ? '만원' : f.unit}</span>
+                    </div>
+                    {f.type === 'money' && <span class="calc-readout" aria-live="polite"></span>}
+                  </>
+                )}
+                {f.hint && <small class="calc-hint">{f.hint}</small>}
+              </div>
+            ))}
+          </form>
+
+          <div class="calc-result" aria-live="polite">
+            <div class="calc-result-head">
+              <span class="calc-result-label"></span>
+              <span class="calc-result-tag"></span>
+            </div>
+            <p class="calc-result-value"></p>
+            <p class="calc-result-sub"></p>
+            <table class="calc-ledger"><tbody></tbody></table>
+            <div class="calc-notes"></div>
+            <div class="calc-actions">
+              <button type="button" class="calc-btn" data-act="share">결과 링크 복사</button>
+              <button type="button" class="calc-btn calc-btn-plain" data-act="reset">처음 값으로</button>
+            </div>
+          </div>
+        </div>
+        <div class="calc-table-wrap" hidden></div>
+        {c.basis && (
+          <div class="calc-basis" data-pagefind-body>
+            <h3>계산 기준</h3>
+            <ul>{c.basis.map((b) => <li>{b}</li>)}</ul>
+          </div>
+        )}
+      </section>
+    ))}
+
+    <div class="calc-peek" hidden>
+      <span class="calc-peek-label"></span>
+      <strong class="calc-peek-value"></strong>
+      <span aria-hidden="true">결과 ↓</span>
+    </div>
+
+    <aside class="calc-disclaimer" data-pagefind-body>
+      <h2>쓰기 전에</h2>
+      <ul>
+        <li>세금과 대출 규제는 {BASIS_DATE} 기준 법령과 정부 대책으로 계산했습니다. 자주 바뀌므로 계약 전에 관할 지자체, 세무서, 은행에 확인하세요.</li>
+        <li>결과는 참고용 추정치입니다. 감면·특례 요건, 세부담 상한, 은행별 심사 기준은 사람마다 다릅니다.</li>
+        <li>입력한 값은 이 브라우저 밖으로 보내지 않습니다. '결과 링크 복사'를 누를 때만 입력값이 링크에 담깁니다.</li>
+      </ul>
+    </aside>
+  </article>
+</Base>
+
+<script>
+  import { CALCS, resolve, defaults, type Calc, type Result, type Values } from '../lib/calc/calculators';
+  import { kor } from '../lib/calc/core';
+
+  const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
+  const byId = new Map(CALCS.map((c) => [c.id, c]));
+  const panelOf = (c: Calc) => document.getElementById(`p-${c.id}`)!;
+  const toNum = (s: string) => { const n = parseFloat(s.replace(/,/g, '')); return Number.isFinite(n) ? n : 0; };
+
+  function read(c: Calc): Values {
+    const p = panelOf(c), v: Values = {};
+    for (const f of c.fields) {
+      if (f.type === 'seg') v[f.k] = (p.querySelector<HTMLInputElement>(`input[name="${c.id}-${f.k}"]:checked`))?.value ?? f.def;
+      else {
+        const el = p.querySelector<HTMLInputElement>(`[name="${f.k}"]`)!;
+        v[f.k] = f.type === 'check' ? el.checked : f.auto && el.value.trim() === '' ? null : toNum(el.value);
+      }
+    }
+    return v;
+  }
+
+  function write(c: Calc, v: Values) {
+    const p = panelOf(c);
+    for (const f of c.fields) {
+      const val = v[f.k];
+      if (val === undefined) continue;
+      if (f.type === 'seg') p.querySelectorAll<HTMLInputElement>(`input[name="${c.id}-${f.k}"]`).forEach((r) => (r.checked = r.value === String(val)));
+      else {
+        const el = p.querySelector<HTMLInputElement>(`[name="${f.k}"]`)!;
+        if (f.type === 'check') el.checked = val === true || val === 'true' || val === '1';
+        else el.value = val === null || val === '' ? '' : f.type === 'money' ? toNum(String(val)).toLocaleString('ko-KR') : String(val);
+      }
+    }
+  }
+
+  function render(c: Calc) {
+    const p = panelOf(c), raw = read(c), v = resolve(c, raw);
+    // 조건에 맞는 칸만 보이고, 자동값은 placeholder로 알려 준다
+    for (const f of c.fields) {
+      const box = p.querySelector<HTMLElement>(`[data-field="${f.k}"]`)!;
+      box.hidden = f.show ? !f.show(v) : false;
+      if (f.auto) p.querySelector<HTMLInputElement>(`[name="${f.k}"]`)!.placeholder = `자동 ${f.auto(v)}`;
+      if (f.type === 'money') box.querySelector('.calc-readout')!.textContent = kor(toNum(String(raw[f.k])) * 1e4);
+    }
+    let r: Result;
+    try { r = c.compute(v); } catch (err) { console.error('[calc]', err); return; }
+    p.querySelector('.calc-result-label')!.textContent = r.label;
+    p.querySelector('.calc-result-tag')!.textContent = r.tag ?? '';
+    p.querySelector('.calc-result-value')!.textContent = r.value;
+    p.querySelector('.calc-result-sub')!.textContent = r.sub ?? '';
+    p.querySelector('.calc-ledger tbody')!.innerHTML = r.rows.map((row) =>
+      `<tr${row.tone ? ` class="is-${row.tone}"` : ''}><th scope="row">${esc(row.k)}${row.rate ? `<span>${esc(row.rate)}</span>` : ''}</th><td>${esc(row.v)}</td></tr>`).join('');
+    p.querySelector('.calc-notes')!.innerHTML = r.notes.map((n) => `<p class="calc-note${n.warn ? ' is-warn' : ''}">${esc(n.t)}</p>`).join('');
+    const tw = p.querySelector<HTMLElement>('.calc-table-wrap')!;
+    tw.hidden = !r.table;
+    if (r.table) {
+      tw.innerHTML = `<table class="calc-sched"><caption>${esc(r.table.caption)}</caption><thead><tr>${r.table.head.map((h) => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${
+        r.table.rows.map((row) => `<tr>${row.map((x, i) => (i ? `<td>${esc(x)}</td>` : `<th scope="row">${esc(x)}</th>`)).join('')}</tr>`).join('')}</tbody></table>`;
+    }
+    peekLabel.textContent = r.label;
+    peekValue.textContent = r.value;
+  }
+
+  /* ───── 탭 (주소 #id 와 맞춘다) ───── */
+  let current = CALCS[0];
+  function show(id: string) {
+    const c = byId.get(id) ?? CALCS[0];
+    current = c;
+    for (const x of CALCS) panelOf(x).hidden = x !== c;
+    document.querySelectorAll<HTMLAnchorElement>('.calc-tab').forEach((a) =>
+      a.dataset.tab === c.id ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+    render(c);
+  }
+  function fromHash() {
+    const [id, query] = location.hash.slice(1).split('?');
+    const c = byId.get(decodeURIComponent(id || ''));
+    if (c && query) write(c, Object.fromEntries(new URLSearchParams(query)));
+    show(c?.id ?? CALCS[0].id);
+  }
+  document.querySelector('.calc-tabs')!.addEventListener('click', (e) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('.calc-tab');
+    if (!a) return;
+    e.preventDefault();
+    history.replaceState(null, '', `#${a.dataset.tab}`);
+    show(a.dataset.tab!);
+  });
+  window.addEventListener('hashchange', fromHash);
+
+  /* ───── 입력 ───── */
+  for (const c of CALCS) {
+    const p = panelOf(c);
+    p.addEventListener('input', (e) => {
+      const el = e.target as HTMLInputElement;
+      if (el.inputMode === 'numeric' && el.type === 'text') {
+        // 금액은 쉼표를 넣어 보여 준다(커서는 끝 기준으로 유지)
+        const fromEnd = el.value.length - (el.selectionStart ?? el.value.length);
+        const digits = el.value.replace(/[^\d]/g, '');
+        el.value = digits ? Number(digits).toLocaleString('ko-KR') : '';
+        const pos = Math.max(0, el.value.length - fromEnd);
+        el.setSelectionRange(pos, pos);
+      }
+      render(c);
+    });
+    p.addEventListener('change', () => render(c));
+    p.querySelector('[data-act="reset"]')!.addEventListener('click', () => { write(c, defaults(c)); render(c); });
+    p.querySelector<HTMLButtonElement>('[data-act="share"]')!.addEventListener('click', async (e) => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      const v = read(c), q = new URLSearchParams();
+      for (const f of c.fields) if (v[f.k] !== null) q.set(f.k, String(v[f.k]));
+      const link = `${location.origin}${location.pathname}#${c.id}?${q}`;
+      history.replaceState(null, '', `#${c.id}?${q}`);
+      try { await navigator.clipboard.writeText(link); btn.textContent = '복사했습니다'; }
+      catch { btn.textContent = '주소창의 링크를 복사하세요'; }
+      setTimeout(() => (btn.textContent = '결과 링크 복사'), 2000);
+    });
+  }
+
+  /* ───── 휴대폰: 결과가 화면 밖에 있을 때 아래에 결과 띠 ───── */
+  const peek = document.querySelector<HTMLElement>('.calc-peek')!;
+  const peekLabel = peek.querySelector('.calc-peek-label')!, peekValue = peek.querySelector('.calc-peek-value')!;
+  const seen = new Set<Element>();
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) en.isIntersecting ? seen.add(en.target) : seen.delete(en.target);
+    peek.hidden = seen.size > 0;
+  });
+  document.querySelectorAll('.calc-result, .calc-disclaimer').forEach((el) => io.observe(el));
+  peek.addEventListener('click', () => panelOf(current).querySelector('.calc-result')!.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+
+  fromHash();
+</script>
