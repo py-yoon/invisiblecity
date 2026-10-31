@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
 import Sidebar from '../components/Sidebar.astro';
+import Apps from '../components/Apps.astro';
 import { getPosts, PER_PAGE } from '../lib/site';
 const posts = await getPosts();
 const SITE = 'https://invisiblecity.co.kr';
@@ -17,7 +18,7 @@ const jsonld = [{
 ---
 <Base jsonld={jsonld}>
   <div class="with-sidebar">
-    <div class="content"><PostList posts={posts.slice(0, PER_PAGE)} pages={Math.ceil(posts.length / PER_PAGE)} /></div>
+    <div class="content"><Apps /><PostList posts={posts.slice(0, PER_PAGE)} pages={Math.ceil(posts.length / PER_PAGE)} /></div>
     <Sidebar />
   </div>
 </Base>
