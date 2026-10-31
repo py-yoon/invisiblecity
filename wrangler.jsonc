@@ -1,0 +1,12 @@
+// Cloudflare Workers 정적 사이트 설정: pnpm build로 만든 dist/를 그대로 올린다.
+// _redirects(옛 워드프레스 주소)와 404.html도 여기서 처리된다.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "invisiblecity",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  }
+}
