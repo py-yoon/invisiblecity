@@ -31,6 +31,24 @@ const categories = groupBy(posts, 'categories').map(([n]) => n).sort((a, b) => a
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {isPreview && <meta name="robots" content="noindex, nofollow" />}
+    {!isPreview && (
+      <>
+        <meta name="naver-site-verification" content="9c751a75167a24abd8cd503ceabd5d2edac50c72" />
+        {/* Site Kit이 하던 것: 유럽 방문자는 동의 전까지 광고·분석 저장 거부(동의 모드) */}
+        <script is:inline>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('consent', 'default', {
+            ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied',
+            region: ['AT','BE','BG','CY','CZ','DE','DK','EE','ES','FI','FR','GB','GR','HR','HU','IE','IS','IT','LI','LT','LU','LV','MT','NL','NO','PL','PT','RO','SE','SI','SK','CH'],
+          });
+          gtag('js', new Date());
+          gtag('config', 'GT-NCLZN88');
+        </script>
+        <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=GT-NCLZN88"></script>
+        <script is:inline async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3661100956787514" crossorigin="anonymous"></script>
+      </>
+    )}
     <link rel="icon" href={url('/favicon.png')} />
     <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href={url('/rss.xml')} />
     <link rel="sitemap" href={url('/sitemap-index.xml')} />
@@ -84,7 +102,7 @@ const categories = groupBy(posts, 'categories').map(([n]) => n).sort((a, b) => a
           </ul>
         </section>
       </div>
-      <div class="copyright">© {new Date().getFullYear()} invisiblecity</div>
+      <div class="copyright">© {new Date().getFullYear()} invisiblecity · <a href={url('/privacy/')}>개인정보처리방침</a></div>
     </footer>
     <a class="back-to-top" href="#" aria-label="맨 위로">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
