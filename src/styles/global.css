@@ -275,3 +275,6 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
   .app-name { font-size: 15px; }
   .app-title { font-size: 13px; }
 }
+
+/* 애드센스 자동광고가 채워지지 않으면 자리도 비우지 않는다(구글 안내 방식). 첫 화면 위 280px 빈칸의 원인이었다. */
+ins.adsbygoogle[data-ad-status="unfilled"], .google-auto-placed:has(> ins.adsbygoogle[data-ad-status="unfilled"]) { display: none !important; }
