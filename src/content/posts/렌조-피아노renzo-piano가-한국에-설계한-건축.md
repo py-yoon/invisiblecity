@@ -66,9 +66,9 @@ wpId: 300
 
 <div class="verse">KT 새 사옥(높이 110m, 25층)은 ‘공중부양’의 형태가 될 것이라고 들었다.<br><br>“그게 핵심이다. 디자인은 단순하다. 1층에는 기둥과 엘리베이터만 있고, 건물이 지상 12m 위 공중에 떠 있는 것처럼 기둥(필로티)으로만 받치는 구조다. 1층을 일반 사람들에게 완전하게 개방하기 위한 거다. 꼭대기층도 마찬가지다. 멋진 건축이란 멋지게 보이는 것이 아니라 사람들이 멋진 경험을 하게 되는 공간을 말한다. 사람들은 이곳에서 정말 서울이 얼마나 아름다운지 깨닫게 될 것이다.” <a href="https://www.joongang.co.kr/article/8481768#home">출처</a></div>
 
-![렌조 피아노](https://blog.kakaocdn.net/dn/FxSQs/btsdGmDQ2ts/71CKwKNCsV7bDhZujrS2i1/img.jpg "KT 광화문빌딩 East, 출처 : 에이앤뉴스 건축디자인")
+![렌조 피아노](/uploads/tistory/btsdGmDQ2ts.jpg "KT 광화문빌딩 East, 출처 : 에이앤뉴스 건축디자인")
 
-![렌조 피아노](https://blog.kakaocdn.net/dn/bK2fEe/btsdJp7aLjY/HHhbNmQnjpJOmVLFfrFo00/img.jpg "KT 광화문빌딩 East, 출처 : 에이앤뉴스 건축디자인")
+![렌조 피아노](/uploads/tistory/btsdJp7aLjY.jpg "KT 광화문빌딩 East, 출처 : 에이앤뉴스 건축디자인")
 
 ## 용산 트리플 원
 

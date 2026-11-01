@@ -27,11 +27,11 @@ HdM은 세계에서 손꼽히는 스위스 건축가 듀오이다.
 
 ## 헤르조그 & 드 뫼롱, **더 피크 도산**
 
-![](https://blog.kakaocdn.net/dn/bTjOZj/btsjWqyqL9m/OeuKqeTIuVZf9Z98YUfJak/img.png)
+![](/uploads/tistory/btsjWqyqL9m.jpg)
 
-![](https://blog.kakaocdn.net/dn/bBKIXr/btsjPFjhBgv/wRzrNmbAD5yqVqJERqkXg0/img.png)
+![](/uploads/tistory/btsjPFjhBgv.jpg)
 
-![](https://blog.kakaocdn.net/dn/bUA26e/btsjYsid1uS/wg21qhOkrnSwWJkhUheML1/img.png)
+![](/uploads/tistory/btsjYsid1uS.jpg)
 
 ## 2026년 11월 업데이트
 

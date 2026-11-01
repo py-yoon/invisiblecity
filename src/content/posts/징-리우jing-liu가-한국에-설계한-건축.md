@@ -9,7 +9,7 @@ description: "징 리우(Jing Liu)는 중국 출신의 건축가다. 미국 뉴�
 cover: "/uploads/2023/09/image-13.png"
 wpId: 325
 ---
-![](https://blog.kakaocdn.net/dn/cc3CzY/btshjDGGAf2/GhA0VqKbiukcEcELhKOUVK/img.png "징 리우")
+![](/uploads/tistory/btshjDGGAf2.jpg "징 리우")
 
 징 리우(Jing Liu)는 중국 출신의 건축가다.
 

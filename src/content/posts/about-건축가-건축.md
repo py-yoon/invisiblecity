@@ -8,7 +8,7 @@ tags: ["건축","건축가"]
 description: "\") 루트비히 비트겐슈타인은 빈에서 누이 그레틀을 위한 집을 지으려고 3년 동안 학계를 떠났다가 그 일이 생각보다 엄청나다는 것을 깨달았다. <논리철학 논고>의 저자이기도 했던 이 철학자는 이렇게 말했다. 여러분은 철학이 어렵다고 생각한다. 하지만 내"
 wpId: 505
 ---
-![](https://blog.kakaocdn.net/dn/bCEI7H/btsdsQKu7d9/zBoNiqhLHNJdfUJCtQpI9K/img.jpg "루트비히 비트겐슈타인(1889-1951)")
+![](/uploads/tistory/btsdsQKu7d9.jpg "루트비히 비트겐슈타인(1889-1951)")
 
 루트비히 비트겐슈타인은 빈에서 누이 그레틀을 위한 집을 지으려고 3년 동안 학계를 떠났다가 그 일이 생각보다 엄청나다는 것을 깨달았다. <논리철학 논고>의 저자이기도 했던 이 철학자는 이렇게 말했다.
 
@@ -24,7 +24,7 @@ wpId: 505
 >   
 > 건축, 모두의 미래를 짓다
 
-![](https://blog.kakaocdn.net/dn/JASx7/btsgDJoLlxN/cQS2MHk8YLY3ekmqy4xikK/img.jpg "존 러스킨(1819년~1900년)")
+![](/uploads/tistory/btsgDJoLlxN.jpg "존 러스킨(1819년~1900년)")
 
   
 존 러스킨은 19세기 영국의 미술 평론가이자 예술가였다.

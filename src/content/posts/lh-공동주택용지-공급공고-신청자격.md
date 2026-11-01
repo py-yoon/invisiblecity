@@ -22,4 +22,4 @@ LH 공동주택용지 공급공고 신청자격은 다음과 같다.
 
 (LH 공급공고문 예시)
 
-![](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FyUPS8%2FbtsMIMIzlwF%2FVcqOj32paMQeG6Q3estwY1%2Fimg.png)
+![](/uploads/tistory/btsMIMIzlwF.jpg)

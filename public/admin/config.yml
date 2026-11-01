@@ -14,6 +14,18 @@ locale: ko
 site_url: https://invisiblecity.co.kr
 media_folder: public/uploads/cms
 public_folder: /uploads/cms
+# 올리는 사진은 저장소 용량을 아끼려고 WebP로 바꾸고 가로·세로 최대 1600px / 4000px로 줄인다.
+# 세로를 넉넉히 둔 것은 긴 도표·캡처가 너무 작아지지 않게 하기 위해서다.
+# shortcut: 사진은 git 저장소에 쌓인다. 수천 장 넘게 늘면 Cloudflare R2로 옮긴다.
+media_libraries:
+  default:
+    config:
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 1600
+          height: 4000
 
 slug:
   encoding: unicode
