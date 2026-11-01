@@ -3,6 +3,7 @@
 //   node scripts/digest.mjs factory 2026-11-01   공장용지 지도: 기준일에 접수 중인 산업용지·자족용지 공고
 //   node scripts/digest.mjs retrack 2026-10      RETRACK: 그 달에 진행 단계가 바뀐 서울 정비사업
 //   node scripts/digest.mjs retrack-week 2026-11-02  RETRACK: 기준일까지 7일 동안 단계가 바뀐 정비사업(월요일 글)
+//   node scripts/digest.mjs gu next              RETRACK 자치구 정비사업 현황: 아직 안 쓴 구 중 사업 많은 순(또는 구 이름)
 //   node scripts/digest.mjs apt 동남권            RETRACK 구별 대장아파트: 권역 하나(동남·도심·서남·서북·동북)
 //
 // 데이터는 옆 저장소에서 읽는다(경로는 환경 변수로 바꿀 수 있다).
@@ -255,12 +256,80 @@ function apt(region) {
   });
 }
 
+// ── RETRACK 자치구별 정비사업 현황: 아직 안 쓴 구를 사업 수 많은 순으로 하나씩 ─────────
+const PHASES = [
+  ['구상·구역 지정', ['unknown', 'safety-check', 'plan', 'designated']],
+  ['추진위·조합 설립', ['member-recruit', 'committee', 'operator', 'union']],
+  ['사업시행·관리처분 인가', ['review', 'impl-approved', 'mgmt-approved']],
+  ['분양·공사 중', ['presale', 'construction']],
+  ['완료(준공·이전고시·해산)', ['completed', 'transfer', 'dissolved']],
+];
+const shortName = (n) => {
+  let t = n.replace(/^\d+\.\s*/, '').replace(/\s*도시환경정비사업/g, ' ').replace(/\s*(주택|도시환경)?(재개발|재건축)정비사업(\s*사업시행자)?/g, ' ').replace(/\s*\((신탁방식|사업시행자)?[^()]*신탁\)$/, '').replace(/\s+/g, ' ').trim();
+  for (let prev = ''; prev !== t;) { prev = t; t = t.replace(/\s*(조합설립|조합|추진위원회|정비사업|사업|도시환경|도시정비형|주택정비형|주택|재개발|재건축|정비)$/, '').trim(); }
+  return t || n;
+};
+
+function guReport(arg) {
+  const W = (f) => readJson(path.join(RETRACK_DIR, 'web/data', f));
+  const P = W('projects.json');
+  const meta = W('meta.json');
+  const order = new Map(W('stages.json').map((x) => [x.code, x.order]));
+  const counts = P.reduce((m, p) => ((m[p.gu] = (m[p.gu] ?? 0) + 1), m), {});
+  const done = new Set(fs.readdirSync(POSTS).map((f) => f.match(/^서울-(.+구)-재개발-재건축-현황-/)?.[1]).filter(Boolean));
+  const gu = arg === 'next'
+    ? Object.keys(counts).sort((a, b) => counts[b] - counts[a] || a.localeCompare(b, 'ko')).find((g) => !done.has(g))
+    : arg;
+  if (!gu || !counts[gu]) throw new Error(arg === 'next' ? '25개 구를 다 썼다' : `없는 구: ${arg}`);
+
+  const RT = 'https://retrack.invisiblecity.co.kr';
+  const link = (p) => `[${shortName(p.name)}](${RT}/project/${encodeURIComponent(p.slug)}/)`;
+  const mine = P.filter((p) => p.gu === gu);
+  const rank = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).indexOf(gu) + 1;
+  const phaseOf = (p) => PHASES.findIndex(([, cs]) => cs.includes(p.stage));
+  const byPhase = PHASES.map(([n], i) => [n, mine.filter((p) => phaseOf(p) === i)]);
+  const active = mine.filter((p) => phaseOf(p) < 4);
+  const cats = Object.entries(mine.reduce((m, p) => ((m[p.category] = (m[p.category] ?? 0) + 1), m), {})).sort((a, b) => b[1] - a[1]);
+  const units = (xs) => xs.reduce((n, p) => n + (p.totalUnits ?? 0), 0);
+  const byStage = (a, b) => (order.get(b.stage) ?? 0) - (order.get(a.stage) ?? 0) || (b.totalUnits ?? 0) - (a.totalUnits ?? 0);
+  const big = [...active].filter((p) => p.totalUnits).sort((a, b) => b.totalUnits - a.totalUnits).slice(0, 10);
+  const builders = Object.entries(active.flatMap((p) => p.contractors).reduce((m, c) => ((m[c] = (m[c] ?? 0) + 1), m), {})).sort((a, b) => b[1] - a[1]);
+  const since = new Date(Date.parse(meta.dataDate) - 183 * 864e5).toISOString().slice(0, 10);
+  const recent = W('updates.json').filter((x) => x.gu === gu && x.kind === 'stage' && x.date >= since).sort((a, b) => b.date.localeCompare(a.date));
+  const dongs = Object.entries(active.reduce((m, p) => ((m[p.dong] = (m[p.dong] ?? 0) + 1), m), {})).sort((a, b) => b[1] - a[1]);
+
+  const parts = [];
+  parts.push(`서울 ${gu}에는 RETRACK이 추적하는 재개발·재건축 정비사업이 **${mine.length}곳** 있다. 서울 25개 구 가운데 ${rank === 1 ? '가장 많다' : rank === 25 ? '가장 적다' : `${rank}번째로 많다`}. 이미 준공·해산까지 끝난 ${byPhase[4][1].length}곳을 빼면 지금 진행 중인 사업은 ${active.length}곳이고, 세대수가 공개된 사업의 계획 세대수를 더하면 ${num(units(active))}세대다. 유형별로는 ${cats.map(([c, n]) => `${c} ${n}곳`).join(', ')}이다(서울시 정비사업 정보몽땅, ${ymd(meta.dataDate)} 기준).`);
+  parts.push(table(['단계', '사업 수', '계획 세대수'], byPhase.map(([n, xs]) => [n, `${xs.length}곳`, xs.length ? num(units(xs)) : ''])));
+  if (dongs.length) parts.push(`진행 중인 사업이 많은 동은 ${dongs.slice(0, 5).map(([d, n]) => `${d}(${n}곳)`).join(', ')}이다.`);
+  const late = [...byPhase[3][1], ...byPhase[2][1]].sort(byStage);
+  if (late.length) parts.push(`## 인가를 받았거나 공사 중인 사업 ${late.length}곳\n\n관리처분인가 이후 사업은 이주·철거와 분양이 가까운 곳이다.\n\n` +
+    table(['사업', '동', '유형', '단계', '계획 세대수', '시공사'], late.map((p) => [link(p), p.dong, p.category, p.stageLabel, p.totalUnits ? num(p.totalUnits) : '', p.contractors.join('·')])));
+  if (big.length) parts.push(`## 계획 세대수가 큰 진행 중 사업\n\n` + table(['사업', '동', '단계', '계획 세대수'], big.map((p) => [link(p), p.dong, p.stageLabel, num(p.totalUnits)])));
+  const early = [...byPhase[0][1], ...byPhase[1][1]].sort(byStage);
+  if (early.length) parts.push(`## 초기 단계 사업 ${early.length}곳\n\n구역 지정 전후부터 조합 설립까지의 사업이다.\n\n` +
+    table(['사업', '동', '유형', '단계', '계획 세대수'], early.map((p) => [link(p), p.dong, p.category, p.stageLabel, p.totalUnits ? num(p.totalUnits) : ''])));
+  if (builders.length) parts.push(`## 시공사\n\n진행 중인 사업에서 시공사로 이름이 오른 곳은 ${builders.slice(0, 6).map(([c, n]) => `${c}(${n}곳)`).join(', ')} 순이다. 공동 시공은 각 회사에 한 번씩 셌다.`);
+  if (recent.length) parts.push(`## 최근 6개월 단계 변화\n\n` + table(['사업', '단계 변화', '확인일'], recent.map((x) => [`[${shortName(x.name)}](${RT}/project/${encodeURIComponent(x.slug)}/)`, x.summary, ymd(x.date)])));
+  parts.push(`## 읽는 법\n\n단계는 정비사업 정보몽땅에 올라온 최신 진행 단계다. 계획 세대수는 정비계획에 적힌 값이라 사업 중 바뀔 수 있고, 아직 공개되지 않은 사업은 비어 있다. 사업 이름을 누르면 RETRACK에서 추진 경과와 위치를 볼 수 있고, ${gu} 전체 지도는 [RETRACK ${gu}](${RT}/gu/${encodeURIComponent(gu)}/)에 있다. 같은 구 아파트 시세는 [구별 대장아파트](${RT}/apt/leaders/)에서 볼 수 있다.\n\n## 출처\n\n- [서울시 정비사업 정보몽땅](https://cleanup.seoul.go.kr) (${ymd(meta.dataDate)} 기준)`);
+
+  writePost({
+    slug: `서울-${gu}-재개발-재건축-현황-${meta.dataDate.slice(0, 7)}`,
+    title: `${gu} 재개발·재건축 현황: 진행 중 ${active.length}곳, 계획 ${num(units(active))}세대 (${ymd(meta.dataDate).slice(0, -3).trim()} 기준)`.replace(/ \d+일 기준/, ' 기준'),
+    categories: ['도시정비사업'],
+    tags: ['재개발', '재건축', '정비사업', gu, '서울', '관리처분인가', '시공사'],
+    description: `서울 ${gu} 재개발·재건축 정비사업 ${mine.length}곳(진행 중 ${active.length}곳)의 단계별 현황, 관리처분·공사 중 사업, 큰 사업, 시공사, 최근 단계 변화를 정리했다.`,
+    body: parts.join('\n\n'),
+  });
+}
+
 const [kind, arg] = process.argv.slice(2);
 if (kind === 'factory' && /^\d{4}-\d{2}-\d{2}$/.test(arg ?? '')) factory(arg);
 else if (kind === 'retrack' && /^\d{4}-\d{2}$/.test(arg ?? '')) retrack(arg);
 else if (kind === 'retrack-week' && /^\d{4}-\d{2}-\d{2}$/.test(arg ?? '')) retrackWeek(arg);
 else if (kind === 'apt' && arg) apt(arg);
+else if (kind === 'gu' && arg) guReport(arg);
 else {
-  console.error('사용법: node scripts/digest.mjs factory YYYY-MM-DD | retrack YYYY-MM | retrack-week YYYY-MM-DD | apt 동남권');
+  console.error('사용법: node scripts/digest.mjs factory YYYY-MM-DD | retrack YYYY-MM | retrack-week YYYY-MM-DD | apt 동남권 | gu 영등포구|next');
   process.exit(1);
 }
