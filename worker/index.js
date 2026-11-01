@@ -17,6 +17,10 @@ const APPS = [
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // RETRACK은 서브도메인에서 돈다. 다른 사이트처럼 /retrack 으로 들어와도 찾아가게 한다.
+    if (url.pathname === '/retrack' || url.pathname.startsWith('/retrack/')) {
+      return Response.redirect(`https://retrack.invisiblecity.co.kr${url.pathname.slice('/retrack'.length) || '/'}${url.search}`, 301);
+    }
     const app = APPS.find((a) => url.pathname === a.prefix || url.pathname.startsWith(a.prefix + '/'));
     if (!app) return env.ASSETS.fetch(request);
 

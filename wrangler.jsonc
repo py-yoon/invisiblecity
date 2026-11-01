@@ -14,7 +14,7 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "run_worker_first": ["/spire", "/spire/*", "/nimby", "/nimby/*", "/factory", "/factory/*", "/architect", "/architect/*", "/a063e951082ad4c6/*"],
+    "run_worker_first": ["/spire", "/spire/*", "/nimby", "/nimby/*", "/factory", "/factory/*", "/architect", "/architect/*", "/a063e951082ad4c6/*", "/retrack", "/retrack/*"],
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
   }

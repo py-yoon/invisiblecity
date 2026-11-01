@@ -3,10 +3,6 @@
 # 2026-10-31 메뉴 정리로 합친 페이지
 /wm/ /am/#world 301
 /wm /am/#world 301
-
-# RETRACK은 서브도메인에서 돈다. 다른 사이트처럼 /retrack 으로 들어와도 찾아가게.
-/retrack https://retrack.invisiblecity.co.kr/ 301
-/retrack/* https://retrack.invisiblecity.co.kr/:splat 301
 /link/ /about/ 301
 /link /about/ 301
 /page/ /about/ 301
