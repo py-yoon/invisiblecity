@@ -2,6 +2,8 @@
 //
 //   node scripts/digest.mjs factory 2026-11-01   공장용지 지도: 기준일에 접수 중인 산업용지·자족용지 공고
 //   node scripts/digest.mjs retrack 2026-10      RETRACK: 그 달에 진행 단계가 바뀐 서울 정비사업
+//   node scripts/digest.mjs retrack-week 2026-11-02  RETRACK: 기준일까지 7일 동안 단계가 바뀐 정비사업(월요일 글)
+//   node scripts/digest.mjs apt 동남권            RETRACK 구별 대장아파트: 권역 하나(동남·도심·서남·서북·동북)
 //
 // 데이터는 옆 저장소에서 읽는다(경로는 환경 변수로 바꿀 수 있다).
 //   FACTORY_DIR (기본 ../factory-map), RETRACK_DIR (기본 ../seoul-redev)
@@ -23,12 +25,15 @@ const md = (d) => `${+d.slice(5, 7)}월 ${+d.slice(8, 10)}일`;
 const ymd = (d) => `${d.slice(0, 4)}년 ${md(d)}`;
 const nowKst = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 19) + '+09:00';
 
+// DRAFT=1 이면 초안(draft: true)으로 쓴다. 운영 사이트에는 안 나오고 pnpm dev 에서만 보인다.
+const draft = process.env.DRAFT === '1';
 function writePost({ slug, title, categories, tags, description, body }) {
   const fm = [
     '---',
     `title: ${JSON.stringify(title)}`,
     `slug: ${JSON.stringify(slug)}`,
     `date: ${nowKst()}`,
+    ...(draft ? ['draft: true'] : []),
     `categories: ${JSON.stringify(categories)}`,
     `tags: ${JSON.stringify(tags)}`,
     `description: ${JSON.stringify(description)}`,
@@ -124,17 +129,26 @@ const GROUPS = [
 ];
 
 function retrack(month) {
+  const [y, mo] = month.split('-');
+  stageDigest({ from: `${month}-01`, to: `${month}-31`, label: `${y}년 ${+mo}월`, span: '한 달 동안', slug: `서울-재개발-재건축-단계-변화-${month}` });
+}
+
+// 주간판: 기준일까지 7일(기준일 포함). 월요일 글은 지난 화~월 수집분을 다룬다.
+function retrackWeek(ref) {
+  const from = new Date(Date.parse(ref) - 6 * 864e5).toISOString().slice(0, 10);
+  stageDigest({ from, to: ref, label: `${md(from)}~${md(ref)}`, span: '한 주 동안', slug: `서울-재개발-재건축-단계-변화-주간-${ref}`, weekly: true });
+}
+
+function stageDigest({ from, to, label, span, slug, weekly = false }) {
   const W = (f) => readJson(path.join(RETRACK_DIR, 'web/data', f));
   const projects = new Map(W('projects.json').map((p) => [p.slug, p]));
   const meta = W('meta.json');
   const items = W('updates.json')
-    .filter((x) => x.kind === 'stage' && x.date.startsWith(month))
+    .filter((x) => x.kind === 'stage' && x.date >= from && x.date <= to)
     .sort((a, b) => a.gu.localeCompare(b.gu, 'ko') || a.name.localeCompare(b.name, 'ko'));
-  if (!items.length) throw new Error(`${month}에 단계가 바뀐 사업이 없다`);
+  if (!items.length) throw new Error(`${label}에 단계가 바뀐 사업이 없다`);
   const nProj = new Set(items.map((x) => x.slug)).size;
   const last = items.reduce((m, x) => (x.date > m ? x.date : m), '');
-  const [y, mo] = month.split('-');
-  const label = `${y}년 ${+mo}월`;
   const link = (x) => `[${x.name}](https://retrack.invisiblecity.co.kr/project/${encodeURIComponent(x.slug)}/)`;
   const units = (x) => { const u = projects.get(x.slug)?.totalUnits; return u ? num(u) : ''; };
 
@@ -146,7 +160,7 @@ function retrack(month) {
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko'));
 
   const parts = [];
-  parts.push(`${label} 한 달 동안 서울 재개발·재건축 정비사업 가운데 진행 단계가 바뀐 사업은 **${nProj}곳**, 기록된 단계 변화는 ${items.length}건이다. [RETRACK](https://retrack.invisiblecity.co.kr/)이 매주 서울시 정비사업 정보몽땅을 읽어 단계 변화를 기록한 결과다(${md(last)} 수집분까지).`);
+  parts.push(`${label} ${span} 서울 재개발·재건축 정비사업 가운데 진행 단계가 바뀐 사업은 **${nProj}곳**, 기록된 단계 변화는 ${items.length}건이다. [RETRACK](https://retrack.invisiblecity.co.kr/)이 매주 서울시 정비사업 정보몽땅을 읽어 단계 변화를 기록한 결과다(${md(last)} 수집분까지).`);
   parts.push(table(['변화', '건'], nonEmpty.map(([n, xs]) => [n, xs.length])));
   parts.push(`자치구별로는 ${byGu.slice(0, 5).map(([g, c]) => `${g} ${c}곳`).join(', ')} 순으로 많았다.`);
   for (const [name, xs] of nonEmpty) {
@@ -157,8 +171,8 @@ function retrack(month) {
 
   const top = nonEmpty[0];
   writePost({
-    slug: `서울-재개발-재건축-단계-변화-${month}`,
-    title: `${label} 서울 재개발·재건축 진행 단계가 바뀐 ${nProj}곳`,
+    slug,
+    title: `${weekly ? `이번 주(${label})` : label} 서울 재개발·재건축 진행 단계가 바뀐 ${nProj}곳`,
     categories: ['도시정비사업'],
     tags: ['재개발', '재건축', '정비사업', '서울', '진행단계', '조합설립인가'],
     description: `${label} 서울 재개발·재건축 정비사업 ${nProj}곳의 진행 단계가 바뀌었다(${items.length}건). ${top[0]} ${top[1].length}건을 비롯해 자치구별 사업 이름, 단계 변화, 계획 세대수를 정리했다.`,
@@ -166,10 +180,87 @@ function retrack(month) {
   });
 }
 
+// ── RETRACK 구별 대장아파트: 권역 하나씩 돌아가며 ─────────────────────────
+// 서울시 생활권 5개 권역. 격주 수요일마다 하나씩 돌고, 다섯 번이면 한 바퀴다.
+const REGIONS = {
+  동남권: ['서초구', '강남구', '송파구', '강동구'],
+  도심권: ['종로구', '중구', '용산구'],
+  서남권: ['양천구', '강서구', '구로구', '금천구', '영등포구', '동작구', '관악구'],
+  서북권: ['은평구', '서대문구', '마포구'],
+  동북권: ['성동구', '광진구', '동대문구', '중랑구', '성북구', '강북구', '도봉구', '노원구'],
+};
+// 앞 낱말 끝소리에 맞춰 조사를 고른다(받침 있으면 a, 없으면 b). 괄호·숫자·영문 끝도 읽는 소리로 본다.
+const jong = (w) => {
+  const t = w.replace(/[)\]\s]+$/, '');
+  const c = t.at(-1) ?? '';
+  const code = c.charCodeAt(0) - 0xac00;
+  if (code >= 0 && code < 11172) return code % 28;
+  if (/\d/.test(c)) return '0136780'.includes(c) ? (c === '1' || c === '7' || c === '8' ? 8 : 1) : 0;
+  return /[LMNRlmnr]/.test(c) ? 8 : /[a-zA-Z]/.test(c) ? 0 : 0;
+};
+const josa = (w, a, b) => w + (jong(w) ? a : b);
+const ro = (w) => w + (jong(w) && jong(w) !== 8 ? '으로' : '로');
+const eok = (won) => {
+  const e = won / 1e8;
+  return e >= 10 ? `${e.toFixed(1).replace(/\.0$/, '')}억` : `${e.toFixed(2).replace(/0$/, '').replace(/\.0?$/, '')}억`;
+};
+
+// K-apt 단지명 끝의 동 목록(현대14차(203,204,205,206동), 옥수파크힐스101동~116동)은 떼고 보여 준다.
+const aptName = (n) => n.replace(/\(?[\d,~·\s]+동(~\d+동)?\)?$/, '').trim() || n;
+
+function apt(region) {
+  const doc = readJson(path.join(RETRACK_DIR, 'web/data/apt-leaders.json'));
+  const gus = REGIONS[region];
+  if (!gus) throw new Error(`권역: ${Object.keys(REGIONS).join(', ')}`);
+  const all = doc.gus;
+  const mine = gus.map((g) => all.find((x) => x.gu === g)).map((g) => ({ ...g, leaders: g.leaders.map((l) => ({ ...l, name: aptName(l.name) })), top: g.top && { ...g.top, name: aptName(g.top.name) } }));
+  const RT = 'https://retrack.invisiblecity.co.kr';
+  const guLink = (g) => `[${g}](${RT}/gu/${encodeURIComponent(g)}/)`;
+  const { from, to } = doc.window;
+  const span = `${from.slice(0, 4)}년 ${+from.slice(5, 7)}월~${+to.slice(5, 7)}월`;
+
+  // 서울 25개 구를 1위 단지 중위가로 줄 세운 순위(권역 안 구가 서울에서 몇 번째인지).
+  const seoulRank = [...all].sort((a, b) => b.leaders[0].median - a.leaders[0].median).map((x) => x.gu);
+  const firsts = mine.map((g) => ({ gu: g.gu, ...g.leaders[0] })).sort((a, b) => b.median - a.median);
+  const hi = firsts[0], lo = firsts.at(-1);
+  const new10 = mine.flatMap((g) => g.leaders).filter((l) => l.built >= +to.slice(0, 4) - 10).length;
+  const total = mine.reduce((n, g) => n + g.leaders.length, 0);
+  const busiest = mine.flatMap((g) => g.leaders.map((l) => ({ gu: g.gu, ...l }))).sort((a, b) => b.n - a.n)[0];
+  const trades = mine.reduce((n, g) => n + g.trades84, 0);
+
+  const parts = [];
+  parts.push(`서울 ${region}(${gus.join('·')}) 각 구에서 국민평형(전용 ${doc.area[0]}~${doc.area[1]}㎡)이 가장 비싸게 거래된 아파트 1~5위를 정리했다. ${span} 신고된 중개거래 실거래가(직거래·해제 제외)로 단지별 **중위가**를 내고, 거래가 ${doc.minN}건 이상인 단지만 순위에 올렸다. 이 기간 ${region} ${gus.length}개 구의 국민평형 거래는 ${num(trades)}건이다.`);
+  const tied = firsts.filter((f) => eok(f.median) === eok(hi.median));
+  const head = tied.length > 1
+    ? `${region}에서 구별 1위가 가장 높은 곳은 ${tied.map((f, i) => i < tied.length - 1 ? `${f.gu} **${f.name}**${josa(f.name, '과', '와').slice(f.name.length)}` : `${f.gu} **${f.name}**${josa(f.name, '이다', '다').slice(f.name.length)}`).join(' ')}. 둘 다 중위가 ${eok(hi.median)}이다`
+    : `${region}에서 구별 1위가 가장 높은 곳은 ${hi.gu} **${hi.name}**(${eok(hi.median)})이다`;
+  parts.push(`${head}. 가장 낮은 곳은 ${lo.gu} ${lo.name}(${eok(lo.median)})${ro(eok(lo.median)).slice(eok(lo.median).length)}, 같은 권역 안에서도 ${(hi.median / lo.median).toFixed(1)}배 차이가 난다. 권역 안 ${total}개 순위 단지 가운데 준공 10년 이내 단지는 ${new10}곳이다. 거래가 가장 많았던 순위 단지는 ${busiest.n}건이 신고된 ${busiest.gu} ${josa(busiest.name, '이다', '다')}.`);
+  parts.push(table(['구', '1위 단지', '중위가', '서울 25개 구 중'], firsts.map((f) => [f.gu, f.name, eok(f.median), `${seoulRank.indexOf(f.gu) + 1}위`])));
+  for (const g of mine) {
+    const rows = g.leaders.map((l) => [l.rank, l.name, l.dong, l.built, `${l.n}건`, eok(l.median), `${eok(l.min)}~${eok(l.max)}`, `${md(l.latest.date)} ${eok(l.latest.price)}(${l.latest.floor}층)`]);
+    const t = g.top;
+    parts.push(`## ${g.gu}\n\n국민평형 거래 ${num(g.trades84)}건(${g.complexes84}개 단지).${g.relaxed ? ` 거래가 적어 ${doc.minN}건 기준을 낮춰 순위를 냈다.` : ''}\n\n` +
+      table(['순위', '단지', '동', '준공', '거래', '중위가', '거래 범위', '최근 거래'], rows) +
+      (t ? `\n\n면적과 상관없이 이 기간 ${g.gu}에서 가장 비싼 거래는 ${t.dong} ${t.name} 전용 ${t.m2}㎡ ${eok(t.price)}(${md(t.date)}, ${t.floor}층)이다.` : ''));
+  }
+  parts.push(`## 읽는 법\n\n순위는 평균이나 최고가가 아니라 중위가 기준이다. 한두 건의 이상 거래에 흔들리지 않게 하려는 것이다. 거래가 적은 단지는 빠지므로, 비싸도 이 기간 손바뀜이 ${doc.minN}건 미만이면 순위에 없다. 같은 단지가 단지별로 나뉘어 신고되면 따로 집계된다. 지도와 다른 권역 순위는 [RETRACK 구별 대장아파트](${RT}/apt/leaders/)에서 볼 수 있고, 구 이름을 누르면 그 구의 정비사업 현황으로 간다: ${gus.map(guLink).join(', ')}.\n\n## 출처\n\n- 국토교통부 아파트 매매 실거래가 (${ymd(from)}~${ymd(to)} 신고분, ${ymd(doc.asOf)} 집계)\n- 공동주택관리정보시스템(K-apt) 단지 정보`);
+
+  writePost({
+    slug: `서울-${region}-대장아파트-${to.slice(0, 7)}`,
+    title: `서울 ${region} 구별 대장아파트 순위: ${hi.gu} ${hi.name} ${eok(hi.median)} (${span} 국민평형 실거래)`,
+    categories: ['부동산'],
+    tags: ['대장아파트', '아파트', '실거래가', '국민평형', region, ...gus],
+    description: `${span} 국민평형(84㎡) 실거래 중위가로 본 서울 ${region} ${gus.join('·')} 구별 대장아파트 1~5위. 1위는 ${firsts.map((f) => `${f.gu} ${f.name}`).join(', ')}.`,
+    body: parts.join('\n\n'),
+  });
+}
+
 const [kind, arg] = process.argv.slice(2);
 if (kind === 'factory' && /^\d{4}-\d{2}-\d{2}$/.test(arg ?? '')) factory(arg);
 else if (kind === 'retrack' && /^\d{4}-\d{2}$/.test(arg ?? '')) retrack(arg);
+else if (kind === 'retrack-week' && /^\d{4}-\d{2}-\d{2}$/.test(arg ?? '')) retrackWeek(arg);
+else if (kind === 'apt' && arg) apt(arg);
 else {
-  console.error('사용법: node scripts/digest.mjs factory YYYY-MM-DD | retrack YYYY-MM');
+  console.error('사용법: node scripts/digest.mjs factory YYYY-MM-DD | retrack YYYY-MM | retrack-week YYYY-MM-DD | apt 동남권');
   process.exit(1);
 }
