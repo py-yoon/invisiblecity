@@ -4,7 +4,7 @@
 //   node scripts/digest.mjs retrack 2026-10      RETRACK: 그 달에 진행 단계가 바뀐 서울 정비사업
 //   node scripts/digest.mjs retrack-week 2026-11-02  RETRACK: 기준일까지 7일 동안 단계가 바뀐 정비사업(월요일 글)
 //   node scripts/digest.mjs gu next              RETRACK 자치구 정비사업 현황: 아직 안 쓴 구 중 사업 많은 순(또는 구 이름)
-//   node scripts/digest.mjs apt 동남권            RETRACK 구별 대장아파트: 권역 하나(동남·도심·서남·서북·동북)
+//   node scripts/digest.mjs apt next              RETRACK 구별 대장아파트: 이 데이터로 아직 안 쓴 권역(또는 권역 이름)
 //
 // 데이터는 옆 저장소에서 읽는다(경로는 환경 변수로 바꿀 수 있다).
 //   FACTORY_DIR (기본 ../factory-map), RETRACK_DIR (기본 ../seoul-redev)
@@ -209,8 +209,14 @@ const eok = (won) => {
 // K-apt 단지명 끝의 동 목록(현대14차(203,204,205,206동), 옥수파크힐스101동~116동)은 떼고 보여 준다.
 const aptName = (n) => n.replace(/\(?[\d,~·\s]+동(~\d+동)?\)?$/, '').trim() || n;
 
-function apt(region) {
+function apt(arg) {
   const doc = readJson(path.join(RETRACK_DIR, 'web/data/apt-leaders.json'));
+  // next: 이 데이터 기간(to 의 연월)으로 아직 안 쓴 권역을 REGIONS 순서대로. 다 썼으면 오류(새 데이터를 기다린다).
+  const tag = doc.window.to.slice(0, 7);
+  const files = fs.readdirSync(POSTS);
+  const region = arg !== 'next' ? arg
+    : Object.keys(REGIONS).find((r) => !files.includes(`서울-${r}-대장아파트-${tag}.md`))
+      ?? (() => { throw new Error(`${tag} 데이터로 다섯 권역을 다 썼다. RETRACK 대장아파트 데이터가 갱신될 때까지 기다린다`); })();
   const gus = REGIONS[region];
   if (!gus) throw new Error(`권역: ${Object.keys(REGIONS).join(', ')}`);
   const all = doc.gus;
