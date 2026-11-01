@@ -17,6 +17,10 @@ const APPS = [
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // http → https, www → apex 를 한 번에 301로 맞춘다(검색엔진이 주소 하나만 보게).
+    if (url.protocol === 'http:' || url.hostname === 'www.invisiblecity.co.kr') {
+      return Response.redirect(`https://invisiblecity.co.kr${url.pathname}${url.search}`, 301);
+    }
     // RETRACK은 서브도메인에서 돈다. 다른 사이트처럼 /retrack 으로 들어와도 찾아가게 한다.
     if (url.pathname === '/retrack' || url.pathname.startsWith('/retrack/')) {
       return Response.redirect(`https://retrack.invisiblecity.co.kr${url.pathname.slice('/retrack'.length) || '/'}${url.search}`, 301);
