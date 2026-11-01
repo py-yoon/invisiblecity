@@ -43,7 +43,10 @@ collections:
     slug: "{{fields.slug}}"
     identifier_field: title
     summary: "{{title}}"
-    sortable_fields: [date, title]
+    # 글 목록은 최신 발행일이 맨 위에 오게 한다
+    sortable_fields:
+      - { field: date, label: 발행일, default_sort: desc }
+      - title
     view_filters:
       - { label: 초안, field: draft, pattern: true }
     fields:
