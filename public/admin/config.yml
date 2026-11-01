@@ -54,7 +54,6 @@ collections:
           - "지구단위계획"
           - "부담금/세금"
           - "인프라시설"
-          - "관광시설"
           - "해외건축가"
           - "국내건축가"
           - "부동산"
@@ -62,10 +61,7 @@ collections:
           - "도시기반시설"
           - "지식산업센터"
           - "도시정책/통계"
-          - "자전거"
           - "도시산책"
-          - "대장아파트"
-          - "노인복지주택"
           - "도시정비사업"
       - { name: tags, label: 태그, widget: list, required: false, hint: "쉼표로 구분" }
       - { name: description, label: 요약, widget: text, required: false, hint: "목록과 검색 결과에 보이는 설명. 비우면 본문 앞부분을 씁니다." }
