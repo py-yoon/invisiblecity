@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 }
 const { name, posts } = Astro.props;
 ---
-<Base title={name} description={`${name}  글 ${posts.length}편`}>
+<Base title={`태그: ${name}`} description={`${name}  글 ${posts.length}편`}>
   <div class="with-sidebar">
     <div class="content">
       <h1 class="archive-title">태그: {name}</h1>
