@@ -6,17 +6,19 @@ import Apps from '../components/Apps.astro';
 import { getPosts, PER_PAGE } from '../lib/site';
 const posts = await getPosts();
 const SITE = 'https://invisiblecity.co.kr';
+const DESC = '보이지 않는 도시연구소는 도시를 바꾸는 개발사업, 건축, 부동산 제도와 통계를 기록한다. 공장용지 지도, 서울 재개발·재건축 RETRACK, 건축 지도, 전국 기피시설 지도, 세계 최고층 빌딩 도감 SPIRE를 만든다.';
 const jsonld = [{
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'invisiblecity',
   alternateName: '보이지 않는 도시연구소',
+  description: DESC,
   url: `${SITE}/`,
   inLanguage: 'ko-KR',
   potentialAction: { '@type': 'SearchAction', target: `${SITE}/search/?q={search_term_string}`, 'query-input': 'required name=search_term_string' },
 }];
 ---
-<Base jsonld={jsonld}>
+<Base description={DESC} jsonld={jsonld}>
   <div class="with-sidebar">
     <div class="content"><Apps /><PostList posts={posts.slice(0, PER_PAGE)} pages={Math.ceil(posts.length / PER_PAGE)} /></div>
     <Sidebar />

@@ -13,7 +13,8 @@ const isPreview = Astro.site?.origin !== REAL_SITE;
 // 워드프레스와 똑같이 퍼센트 인코딩은 소문자(%eb…)로
 const canonical = new URL(Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/', REAL_SITE)
   .href.replace(/%[0-9A-F]{2}/g, (m) => m.toLowerCase());
-const ogImage = image ? new URL(image, Astro.site).href : undefined;
+// 대표 이미지가 없는 페이지(홈·소개·계산기·목록)는 사이트 공통 이미지로 공유 미리보기를 채운다.
+const ogImage = new URL(image ?? '/og.png', Astro.site).href;
 // 메뉴: 만든 사이트 묶음, 카테고리 세 묶음, 계산기. 글이 있는 카테고리만 보이고,
 // 새로 생긴 카테고리는 마지막 묶음 끝에 붙는다.
 type MenuItem = [href: string, label: string];

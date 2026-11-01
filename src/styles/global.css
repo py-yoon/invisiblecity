@@ -116,6 +116,12 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 .entry-content table { width: 100%; border-collapse: collapse; margin: 0 0 1em; font-size: 0.85em; display: block; overflow-x: auto; }
 .entry-content th, .entry-content td { border: 1px solid #000; padding: 0.5em; text-align: left; vertical-align: top; }
 .entry-content th { font-weight: 600; }
+/* 한글 단어 중간에서 줄이 끊기지 않게. 좁은 화면에서는 칸이 한 글자 폭까지 줄지 않고 표가 가로로 스크롤된다. */
+.entry-content th, .entry-content td { word-break: keep-all; overflow-wrap: break-word; }
+@media (max-width: 600px) {
+  .entry-content th, .entry-content td { min-width: 5em; }
+  .entry-content tr > :first-child { min-width: 8em; }
+}
 .entry-content .embed { margin: 1em 0; }
 .entry-content .embed iframe { display: block; width: 100%; border: 0; }
 .entry-content .embed.video iframe { aspect-ratio: 16 / 9; height: auto; }

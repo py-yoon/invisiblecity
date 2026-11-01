@@ -9,6 +9,9 @@ const APPS = [
   { prefix: '/factory', origin: 'https://factory-map.vercel.app', keepPrefix: false },
   // 건축, 걷다(archi2)는 Next.js basePath가 /architect 라서 경로를 그대로 넘긴다.
   { prefix: '/architect', origin: 'https://archi2-lovat.vercel.app', keepPrefix: true },
+  // SPIRE의 Vercel Web Analytics는 basePath와 상관없이 루트의 이 경로로 스크립트·이벤트를 보낸다.
+  // (Vercel이 프로젝트마다 정하는 경로. 바뀌면 SPIRE 페이지 HTML의 /…/script.js 주소로 갱신)
+  { prefix: '/a063e951082ad4c6', origin: 'https://worlds-tallest.vercel.app', keepPrefix: true },
 ];
 
 export default {
