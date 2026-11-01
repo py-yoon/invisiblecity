@@ -11,14 +11,14 @@
 /tools /tools-2/ 301
 
 # 2026-11-01 글 1개뿐인 카테고리 합침
-/category/관광시설/ /category/도시를-바꾸는-개발사업/ 301
-/category/관광시설 /category/도시를-바꾸는-개발사업/ 301
-/category/노인복지주택/ /category/주택사업/ 301
-/category/노인복지주택 /category/주택사업/ 301
-/category/대장아파트/ /category/부동산/ 301
-/category/대장아파트 /category/부동산/ 301
-/category/자전거/ /category/도시정책-통계/ 301
-/category/자전거 /category/도시정책-통계/ 301
+/category/%EA%B4%80%EA%B4%91%EC%8B%9C%EC%84%A4/ /category/도시를-바꾸는-개발사업/ 301
+/category/%EA%B4%80%EA%B4%91%EC%8B%9C%EC%84%A4 /category/도시를-바꾸는-개발사업/ 301
+/category/%EB%85%B8%EC%9D%B8%EB%B3%B5%EC%A7%80%EC%A3%BC%ED%83%9D/ /category/주택사업/ 301
+/category/%EB%85%B8%EC%9D%B8%EB%B3%B5%EC%A7%80%EC%A3%BC%ED%83%9D /category/주택사업/ 301
+/category/%EB%8C%80%EC%9E%A5%EC%95%84%ED%8C%8C%ED%8A%B8/ /category/부동산/ 301
+/category/%EB%8C%80%EC%9E%A5%EC%95%84%ED%8C%8C%ED%8A%B8 /category/부동산/ 301
+/category/%EC%9E%90%EC%A0%84%EA%B1%B0/ /category/도시정책-통계/ 301
+/category/%EC%9E%90%EC%A0%84%EA%B1%B0 /category/도시정책-통계/ 301
 
 /wp-content/uploads/2024/03/image-1-150x150.png /uploads/2024/03/image-1-1024x481.png 301
 /wp-content/uploads/2024/03/image-1-1536x721.png /uploads/2024/03/image-1-1024x481.png 301

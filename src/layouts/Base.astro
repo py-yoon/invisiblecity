@@ -32,7 +32,8 @@ const CATEGORY_GROUPS: [string, string[]][] = [
   ['도시·건축', ['해외건축가', '국내건축가', '도시기반시설', '인프라시설', '도시정책/통계', '도시산책']],
 ];
 const posts = await getPosts();
-const categories = groupBy(posts, 'categories').map(([n]) => n).sort((a, b) => a.localeCompare(b, 'ko'));
+const catCount = new Map(groupBy(posts, 'categories').map(([n, ps]) => [n, ps.length]));
+const categories = [...catCount.keys()].sort((a, b) => a.localeCompare(b, 'ko'));
 const grouped = new Set(CATEGORY_GROUPS.flatMap(([, cs]) => cs));
 const menu: [string, MenuItem[]][] = [
   ['Sites', SITES],
@@ -155,7 +156,7 @@ const menu: [string, MenuItem[]][] = [
         <section>
           <h2>Category</h2>
           <ul class="footer-cats">
-            {categories.map((c) => <li><a href={categoryUrl(c)}>{c}</a></li>)}
+            {categories.map((c) => <li><a href={categoryUrl(c)}>{c}</a> ({catCount.get(c)})</li>)}
           </ul>
         </section>
       </div>
