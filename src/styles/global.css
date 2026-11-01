@@ -152,18 +152,18 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 /* 첫 화면 '만든 사이트' 카드 */
 .apps { margin: 0.6em 0 1.6em; }
 .apps h2 { font-size: 32px; font-weight: 600; text-transform: uppercase; line-height: 1.2; margin: 0 0 16px; padding-top: 1rem; }
-.apps ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.app a { display: flex; flex-direction: column; gap: 6px; height: 100%; padding: 16px 20px; border: 1px solid #000; text-decoration: none; transition: transform 0.15s, box-shadow 0.15s; }
+.apps ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.app a { display: flex; flex-direction: column; gap: 4px; aspect-ratio: 1; overflow: hidden; padding: 12px 14px; border: 1px solid #000; text-decoration: none; transition: transform 0.15s, box-shadow 0.15s; }
 .app a:hover { color: #000; transform: translate(-3px, -3px); box-shadow: 4px 4px 0 #000; }
 .app.pink a { background: var(--pink); }
 .app.purple a { background: var(--purple); }
 .app.yellow a { background: var(--yellow); }
 .app.white a { background: #fff; }
-.app-name { font-size: 28px; font-weight: 900; text-transform: uppercase; line-height: 1; letter-spacing: 0.01em; }
-.app-title { font-size: 19px; font-weight: 700; }
-.app-desc { font-size: 16px; line-height: 1.45; flex: 1; }
-.app-top { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
-.app-go { margin-left: auto; font-size: 24px; font-weight: 900; line-height: 1; transition: transform 0.15s; }
+.app-name { font-size: clamp(15px, 1.4vw, 20px); font-weight: 900; text-transform: uppercase; line-height: 1; letter-spacing: 0.01em; }
+.app-title { font-size: clamp(13px, 1.05vw, 16px); font-weight: 700; }
+.app-desc { font-size: 13px; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; align-self: start; }
+.app-top { display: flex; flex-direction: column; gap: 4px; }
+.app-go { margin-top: auto; font-size: 22px; font-weight: 900; line-height: 1; transition: transform 0.15s; }
 .app a:hover .app-go { transform: translateX(4px); }
 
 /* 꼬리말: 노랑 위젯 + 분홍 저작권 띠 */
@@ -200,9 +200,11 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 #search { --pagefind-ui-primary: #000; --pagefind-ui-text: #000; --pagefind-ui-background: #fff; --pagefind-ui-border: #000; --pagefind-ui-tag: var(--yellow); --pagefind-ui-font: var(--font); --pagefind-ui-border-radius: 0; --pagefind-ui-scale: 1; }
 
 /* 태블릿 */
+/* 카드가 작아지는 폭에서는 설명을 빼고 이름·제목·화살표만 */
+@media (min-width: 782px) and (max-width: 1300px) {
+  .app-desc { display: none; }
+}
 @media (max-width: 1024px) {
-  .apps ul { gap: 12px; }
-  .app-name { font-size: 24px; }
   .with-sidebar { flex-direction: column; }
   .with-sidebar > .content, .sidebar { flex-basis: auto; width: 100%; }
 }
@@ -236,11 +238,12 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
   body { font-size: 18px; }
   .post-list { grid-template-columns: minmax(0, 1fr); }
   .apps h2 { font-size: 25px; }
-  .apps ul { grid-template-columns: 1fr; gap: 12px; }
-  .app a { padding: 12px 14px; gap: 4px; }
-  .app-name { font-size: 22px; }
-  .app-title { font-size: 17px; }
-  .app-desc { font-size: 15px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+  /* 좁은 화면: 한 줄 그대로 두고 옆으로 넘겨 본다 */
+  .apps ul { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 46vw; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+  .app { scroll-snap-align: start; }
+  .app a { padding: 12px; gap: 4px; }
+  .app-name { font-size: 17px; }
+  .app-title { font-size: 14px; }
   .post-list h2 { font-size: 24px; }
   .entry-title { font-size: 30px; }
   .single:not(.wide) .entry-content { font-size: 18px; }
@@ -257,8 +260,6 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 
 /* 아주 좁은 화면: 사이트 카드 제목을 한 줄에 */
 @media (max-width: 360px) {
-  .app-name { font-size: 19px; }
-  .app-title { font-size: 15px; }
-  .app-top { gap: 4px 8px; }
-  .app-go { font-size: 20px; }
+  .app-name { font-size: 15px; }
+  .app-title { font-size: 13px; }
 }

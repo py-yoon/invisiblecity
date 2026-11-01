@@ -6,7 +6,7 @@ const apps = [
   { href: 'https://retrack.invisiblecity.co.kr/', name: 'RETRACK', title: '서울 재개발·재건축', desc: '서울 재개발·재건축 874곳의 진행단계, 민간개발과 시세 흐름.', tone: 'purple' },
   { href: url('/architect'), name: 'ARCHITECT', title: '건축, 걷다', desc: '한국·일본 근대·현대 건축 772곳과 걸어서 도는 답사 코스.', tone: 'yellow' },
   { href: url('/nimby/'), name: 'NIMBY MAP', title: '전국 기피시설 지도', desc: '소각장·하수처리장·화장장 등 1만여 곳을 우리 동네 반경으로 검색.', tone: 'white' },
-  { href: url('/spire/'), name: 'SPIRE', title: '세계 최고층 빌딩 도감', desc: '300m 이상 초고층 108동을 같은 축척으로 세워 비교합니다.', tone: 'pink' },
+  { href: url('/spire/'), name: 'SPIRE', title: '세계 최고층 빌딩 도감', desc: '300m 이상 초고층 108동을 같은 축척으로 세워 비교.', tone: 'pink' },
 ];
 ---
 <section class="apps" aria-labelledby="apps-title">
@@ -18,9 +18,9 @@ const apps = [
           <span class="app-top">
             <span class="app-name">{a.name}</span>
             <span class="app-title">{a.title}</span>
-            <span class="app-go" aria-hidden="true">→</span>
           </span>
           <span class="app-desc">{a.desc}</span>
+          <span class="app-go" aria-hidden="true">→</span>
         </a>
       </li>
     ))}
