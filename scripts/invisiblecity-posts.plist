@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>kr.co.invisiblecity.posts</string>
+  <key>ProgramArguments</key><array><string>/bin/zsh</string><string>/Users/jinsuyoon/.invisiblecity-sync/scripts/weekly-post.sh</string></array>
+  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>22</integer><key>Minute</key><integer>0</integer></dict>
+  <key>StandardOutPath</key><string>/Users/jinsuyoon/Library/Logs/invisiblecity-posts.log</string>
+  <key>StandardErrorPath</key><string>/Users/jinsuyoon/Library/Logs/invisiblecity-posts.log</string>
+</dict></plist>

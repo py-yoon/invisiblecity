@@ -254,7 +254,7 @@ function apt(arg) {
 
   writePost({
     slug: `서울-${region}-대장아파트-${to.slice(0, 7)}`,
-    title: `서울 ${region} 구별 대장아파트 순위: ${hi.gu} ${hi.name} ${eok(hi.median)} (${span} 국민평형 실거래)`,
+    title: `서울 ${region} 구별 대장아파트 순위 - ${hi.gu} ${hi.name} ${eok(hi.median)} (${span} 국민평형 실거래)`,
     categories: ['부동산'],
     tags: ['대장아파트', '아파트', '실거래가', '국민평형', region, ...gus],
     description: `${span} 국민평형(84㎡) 실거래 중위가로 본 서울 ${region} ${gus.join('·')} 구별 대장아파트 1~5위. 1위는 ${firsts.map((f) => `${f.gu} ${f.name}`).join(', ')}.`,
@@ -321,7 +321,7 @@ function guReport(arg) {
 
   writePost({
     slug: `서울-${gu}-재개발-재건축-현황-${meta.dataDate.slice(0, 7)}`,
-    title: `${gu} 재개발·재건축 현황: 진행 중 ${active.length}곳, 계획 ${num(units(active))}세대 (${ymd(meta.dataDate).slice(0, -3).trim()} 기준)`.replace(/ \d+일 기준/, ' 기준'),
+    title: `${gu} 재개발·재건축 현황 - 진행 중 ${active.length}곳, 계획 ${num(units(active))}세대 (${ymd(meta.dataDate).slice(0, -3).trim()} 기준)`.replace(/ \d+일 기준/, ' 기준'),
     categories: ['도시정비사업'],
     tags: ['재개발', '재건축', '정비사업', gu, '서울', '관리처분인가', '시공사'],
     description: `서울 ${gu} 재개발·재건축 정비사업 ${mine.length}곳(진행 중 ${active.length}곳)의 단계별 현황, 관리처분·공사 중 사업, 큰 사업, 시공사, 최근 단계 변화를 정리했다.`,
