@@ -421,6 +421,18 @@
 /page-sitemap.xml /sitemap-index.xml 301
 /category-sitemap.xml /sitemap-index.xml 301
 /category/:slug/page/* /category/:slug/ 301
+# 2026-11-03 같은 뜻의 태그 합침
+/tag/%EC%9E%90%ED%95%98%ED%95%98%EB%94%94%EB%93%9C/ /tag/자하-하디드/ 301
+/tag/%EC%9E%90%ED%95%98%ED%95%98%EB%94%94%EB%93%9C /tag/자하-하디드/ 301
+/tag/%EC%95%88%EB%8F%84%EB%8B%A4%EB%8B%A4%EC%98%A4/ /tag/안도-다다오/ 301
+/tag/%EC%95%88%EB%8F%84%EB%8B%A4%EB%8B%A4%EC%98%A4 /tag/안도-다다오/ 301
+/tag/gtx%EB%85%B8%EC%84%A0/ /tag/gtx/ 301
+/tag/gtx%EB%85%B8%EC%84%A0 /tag/gtx/ 301
+/tag/%EB%8F%84%EC%8B%9C%EC%A0%95%EB%B9%84%EC%82%AC%EC%97%85/ /tag/정비사업/ 301
+/tag/%EB%8F%84%EC%8B%9C%EC%A0%95%EB%B9%84%EC%82%AC%EC%97%85 /tag/정비사업/ 301
+/tag/%EB%A7%88%EB%A6%AC%EC%98%A4%EB%B3%B4%ED%83%80/ /tag/마리오-보타/ 301
+/tag/%EB%A7%88%EB%A6%AC%EC%98%A4%EB%B3%B4%ED%83%80 /tag/마리오-보타/ 301
+
 /tag/:slug/page/* /tag/:slug/ 301
 /category/:slug/feed/ /rss.xml 301
 /wp-admin/* /admin/ 302
