@@ -4,8 +4,8 @@ import SearchForm from '../components/SearchForm.astro';
 import { SITE_TITLE, SITE_DESC, url, getPosts, groupBy, postUrl, categoryUrl, fmtShortDate } from '../lib/site';
 
 interface Article { published: Date; modified?: Date; section?: string; tags: string[] }
-interface Props { title?: string; description?: string; image?: string; type?: 'website' | 'article'; article?: Article; jsonld?: object[] }
-const { title, description = SITE_DESC, image, type = 'website', article, jsonld = [] } = Astro.props;
+interface Props { title?: string; description?: string; image?: string; type?: 'website' | 'article'; noindex?: boolean; article?: Article; jsonld?: object[] }
+const { title, description = SITE_DESC, image, type = 'website', noindex = false, article, jsonld = [] } = Astro.props;
 const fullTitle = title ? `${title} - ${SITE_TITLE}` : `${SITE_TITLE} - ${SITE_DESC}`;
 // 미리보기(github.io)는 검색에 안 잡히게 하고, 대표 주소는 항상 실제 도메인으로
 const REAL_SITE = 'https://invisiblecity.co.kr';
@@ -53,7 +53,7 @@ const menu: [string, MenuItem[]][] = [
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta name="robots" content={isPreview ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large'} />
+    <meta name="robots" content={isPreview ? 'noindex, nofollow' : noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large'} />
     {!isPreview && (
       <>
         <meta name="naver-site-verification" content="9c751a75167a24abd8cd503ceabd5d2edac50c72" />
