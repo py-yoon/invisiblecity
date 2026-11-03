@@ -41,7 +41,9 @@ function writePost({ slug, title, categories, tags, description, body }) {
     '---',
   ].join('\n');
   const file = path.join(POSTS, `${slug}.md`);
-  fs.writeFileSync(file, `${fm}\n${body.trim()}\n`);
+  // 물결표(~)가 한 문단에 둘 이상이면 마크다운이 그 사이를 취소선으로 바꾼다. 링크 주소 안만 빼고 이스케이프한다.
+  const safe = body.trim().split(/(\]\([^)]*\))/).map((t, i) => (i % 2 ? t : t.replace(/~/g, '\\~'))).join('');
+  fs.writeFileSync(file, `${fm}\n${safe}\n`);
   console.log(`썼다: ${path.relative(ROOT, file)}`);
 }
 
