@@ -42,6 +42,7 @@ button{font:inherit;color:inherit}
 .pin{position:absolute;border-radius:50%;background:var(--c);border:1.5px solid #000;box-sizing:border-box;cursor:pointer;transition:box-shadow .15s}
 .pin.near{box-shadow:0 0 0 2.5px #fff}
 .pin.sel{box-shadow:0 0 0 3px var(--accent),0 0 14px var(--accent)}
+.bld{width:10px;height:10px;border-radius:2px;background:#fff;border:2px solid var(--c-mall);box-sizing:border-box;cursor:pointer}
 .stm{width:7px;height:7px;border-radius:50%;cursor:pointer;opacity:.9;transition:opacity .25s,transform .25s}
 .stm.past{opacity:.12;transform:scale(.7)}
 .mapbtn{position:absolute;right:10px;bottom:24px;z-index:5;display:flex;flex-direction:column;gap:6px}
@@ -222,11 +223,14 @@ footer a{color:#cfc6bb}
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=nbhyehsios"></script>
 <script src="data/places.js"></script>
 <script src="data/stations.js"></script>
-<script src="data/malls.js"></script>
+<script src="data/routes.js"></script>
+<script src="data/links.js"></script>
 <script>
 (() => {
 const P = window.PLACES, S = window.STATIONS, M = window.MARKERS;
-for (const p of P) Object.assign(p, (window.MALL_ROUTES || {})[p.id] || {});
+for (const p of P) Object.assign(p, (window.ROUTES || {})[p.id] || {});
+const LINKS = window.STATION_LINKS || {}, LINKED = window.LINKED || [];
+const LSRC = { user: '운영자 확인', metro: '서울교통공사 연결통로 자료', osm: 'OSM 지하 통로' };
 const CATS = {
   tr: ['교통', '--c-tr'], mall: ['지하상가', '--c-mall'], water: ['물길', '--c-water'], cave: ['자연 동굴', '--c-cave'],
   mine: ['광산', '--c-mine'], hist: ['역사·전쟁', '--c-hist'], sci: ['과학·지진', '--c-sci'],
@@ -352,16 +356,25 @@ for (const p of P) {
   pins[p.id] = m; pinEls[p.id] = el;
 }
 // 지하상가 구간: route = [[ [lat,lng], ... ], ...] (갈래가 여러 개일 수 있음)
-const mallLines = [];
+const mallLines = [], routeLines = {};
 const routeBounds = (p) => { const b = new NV.LatLngBounds(); p.route.flat().forEach(([la, ln]) => b.extend(LL(la, ln))); return b; };
 for (const p of P) for (const seg of p.route || []) {
-  const draw = (w, c, o) => new NV.Polyline({ map, path: seg.map(([la, ln]) => LL(la, ln)), strokeColor: c, strokeWeight: w, strokeOpacity: o, strokeLineCap: 'round', strokeLineJoin: 'round', clickable: true, zIndex: 40 });
-  const halo = draw(9, '#000', .45), line = draw(5, color(p.cat), .95);
+  const draw = (w, c, o, dash) => new NV.Polyline({ map, path: seg.map(([la, ln]) => LL(la, ln)), strokeColor: c, strokeWeight: w, strokeOpacity: o, strokeStyle: dash ? 'shortdash' : 'solid', strokeLineCap: dash ? 'butt' : 'round', strokeLineJoin: 'round', clickable: true, zIndex: 40 });
+  const halo = draw(9, '#000', .45), line = draw(5, color(p.cat), .95, p.routeDash);
   for (const l of [halo, line]) NV.Event.addListener(l, 'click', () => select(p.id, true));
   NV.Event.addListener(line, 'mouseover', (e) => showTip(`<b>${esc(p.name)}</b><br>${esc(p.span || '')}${p.routeLen ? ' · 약 ' + p.routeLen.toLocaleString() + 'm' : ''}`, e.domEvent));
   NV.Event.addListener(line, 'mouseout', hideTip);
-  mallLines.push(halo, line);
+  mallLines.push(halo, line); (routeLines[p.id] ||= []).push(halo, line);
 }
+// 지하로 이어진 건물: 작은 네모
+const bldMarkers = LINKED.map((b) => {
+  const el = document.createElement('div'); el.className = 'bld';
+  el.addEventListener('mouseenter', (e) => showTip(`<b>${esc(b.name)}</b><br>${esc(P.find((p) => p.id === b.mall)?.name || '')}와 지하로 연결`, e));
+  el.addEventListener('mouseleave', hideTip);
+  const m = new NV.Marker({ position: LL(b.lat, b.lng), map, icon: { content: el, anchor: new NV.Point(5, 5) }, zIndex: 90 });
+  NV.Event.addListener(m, 'click', () => select(b.mall));
+  return m;
+});
 const setPin = (id, cls) => { const el = pinEls[id]; el.classList.toggle('near', cls === 'near'); el.classList.toggle('sel', cls === 'sel'); pins[id].setZIndex(cls === 'sel' ? 300 : cls === 'near' ? 200 : 100); };
 
 // ── 필터 ──
@@ -377,7 +390,8 @@ const toggle = (k) => {
   if (k === 'st') { stMarkers.forEach((m) => m.setMap(on.st ? map : null)); ground.querySelector('.lanes').style.display = on.st ? '' : 'none'; }
   else {
     for (const p of P) if (p.cat === k) pins[p.id].setMap(on[k] ? map : null);
-    for (const l of mallLines) if (k === 'mall') l.setMap(on.mall ? map : null);
+    for (const p of P) if (p.cat === k) (routeLines[p.id] || []).forEach((l) => l.setMap(on[k] ? map : null));
+    if (k === 'mall') bldMarkers.forEach((m) => m.setMap(on.mall ? map : null));
     for (const el of document.querySelectorAll(`[data-cat="${k}"]`)) el.style.opacity = on[k] ? '' : '.18';
   }
 };
@@ -396,7 +410,7 @@ function select(id, fromMap) {
   detail.style.setProperty('--c', color(p.cat));
   detail.innerHTML = `<button class="x" aria-label="닫기">×</button><div class="cat">${n}</div><h3>${esc(p.name)}</h3><div class="rg">${esc(p.region)}${p.year ? ' · ' + p.year + '년' : ''}</div>
     <div class="facts"><span class="depth">${esc(p.depthText)}</span>${p.len ? `<span>${esc(p.len)}</span>` : ''}<span class="${o[1]}">${o[0]}</span></div>
-    ${p.span || p.facts ? `<dl class="mall">${p.span ? `<dt>구간</dt><dd>${esc(p.span)}</dd>` : ''}${p.routeLen ? `<dt>길이</dt><dd>지도 위 선 약 ${p.routeLen.toLocaleString()}m${p.routeNote ? ` <small>(${esc(p.routeNote)})</small>` : ''}</dd>` : ''}${(p.facts || []).map((f) => `<dt>·</dt><dd>${esc(f)}</dd>`).join('')}</dl>` : ''}
+    ${p.span || p.facts || p.routeLen ? `<dl class="mall">${p.span ? `<dt>구간</dt><dd>${esc(p.span)}</dd>` : ''}${p.routeLen ? `<dt>길이</dt><dd>지도 위 선 약 ${p.routeLen >= 1000 ? (p.routeLen / 1000).toFixed(1) + 'km' : p.routeLen + 'm'}${p.routeNote ? ` <small>(${esc(p.routeNote)})</small>` : ''}</dd>` : ''}${(p.facts || []).map((f) => `<dt>·</dt><dd>${esc(f)}</dd>`).join('')}${LINKED.some((b) => b.mall === p.id) ? `<dt>연결</dt><dd>${LINKED.filter((b) => b.mall === p.id).map((b) => `${esc(b.name)}<small title="${esc(LSRC[b.src])}">${b.src === 'user' ? '' : b.src === 'metro' ? '¹' : '²'}</small>`).join(', ')}<br><small>건물은 지도에 흰 네모로 표시. ¹서울교통공사 연결통로 자료 ²OSM</small></dd>` : ''}</dl>` : ''}
     <p>${esc(p.story)}</p>
     ${p.check ? '<div class="chk">확인 중: 일부 수치·위치를 공식 자료와 아직 대조하지 못했습니다.</div>' : ''}
     ${p.src && p.src.length ? `<div class="src">출처 ${p.src.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener">[${i + 1}] ${esc(new URL(u).hostname.replace(/^www\./, ''))}</a>`).join(' ')}</div>` : ''}`;
@@ -417,7 +431,8 @@ function showStation(i) {
   detail.innerHTML = `<button class="x" aria-label="닫기">×</button><div class="cat">서울 지하철 ${s.line}호선</div><h3>${esc(s.name)}역</h3><div class="rg">${esc(s.floors)} · ${esc(s.platform)} 승강장${s.note ? ' · ' + esc(s.note) : ''}</div>
     <div class="facts"><span class="depth">${s.depth > 0 ? '승강장 지하 ' + s.depth + 'm' : '지상역'}</span>${s.railASL != null ? `<span>선로 해발 ${s.railASL > 0 ? '+' : ''}${s.railASL}m</span>` : ''}</div>
     <p>${s.depth > 0 ? `서울 1~8호선 지하역 ${st.length}곳 가운데 ${st.filter((x) => x.depth > s.depth).length + 1}번째로 깊다.` : '고가나 지상으로 지나는 역이다.'}${s.railASL != null && s.railASL < 0 ? ' 선로가 바다 수면보다 낮다.' : ''}</p>
-    <div class="src">출처 서울교통공사 역사심도정보(2024-11-04)</div>`;
+    ${LINKS[s.name] ? `<dl class="mall"><dt>연결</dt><dd>${LINKS[s.name].map(([n, t]) => `${esc(n)}${/겸용/.test(t) ? ` <small>(${esc(t.replace('겸용통로', '출입구 겸용').replace(/[()]/g, ' ').trim())})</small>` : ''}`).join(', ')}<br><small>역과 지하로 바로 이어진 건물·시설</small></dd></dl>` : ''}
+    <div class="src">출처 서울교통공사 역사심도정보(2024-11-04)${LINKS[s.name] ? ', 지하철 연결통로 시설물정보(2026-09-22)' : ''}</div>`;
   detail.classList.add('show');
   flyTo(s.lat, s.lng, Math.max(map.getZoom(), 14));
   for (const el of ground.querySelectorAll('.sdot.on')) el.classList.remove('on');
