@@ -482,10 +482,10 @@ let lastBucket = null, raf = 0;
 function onScroll() {
   raf = 0;
   const gy = probeY() - ground.getBoundingClientRect().top;
-  const d = gy < TOP ? 0 : dAt(gy);
+  const d = gy < TOP ? 0 : Math.min(dAt(gy), MAXD);
   probeEl.style.opacity = gy < 0 ? 0 : 1;
   const remain = st.filter((s) => s.depth >= d).length;
-  readout.innerHTML = d <= 0 ? '0m<small>지표</small>' : `−${fmt(d)}${d < 60 ? `<small>더 깊은 역 ${remain}곳</small>` : ''}`;
+  readout.innerHTML = d <= 0 ? '0m<small>지표</small>' : d >= 32000 ? `−${fmt(Math.min(d, 32000))}<small>맨틀</small>` : `−${fmt(d)}${d < 60 ? `<small>더 깊은 역 ${remain}곳</small>` : ''}`;
   const near = new Set();
   for (const el of items) {
     const t = parseFloat(el.style.top);
