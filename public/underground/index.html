@@ -225,6 +225,7 @@ footer a{color:#cfc6bb}
 <script src="data/stations.js"></script>
 <script src="data/routes.js"></script>
 <script src="data/links.js"></script>
+<script src="data/subway.js"></script>
 <script>
 (() => {
 const P = window.PLACES, S = window.STATIONS, M = window.MARKERS;
@@ -336,6 +337,13 @@ const depthColor = (d) => { // 얕으면 노랑, 깊으면 빨강
   const t = Math.min(Math.asinh(d / K) / Math.asinh(60 / K), 1);
   return `hsl(${55 - t * 55},95%,${62 - t * 10}%)`;
 };
+// 지하 선로: 역 깊이를 이어 붙인 어림 깊이로 색칠
+const SUB = (window.SUBWAY || []).map(([ln, d, path]) => {
+  const pl = new NV.Polyline({ map, path: path.map(([a, b]) => LL(a, b)), strokeColor: depthColor(d), strokeWeight: 3.5, strokeOpacity: .85, strokeLineCap: 'round', clickable: true, zIndex: 20 });
+  NV.Event.addListener(pl, 'mouseover', (e) => showTip(`<b style="color:${LINE_COLORS[ln]}">${ln}호선</b> 지하 선로<br>약 ${Math.round(d - 2.5)}~${Math.round(d + 2.5)}m <small style="color:#999">(역 깊이로 어림)</small>`, e.domEvent));
+  NV.Event.addListener(pl, 'mouseout', hideTip);
+  return { pl, d };
+});
 const stEls = [], stMarkers = S.map((s, i) => {
   const el = document.createElement('div'); el.className = 'stm'; el.style.background = s.depth > 0 ? depthColor(s.depth) : '#777';
   el.addEventListener('mouseenter', (e) => showTip(`<b>${esc(s.name)}</b> <span style="color:${LINE_COLORS[s.line]}">${s.line}호선</span><br>${s.depth > 0 ? '지하 ' + s.depth + 'm' : '지상역'}`, e));
@@ -387,7 +395,7 @@ fbox.innerHTML = '<div class="chips">' + Object.entries(CATS).map(([k, [n, v]]) 
 const toggle = (k) => {
   on[k] = !on[k];
   fbox.querySelector(`[data-k="${k}"]`).setAttribute('aria-pressed', on[k]);
-  if (k === 'st') { stMarkers.forEach((m) => m.setMap(on.st ? map : null)); ground.querySelector('.lanes').style.display = on.st ? '' : 'none'; }
+  if (k === 'st') { stMarkers.forEach((m) => m.setMap(on.st ? map : null)); SUB.forEach((x) => x.pl.setMap(on.st ? map : null)); ground.querySelector('.lanes').style.display = on.st ? '' : 'none'; }
   else {
     for (const p of P) if (p.cat === k) pins[p.id].setMap(on[k] ? map : null);
     for (const p of P) if (p.cat === k) (routeLines[p.id] || []).forEach((l) => l.setMap(on[k] ? map : null));
@@ -502,6 +510,7 @@ function onScroll() {
   if (bucket !== lastBucket && d < 70) {
     lastBucket = bucket;
     S.forEach((s, i) => stEls[i].classList.toggle('past', s.depth < d));
+    SUB.forEach((x) => x.pl.setOptions({ strokeOpacity: x.d + 2.5 < d ? .12 : .85 }));
   }
 }
 addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(onScroll); }, { passive: true });
