@@ -20,7 +20,6 @@ gtag('js', new Date());
 gtag('config', 'G-9L5W7TM5G2');
 </script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{
   --bg:#14110f; --panel:rgba(24,20,18,.82); --line:rgba(255,255,255,.10); --text:#efe9e2; --mute:#a69b8f; --dim:#6f655c;
@@ -35,11 +34,18 @@ a{color:inherit}
 button{font:inherit;color:inherit}
 
 /* 지도: 데스크톱은 오른쪽 고정, 모바일은 위쪽 고정 */
-#map{position:fixed;top:var(--icbar);right:0;bottom:0;width:var(--map-w);z-index:1;background:#1b1816}
-.leaflet-container{background:#1b1816;font-family:inherit}
-.leaflet-control-attribution{background:rgba(20,17,15,.7)!important;color:#8a7f74!important;font-size:10px}
-.leaflet-control-attribution a{color:#b5a99c!important}
-.leaflet-bar a{background:#221d1a;color:#ddd;border-color:#3a332d}
+#mapwrap{position:fixed;top:var(--icbar);right:0;bottom:0;width:var(--map-w);z-index:1;background:#1b1816}
+#map{width:100%;height:100%}
+.ngrid{position:absolute;inset:0}
+/* 네이버 바탕 지도를 어둡게: 타일 이미지만 반전(마커는 그대로) */
+#map img[src*="pstatic.net"],#map img[src*="naver"]{filter:invert(.92) hue-rotate(180deg) brightness(.92) contrast(.9) saturate(.55)}
+.pin{position:absolute;border-radius:50%;background:var(--c);border:1.5px solid #000;box-sizing:border-box;cursor:pointer;transition:box-shadow .15s}
+.pin.near{box-shadow:0 0 0 2.5px #fff}
+.pin.sel{box-shadow:0 0 0 3px var(--accent),0 0 14px var(--accent)}
+.stm{width:7px;height:7px;border-radius:50%;cursor:pointer;opacity:.9;transition:opacity .25s,transform .25s}
+.stm.past{opacity:.12;transform:scale(.7)}
+.mapbtn{position:absolute;right:10px;bottom:24px;z-index:5;display:flex;flex-direction:column;gap:6px}
+.mapbtn button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:rgba(24,20,18,.9);color:#ddd;font-size:18px;cursor:pointer}
 
 /* 깊이 기둥 */
 #col{position:relative;margin-right:var(--map-w);min-height:100vh;padding-top:var(--icbar)}
@@ -60,6 +66,8 @@ header.hero{position:relative;padding:56px 32px 40px;background:linear-gradient(
 .chip i{width:8px;height:8px;border-radius:50%;background:var(--c)}
 .chip[aria-pressed=false]{opacity:.38}
 .chip.st i{border-radius:2px}
+.chip.all{border-style:dashed;color:var(--mute)}
+.chip.all:hover{color:var(--text)}
 .readout{flex:none;font-variant-numeric:tabular-nums;font-weight:800;font-size:20px;color:var(--accent);letter-spacing:-.02em;min-width:96px;text-align:right;line-height:1.1}
 .readout small{display:block;font-size:11px;color:var(--mute);font-weight:500}
 
@@ -88,6 +96,7 @@ header.hero{position:relative;padding:56px 32px 40px;background:linear-gradient(
 .item .names{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:5px}
 .item .names button{font-size:11.5px;padding:2px 7px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer}
 .item .names button:hover{border-color:var(--c)}
+.item .names small{color:var(--mute);font-size:10.5px}
 .marker-line{position:absolute;left:64px;right:0;border-top:1px dashed rgba(247,252,132,.45)}
 .marker-line span{position:absolute;right:16px;top:4px;font-size:11.5px;color:rgba(247,252,132,.85);text-align:right;max-width:24em}
 .probe{transition:opacity .2s;position:fixed;left:0;right:var(--map-w);top:42vh;height:0;border-top:1px solid rgba(247,252,132,.55);z-index:5;pointer-events:none}
@@ -121,6 +130,10 @@ footer a{color:#cfc6bb}
 #detail .facts{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
 #detail .facts span{font-size:12px;padding:4px 8px;border-radius:7px;background:rgba(255,255,255,.06)}
 #detail .facts .depth{background:rgba(247,252,132,.12);color:var(--accent);font-weight:700}
+#detail dl.mall{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:0 0 12px;font-size:13px;line-height:1.5}
+#detail dl.mall dt{color:var(--mute);font-weight:600}
+#detail dl.mall dd{margin:0}
+#detail dl.mall small{color:var(--dim)}
 #detail p{margin:0;font-size:14px;line-height:1.7;color:#e3dcd3}
 #detail .src{margin-top:12px;font-size:11.5px;color:var(--dim);line-height:1.6;word-break:break-all}
 #detail .src a{color:var(--mute)}
@@ -153,7 +166,7 @@ footer a{color:#cfc6bb}
 @media (max-width:820px){
   :root{--map-h:34vh}
   .icbar-sub{display:none}
-  #map{left:0;right:0;width:auto;bottom:auto;height:var(--map-h)}
+  #mapwrap{left:0;right:0;width:auto;bottom:auto;height:var(--map-h)}
   #col{margin-right:0;padding-top:calc(var(--icbar) + var(--map-h))}
   .filters{top:calc(var(--icbar) + var(--map-h));padding:8px 12px;gap:5px}
   .chip{padding:5px 8px;font-size:12px}
@@ -173,7 +186,7 @@ footer a{color:#cfc6bb}
 <body>
 <nav class="icbar" aria-label="invisiblecity"><a class="icbar-home" href="https://invisiblecity.co.kr/">INVISIBLECITY</a><span class="icbar-sub">보이지 않는 도시연구소</span><details class="icbar-more"><summary>SITES</summary><ul id="icsites"></ul></details></nav>
 
-<div id="map" role="region" aria-label="지도"></div>
+<div id="mapwrap"><div id="map" role="region" aria-label="지도"></div></div>
 
 <main id="col">
   <header class="hero">
@@ -206,12 +219,14 @@ footer a{color:#cfc6bb}
 <aside id="detail" aria-live="polite"></aside>
 <div class="tip" id="tip"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=nbhyehsios"></script>
 <script src="data/places.js"></script>
 <script src="data/stations.js"></script>
+<script src="data/malls.js"></script>
 <script>
 (() => {
 const P = window.PLACES, S = window.STATIONS, M = window.MARKERS;
+for (const p of P) Object.assign(p, (window.MALL_ROUTES || {})[p.id] || {});
 const CATS = {
   tr: ['교통', '--c-tr'], mall: ['지하상가', '--c-mall'], water: ['물길', '--c-water'], cave: ['자연 동굴', '--c-cave'],
   mine: ['광산', '--c-mine'], hist: ['역사·전쟁', '--c-hist'], sci: ['과학·지진', '--c-sci'],
@@ -272,7 +287,7 @@ const LX = mobile ? 170 : 186;
 // 라벨을 먼저 그려 실제 높이를 잰 뒤, 실제 깊이에 두되 겹치면 아래로 민다.
 entries.forEach((e) => {
   if (e.group) {
-    h += `<div class="item" data-group="mall" data-cat="mall" style="--c:${color('mall')}"><span class="dot"></span><div><div class="t">지하상가 ${e.items.length}곳</div><div class="d"><em>지하 1~2층, 약 5~8m</em> · 층수로 어림</div><div class="names">${e.items.map((p) => `<button data-id="${p.id}">${esc(p.name)}</button>`).join('')}</div></div></div>`;
+    h += `<div class="item" data-group="mall" data-cat="mall" style="--c:${color('mall')}"><span class="dot"></span><div><div class="t">지하상가 ${e.items.length}곳</div><div class="d"><em>지하 1~2층, 약 5~8m</em> · 층수로 어림</div><div class="names">${e.items.map((p) => `<button data-id="${p.id}">${esc(p.name)}${p.routeLen ? ` <small>${p.routeLen >= 1000 ? (p.routeLen / 1000).toFixed(1) + 'km' : p.routeLen + 'm'}</small>` : ''}</button>`).join('')}</div></div></div>`;
   } else {
     h += `<div class="item" data-id="${e.id}" data-cat="${e.cat}" style="--c:${color(e.cat)}"><span class="dot"></span><div><div class="t">${esc(e.name)}</div><div class="d"><em>${esc(e.depthText)}</em> · ${esc(e.region)}</div></div></div>`;
   }
@@ -301,48 +316,75 @@ const avg = st.reduce((a, s) => a + s.depth, 0) / st.length;
 document.getElementById('stats').innerHTML =
   `<div><b>${P.length}곳</b>지하 공간</div><div><b>${st.length}개</b>서울 지하역 실측 깊이</div><div><b>${avg.toFixed(1)}m</b>서울 지하역 평균 깊이</div><div><b>${deepest.depth.toFixed(1)}m</b>가장 깊은 서울 역 · ${deepest.name}</div>`;
 
-// ── 지도 ──
-const map = L.map('map', { zoomControl: true, attributionControl: true, preferCanvas: true }).fitBounds(mobile ? [[33.6, 126.1], [38.3, 129.4]] : [[33.1, 125.6], [38.4, 129.6]]);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 16, maxZoom: 18, attribution: 'Esri · © OpenStreetMap' }).addTo(map);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 16, maxZoom: 18, opacity: .7 }).addTo(map);
+// ── 지도(네이버) ──
+const NV = naver.maps, LL = (lat, lng) => new NV.LatLng(lat, lng);
+const KOREA = mobile ? [[33.6, 126.1], [38.3, 129.4]] : [[33.1, 125.6], [38.4, 129.6]];
+const bounds = (b) => new NV.LatLngBounds(LL(b[0][0], b[0][1]), LL(b[1][0], b[1][1]));
+const map = new NV.Map('map', { center: LL(36.4, 127.8), zoom: 7, minZoom: 6, scaleControl: false, logoControlOptions: { position: NV.Position.BOTTOM_LEFT }, mapDataControl: false, zoomControl: true, zoomControlOptions: { position: NV.Position.TOP_LEFT, style: NV.ZoomControlStyle.SMALL } });
+map.fitBounds(bounds(KOREA));
+const flyTo = (lat, lng, z) => map.morph(LL(lat, lng), z, { duration: 700, easing: 'easeOutCubic' });
+const flyBounds = (b) => map.fitBounds(b instanceof NV.LatLngBounds ? b : bounds(b), { top: 30, right: 30, bottom: 30, left: 30 });
+const showTip = (html, ev) => { tip.innerHTML = html; tip.style.left = ev.clientX + 12 + 'px'; tip.style.top = ev.clientY - 34 + 'px'; tip.style.display = 'block'; };
+const hideTip = () => { tip.style.display = 'none'; };
+const tip = document.getElementById('tip');
 
 const depthColor = (d) => { // 얕으면 노랑, 깊으면 빨강
   const t = Math.min(Math.asinh(d / K) / Math.asinh(60 / K), 1);
   return `hsl(${55 - t * 55},95%,${62 - t * 10}%)`;
 };
-const stLayer = L.layerGroup().addTo(map);
-const stMarkers = S.map((s, i) => {
-  const m = L.circleMarker([s.lat, s.lng], { radius: 3.2, weight: 0, fillOpacity: .85, fillColor: s.depth > 0 ? depthColor(s.depth) : '#666' })
-    .bindTooltip(`<b>${esc(s.name)}</b> ${s.line}호선<br>${s.depth > 0 ? '지하 ' + s.depth + 'm' : '지상역'}`, { direction: 'top' });
-  m.on('click', () => showStation(i));
-  m.addTo(stLayer); return m;
+const stEls = [], stMarkers = S.map((s, i) => {
+  const el = document.createElement('div'); el.className = 'stm'; el.style.background = s.depth > 0 ? depthColor(s.depth) : '#777';
+  el.addEventListener('mouseenter', (e) => showTip(`<b>${esc(s.name)}</b> <span style="color:${LINE_COLORS[s.line]}">${s.line}호선</span><br>${s.depth > 0 ? '지하 ' + s.depth + 'm' : '지상역'}`, e));
+  el.addEventListener('mouseleave', hideTip);
+  stEls.push(el);
+  const m = new NV.Marker({ position: LL(s.lat, s.lng), map, icon: { content: el, anchor: new NV.Point(3.5, 3.5) }, zIndex: 50 });
+  NV.Event.addListener(m, 'click', () => showStation(i));
+  return m;
 });
-const pins = {};
+const pins = {}, pinEls = {};
 for (const p of P) {
-  const r = p.depth == null ? 4.5 : 4.5 + Math.min(Math.asinh(p.depth / K) * 0.9, 5);
-  const m = L.circleMarker([p.lat, p.lng], { radius: r, color: '#000', weight: 1.2, fillColor: color(p.cat), fillOpacity: .95 });
-  m.bindTooltip(esc(p.name), { direction: 'top', offset: [0, -4] });
-  m.on('click', () => select(p.id, true));
-  m.addTo(map); pins[p.id] = m;
+  const r = Math.round(p.depth == null ? 9 : 9 + Math.min(Math.asinh(p.depth / K) * 1.8, 10));
+  const el = document.createElement('div'); el.className = 'pin'; el.style.cssText = `width:${r}px;height:${r}px;--c:${color(p.cat)}`;
+  el.addEventListener('mouseenter', (e) => showTip(`<b>${esc(p.name)}</b><br>${esc(p.depthText)}`, e));
+  el.addEventListener('mouseleave', hideTip);
+  const m = new NV.Marker({ position: LL(p.lat, p.lng), map, icon: { content: el, anchor: new NV.Point(r / 2, r / 2) }, zIndex: 100 });
+  NV.Event.addListener(m, 'click', () => select(p.id, true));
+  pins[p.id] = m; pinEls[p.id] = el;
 }
+// 지하상가 구간: route = [[ [lat,lng], ... ], ...] (갈래가 여러 개일 수 있음)
+const mallLines = [];
+const routeBounds = (p) => { const b = new NV.LatLngBounds(); p.route.flat().forEach(([la, ln]) => b.extend(LL(la, ln))); return b; };
+for (const p of P) for (const seg of p.route || []) {
+  const draw = (w, c, o) => new NV.Polyline({ map, path: seg.map(([la, ln]) => LL(la, ln)), strokeColor: c, strokeWeight: w, strokeOpacity: o, strokeLineCap: 'round', strokeLineJoin: 'round', clickable: true, zIndex: 40 });
+  const halo = draw(9, '#000', .45), line = draw(5, color(p.cat), .95);
+  for (const l of [halo, line]) NV.Event.addListener(l, 'click', () => select(p.id, true));
+  NV.Event.addListener(line, 'mouseover', (e) => showTip(`<b>${esc(p.name)}</b><br>${esc(p.span || '')}${p.routeLen ? ' · 약 ' + p.routeLen.toLocaleString() + 'm' : ''}`, e.domEvent));
+  NV.Event.addListener(line, 'mouseout', hideTip);
+  mallLines.push(halo, line);
+}
+const setPin = (id, cls) => { const el = pinEls[id]; el.classList.toggle('near', cls === 'near'); el.classList.toggle('sel', cls === 'sel'); pins[id].setZIndex(cls === 'sel' ? 300 : cls === 'near' ? 200 : 100); };
 
 // ── 필터 ──
 const on = Object.fromEntries(Object.keys(CATS).map((k) => [k, true])); on.st = true;
 const fbox = document.getElementById('filters');
 fbox.innerHTML = '<div class="chips">' + Object.entries(CATS).map(([k, [n, v]]) => `<span class="chip" role="button" tabindex="0" aria-pressed="true" data-k="${k}" style="--c:var(${v})"><i></i>${n}</span>`).join('')
-  + `<span class="chip st" role="button" tabindex="0" aria-pressed="true" data-k="st" style="--c:linear-gradient(90deg,#0052A4,#00A84D,#EF7C1C,#E6186C)"><i style="background:linear-gradient(90deg,#0052A4,#00A84D,#EF7C1C,#E6186C)"></i>지하철역</span></div>`
+  + `<span class="chip st" role="button" tabindex="0" aria-pressed="true" data-k="st" style="--c:linear-gradient(90deg,#0052A4,#00A84D,#EF7C1C,#E6186C)"><i style="background:linear-gradient(90deg,#0052A4,#00A84D,#EF7C1C,#E6186C)"></i>지하철역</span>`
+  + `<span class="chip all" role="button" tabindex="0" data-all="1">전체 선택</span><span class="chip all" role="button" tabindex="0" data-all="0">전체 해제</span></div>`
   + `<span class="readout" id="readout">0m</span>`;
 const toggle = (k) => {
   on[k] = !on[k];
   fbox.querySelector(`[data-k="${k}"]`).setAttribute('aria-pressed', on[k]);
-  if (k === 'st') { on.st ? stLayer.addTo(map) : stLayer.remove(); ground.querySelector('.lanes').style.display = on.st ? '' : 'none'; }
+  if (k === 'st') { stMarkers.forEach((m) => m.setMap(on.st ? map : null)); ground.querySelector('.lanes').style.display = on.st ? '' : 'none'; }
   else {
-    for (const p of P) if (p.cat === k) on[k] ? pins[p.id].addTo(map) : pins[p.id].remove();
+    for (const p of P) if (p.cat === k) pins[p.id].setMap(on[k] ? map : null);
+    for (const l of mallLines) if (k === 'mall') l.setMap(on.mall ? map : null);
     for (const el of document.querySelectorAll(`[data-cat="${k}"]`)) el.style.opacity = on[k] ? '' : '.18';
   }
 };
-fbox.addEventListener('click', (e) => { const c = e.target.closest('.chip'); if (c) toggle(c.dataset.k); });
-fbox.addEventListener('keydown', (e) => { const c = e.target.closest('.chip'); if (c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(c.dataset.k); } });
+const setAll = (v) => { for (const k of [...Object.keys(CATS), 'st']) if (on[k] !== v) toggle(k); };
+const chipAct = (c) => { c.dataset.all ? setAll(c.dataset.all === '1') : toggle(c.dataset.k); lastBucket = null; onScroll(); };
+fbox.addEventListener('click', (e) => { const c = e.target.closest('.chip'); if (c) chipAct(c); });
+fbox.addEventListener('keydown', (e) => { const c = e.target.closest('.chip'); if (c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); chipAct(c); } });
 
 // ── 상세 ──
 const detail = document.getElementById('detail');
@@ -354,14 +396,15 @@ function select(id, fromMap) {
   detail.style.setProperty('--c', color(p.cat));
   detail.innerHTML = `<button class="x" aria-label="닫기">×</button><div class="cat">${n}</div><h3>${esc(p.name)}</h3><div class="rg">${esc(p.region)}${p.year ? ' · ' + p.year + '년' : ''}</div>
     <div class="facts"><span class="depth">${esc(p.depthText)}</span>${p.len ? `<span>${esc(p.len)}</span>` : ''}<span class="${o[1]}">${o[0]}</span></div>
+    ${p.span || p.facts ? `<dl class="mall">${p.span ? `<dt>구간</dt><dd>${esc(p.span)}</dd>` : ''}${p.routeLen ? `<dt>길이</dt><dd>지도 위 선 약 ${p.routeLen.toLocaleString()}m${p.routeNote ? ` <small>(${esc(p.routeNote)})</small>` : ''}</dd>` : ''}${(p.facts || []).map((f) => `<dt>·</dt><dd>${esc(f)}</dd>`).join('')}</dl>` : ''}
     <p>${esc(p.story)}</p>
     ${p.check ? '<div class="chk">확인 중: 일부 수치·위치를 공식 자료와 아직 대조하지 못했습니다.</div>' : ''}
     ${p.src && p.src.length ? `<div class="src">출처 ${p.src.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener">[${i + 1}] ${esc(new URL(u).hostname.replace(/^www\./, ''))}</a>`).join(' ')}</div>` : ''}`;
   detail.classList.add('show');
   for (const el of items) el.classList.toggle('sel', el.dataset.id === id);
-  for (const [k, m] of Object.entries(pins)) m.setStyle({ color: k === id ? '#f7fc84' : '#000', weight: k === id ? 3 : 1.2 });
-  pins[id].bringToFront();
-  map.flyTo([p.lat, p.lng], Math.max(map.getZoom(), p.cat === 'mall' || p.id === 'sema' ? 14 : 11), { duration: .8 });
+  for (const k of Object.keys(pins)) setPin(k, k === id ? 'sel' : '');
+  const z = Math.max(map.getZoom(), p.cat === 'mall' || p.id === 'sema' ? 16 : 12);
+  p.route ? flyBounds(routeBounds(p)) : flyTo(p.lat, p.lng, z);
   if (fromMap && p.depth != null) {
     const el = items.find((x) => x.dataset.id === id) || (p.shallow && items.find((x) => x.dataset.group));
     if (el) scrollToDepthEl(el);
@@ -376,11 +419,11 @@ function showStation(i) {
     <p>${s.depth > 0 ? `서울 1~8호선 지하역 ${st.length}곳 가운데 ${st.filter((x) => x.depth > s.depth).length + 1}번째로 깊다.` : '고가나 지상으로 지나는 역이다.'}${s.railASL != null && s.railASL < 0 ? ' 선로가 바다 수면보다 낮다.' : ''}</p>
     <div class="src">출처 서울교통공사 역사심도정보(2024-11-04)</div>`;
   detail.classList.add('show');
-  map.flyTo([s.lat, s.lng], Math.max(map.getZoom(), 13), { duration: .8 });
+  flyTo(s.lat, s.lng, Math.max(map.getZoom(), 14));
   for (const el of ground.querySelectorAll('.sdot.on')) el.classList.remove('on');
   ground.querySelector(`.sdot[data-s="${i}"]`)?.classList.add('on');
 }
-detail.addEventListener('click', (e) => { if (e.target.closest('.x')) { detail.classList.remove('show'); selId = null; for (const el of items) el.classList.remove('sel'); for (const m of Object.values(pins)) m.setStyle({ color: '#000', weight: 1.2 }); } });
+detail.addEventListener('click', (e) => { if (e.target.closest('.x')) { detail.classList.remove('show'); selId = null; for (const el of items) el.classList.remove('sel'); for (const k of Object.keys(pins)) setPin(k, ''); } });
 
 const probeEl = document.querySelector('.probe');
 const probeY = () => probeEl.getBoundingClientRect().top;
@@ -394,12 +437,11 @@ ground.addEventListener('click', (e) => {
   const d = e.target.closest('.sdot'); if (d) { showStation(+d.dataset.s); return; }
   const it = e.target.closest('.item');
   if (it?.dataset.id) select(it.dataset.id);
-  else if (it?.dataset.group) map.flyToBounds(L.latLngBounds(malls.map((p) => [p.lat, p.lng])).pad(.1), { duration: .8 });
+  else if (it?.dataset.group) { const b = new NV.LatLngBounds(); malls.forEach((p) => b.extend(LL(p.lat, p.lng))); flyBounds(b); }
 });
 document.getElementById('nodepth').addEventListener('click', (e) => { const c = e.target.closest('.card'); if (c) select(c.dataset.id); });
 
 // 역 점 툴팁
-const tip = document.getElementById('tip');
 ground.addEventListener('mouseover', (e) => {
   const d = e.target.closest('.sdot'); if (!d) return;
   const s = S[+d.dataset.s];
@@ -411,8 +453,8 @@ ground.addEventListener('mouseout', (e) => { if (e.target.closest('.sdot')) tip.
 // ── 스크롤: 지금 깊이 → 읽기 값, 가까운 장소 켜기, 더 얕은 역은 지도에서 흐리게 ──
 const readout = document.getElementById('readout'), pinfo = document.getElementById('pinfo');
 let userMoved = false, lastZone = 'nation';
-map.getContainer().addEventListener('pointerdown', () => { userMoved = true; });
-map.getContainer().addEventListener('wheel', () => { userMoved = true; }, { passive: true });
+document.getElementById('map').addEventListener('pointerdown', () => { userMoved = true; });
+document.getElementById('map').addEventListener('wheel', () => { userMoved = true; }, { passive: true });
 let lastBucket = null, raf = 0;
 function onScroll() {
   raf = 0;
@@ -429,20 +471,22 @@ function onScroll() {
     if (act) (el.dataset.id ? [el.dataset.id] : malls.map((p) => p.id)).forEach((x) => near.add(x));
   }
   // 이 깊이(±0.6m)를 지나는 역 이름
-  const anyActive = near.size > 0;
+  // 라벨이 차지한 높이 안이면 역 이름 띠를 숨긴다(겹침 방지)
+  const covered = items.some((el) => { const t = parseFloat(el.style.top); return gy > t - 30 && gy < t + el.offsetHeight + 40; });
+  const anyActive = near.size > 0 || covered;
   const here = d > 8 && d < 58 && on.st && !anyActive ? st.filter((s) => Math.abs(s.depth - d) <= 0.6).sort((a, b) => a.depth - b.depth) : [];
   pinfo.style.display = here.length ? 'block' : 'none';
   if (here.length) pinfo.innerHTML = `<b>이 깊이를 지나는 역 ${here.length}곳</b>` + here.slice(0, mobile ? 8 : 14).map((s) => `<span><i style="background:${LINE_COLORS[s.line]}"></i>${esc(s.name)} ${s.depth}m</span>`).join('') + (here.length > (mobile ? 8 : 14) ? '<span>…</span>' : '');
   // 지도 따라가기: 손대기 전까지만. 역 구간에선 서울, 벗어나면 전국
   if (!userMoved && !selId) {
     const zone = d > 8 && d < 60 ? 'seoul' : 'nation';
-    if (zone !== lastZone) { lastZone = zone; zone === 'seoul' ? map.flyTo([37.535, 126.99], mobile ? 10 : 11, { duration: 1 }) : map.flyToBounds(mobile ? [[33.6, 126.1], [38.3, 129.4]] : [[33.1, 125.6], [38.4, 129.6]], { duration: 1 }); }
+    if (zone !== lastZone) { lastZone = zone; zone === 'seoul' ? flyTo(37.535, 126.99, mobile ? 10 : 11) : flyBounds(KOREA); }
   }
-  for (const p of P) if (p.id !== selId) pins[p.id].setStyle({ color: near.has(p.id) ? '#fff' : '#000', weight: near.has(p.id) ? 2.5 : 1.2 });
+  for (const p of P) if (p.id !== selId) setPin(p.id, near.has(p.id) ? 'near' : '');
   const bucket = Math.round(d * 2) / 2;
   if (bucket !== lastBucket && d < 70) {
     lastBucket = bucket;
-    S.forEach((s, i) => stMarkers[i].setStyle({ fillOpacity: s.depth >= d ? .9 : .12, radius: s.depth >= d ? 3.2 : 2.2 }));
+    S.forEach((s, i) => stEls[i].classList.toggle('past', s.depth < d));
   }
 }
 addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(onScroll); }, { passive: true });
