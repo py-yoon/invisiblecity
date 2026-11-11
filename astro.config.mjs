@@ -24,6 +24,8 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [
     sitemap({
+      // public/ 아래 정적 앱 페이지는 Astro가 모르니 직접 넣는다.
+      customPages: [new URL('underground/', SITE + BASE).href],
       // 워드프레스(Rank Math) 사이트맵처럼 글·페이지·카테고리만. 태그·목록 쪽수는 색인은 허용하되 사이트맵에는 넣지 않는다.
       filter: (page) => !/\/(search|admin|tags|categories)\/$|\/tag\/|\/page\/\d+\/$/.test(page),
       serialize(item) {

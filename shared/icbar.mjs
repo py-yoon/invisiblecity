@@ -1,5 +1,5 @@
 // invisiblecity 공통 띠: 모든 앱(factory·retrack·architect·nimby·spire) 맨 위 28px 검은 띠.
-// 왼쪽은 블로그 홈 링크, 오른쪽 SITES 메뉴는 다섯 사이트로 간다.
+// 왼쪽은 블로그 홈 링크, 오른쪽 SITES 메뉴는 여섯 사이트로 간다(underground는 정적 페이지라 public/underground/index.html에 직접 둠).
 // 각 앱에는 이 파일이 만든 HTML·CSS를 그대로 복사해 둔다(앱마다 저장소가 달라서).
 // 사이트를 추가하거나 이름을 바꾸면 여기를 고치고 `node shared/icbar.mjs` 출력으로 각 앱을 갱신한다.
 
@@ -9,6 +9,7 @@ export const SITES = [
   ['architect', 'ARCHITECT', '건축, 걷다', 'https://invisiblecity.co.kr/architect'],
   ['nimby', 'NIMBY MAP', '전국 기피시설 지도', 'https://invisiblecity.co.kr/nimby/'],
   ['spire', 'SPIRE', '세계 최고층 빌딩 도감', 'https://invisiblecity.co.kr/spire/'],
+  ['underground', 'UNDERGROUND', '땅 아래 대한민국', 'https://invisiblecity.co.kr/underground/'],
 ];
 
 export const CSS = `.icbar{position:relative;z-index:10000;display:flex;align-items:center;gap:10px;height:28px;margin:0;padding:0 16px;box-sizing:border-box;background:#111;color:#fff;font:600 12px/1 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",Pretendard,"Malgun Gothic",sans-serif;letter-spacing:0;-webkit-font-smoothing:antialiased}
