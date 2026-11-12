@@ -359,7 +359,9 @@ const addDays = (d, n) => new Date(Date.parse(d) + n * 864e5).toISOString().slic
 const tyInt = (t) => t.trim().replace(/^0*(\d+)\.\d+/, '$1');
 const shortTy = (t, all = []) => (all.some((u) => u.trim() !== t.trim() && tyInt(u) === tyInt(t)) ? (+t.trim().replace(/[A-Z]+$/, '')).toFixed(2) : tyInt(t));
 const byTy = (x, y) => tyInt(x).localeCompare(tyInt(y), 'ko', { numeric: true }) || x.localeCompare(y);
-const sigungu = (a) => a.HSSPLY_ADRES.split(/\s+/).slice(0, 2).join(' ');
+const sigungu = (a) => `${a.SUBSCRPT_AREA_CODE_NM} ${a.HSSPLY_ADRES.split(/\s+/)[1] ?? ''}`.trim(); // 경기 시흥시
+const mdS = (d) => `${+d.slice(5, 7)}/${+d.slice(8, 10)}`; // 표 안 짧은 날짜 11/16
+const man = (n) => num(n); // 만원 단위 숫자
 const houseName = (a) => a.HOUSE_NM.replace(/\s+/g, ' ').trim();
 const lastGeneralDay = (a) => [a.GNRL_RNK2_ETC_AREA_ENDDE, a.GNRL_RNK2_CRSPAREA_ENDDE, a.GNRL_RNK1_ETC_AREA_ENDDE, a.GNRL_RNK1_CRSPAREA_ENDDE]
   .filter(Boolean).sort().at(-1);
@@ -420,17 +422,16 @@ async function applyResult(ref) {
   if (items.length) {
     const top = items[0];
     parts.push(`가장 경쟁이 치열했던 곳은 ${sigungu(top.a)}의 **${houseName(top.a)}**${/[가-힣]$/.test(houseName(top.a)) && (houseName(top.a).at(-1).charCodeAt(0) - 0xac00) % 28 === 0 ? "다" : "이다"}. 일반공급 ${num(top.supply)}세대에 1순위 ${num(top.r1)}명이 몰려 평균 ${fmtRate(top.rate)}을 기록했다.${items.filter((x) => x.short).length ? ` 반면 ${items.filter((x) => x.short).map((x) => houseName(x.a)).join(', ')} 등 ${items.filter((x) => x.short).length}곳은 2순위까지 받고도 일부 주택형이 미달됐다.` : ''}`);
-    parts.push('## 한눈에 보기\n\n' + table(['단지', '위치', '일반공급', '1순위 접수', '평균 경쟁률', '최고 주택형', '결과'],
-      items.map((x) => [houseName(x.a), sigungu(x.a), `${num(x.supply)}세대`, `${num(x.r1)}명`, fmtRate(x.rate),
-        `${shortTy(x.best.ty, x.types.map((u) => u.ty))} ${fmtRate(x.best.rate)}`, x.short ? `미달 ${num(x.short)}세대` : '순위 내 마감']))
+    parts.push('## 한눈에 보기\n\n' + table(['단지', '일반공급', '1순위 접수', '평균 경쟁률', '결과'],
+      items.map((x) => [`**${houseName(x.a)}**<br>${sigungu(x.a)}`, num(x.supply), num(x.r1), fmtRate(x.rate), x.short ? `미달 ${num(x.short)}` : '마감']))
       + '\n\n평균 경쟁률 = 1순위 접수(해당지역+기타지역) ÷ 일반공급 세대. 특별공급에서 남아 일반공급으로 넘어온 세대가 포함된다.');
     for (const x of items) {
       const a = x.a;
       parts.push([
         `## ${houseName(a)}`,
         `- 위치: ${a.HSSPLY_ADRES}\n- 시공: ${a.CNSTRCT_ENTRPS_NM ?? '-'} · 시행: ${a.BSNS_MBY_NM ?? '-'}\n- 총 ${num(a.TOT_SUPLY_HSHLDCO)}세대 · 당첨자 발표 ${md(a.PRZWNER_PRESNATN_DE)} · 입주 예정 ${a.MVN_PREARNGE_YM.slice(0, 4)}년 ${+a.MVN_PREARNGE_YM.slice(4)}월\n- [청약홈 공고 보기](${a.PBLANC_URL})`,
-        table(['주택형', '일반공급', '1순위 접수', '1순위 경쟁률', '해당지역 경쟁률', '2순위 접수', '결과', '분양 최고가'],
-          x.types.map((t) => [shortTy(t.ty, x.types.map((u) => u.ty)), num(t.supply), num(t.r1), fmtRate(t.rate), t.local ? fmtRate(+t.local) : '-', num(t.r2), t.status, t.top ? won(t.top) : '-'])),
+        table(['주택형', '공급', '1순위', '경쟁률', '2순위', '결과', '최고가(만원)'],
+          x.types.map((t) => [shortTy(t.ty, x.types.map((u) => u.ty)), num(t.supply), num(t.r1), fmtRate(t.rate), num(t.r2), t.status.replace('세대', ''), t.top ? man(t.top) : '-'])),
       ].join('\n\n'));
     }
   }
@@ -468,13 +469,13 @@ async function applySchedule(ref) {
     const ppy = mdl.filter((m) => +m.LTTOT_TOP_AMOUNT && +m.SUPLY_AR).map((m) => +m.LTTOT_TOP_AMOUNT / (+m.SUPLY_AR / 3.3058));
     rows.push({ a, tops, ppy, types: [...new Set(mdl.map((m) => tyInt(m.HOUSE_TY).replace(/[A-Z]+$/, '')))].sort((x, y) => x - y).join('·') });
   }
-  const dr = (b, e) => (!b ? '-' : b === e || !e ? md(b) : `${md(b)}~${md(e)}`);
+  const dr = (b, e) => (!b ? '-' : b === e || !e ? mdS(b) : `${mdS(b)}~${mdS(e)}`);
   const week2 = addDays(ref, 7);
-  const sec = (label, list) => (list.length ? `## ${label}\n\n` + table(['단지', '위치', '구분', '총 세대', '주택형(㎡)', '특별공급', '1순위', '당첨자 발표', '분양 최고가'],
-    list.map(({ a, tops, types }) => [`[${houseName(a)}](${a.PBLANC_URL})`, sigungu(a), `${a.HOUSE_DTL_SECD_NM}${a.HOUSE_SECD_NM !== 'APT' ? `·${a.HOUSE_SECD_NM}` : ''}`,
-      num(a.TOT_SUPLY_HSHLDCO), types || '-', dr(a.SPSPLY_RCEPT_BGNDE, a.SPSPLY_RCEPT_ENDDE),
-      dr(a.GNRL_RNK1_CRSPAREA_RCPTDE ?? a.RCEPT_BGNDE, a.GNRL_RNK1_ETC_AREA_ENDDE), md(a.PRZWNER_PRESNATN_DE),
-      tops.length ? (Math.min(...tops) === Math.max(...tops) ? won(tops[0]) : `${won(Math.min(...tops))}~${won(Math.max(...tops))}`) : '-'])) : '');
+  const sec = (label, list) => (list.length ? `## ${label}\n\n` + table(['단지', '특별공급', '1순위', '발표', '최고가(만원)'],
+    list.map(({ a, tops, types }) => [`[${houseName(a)}](${a.PBLANC_URL})<br>${sigungu(a)} · ${a.HOUSE_DTL_SECD_NM}${a.HOUSE_SECD_NM !== 'APT' ? `·${a.HOUSE_SECD_NM}` : ''} · ${num(a.TOT_SUPLY_HSHLDCO)}세대${types ? ` · ${types}㎡` : ''}`,
+      dr(a.SPSPLY_RCEPT_BGNDE, a.SPSPLY_RCEPT_ENDDE),
+      dr(a.GNRL_RNK1_CRSPAREA_RCPTDE ?? a.RCEPT_BGNDE, a.GNRL_RNK1_ETC_AREA_ENDDE), mdS(a.PRZWNER_PRESNATN_DE),
+      tops.length ? (Math.min(...tops) === Math.max(...tops) ? man(tops[0]) : `${man(Math.min(...tops))}~${man(Math.max(...tops))}`) : '-'])) : '');
   const first = rows.filter((r) => (r.a.GNRL_RNK1_CRSPAREA_RCPTDE ?? r.a.RCEPT_BGNDE) < week2);
   const second = rows.filter((r) => !first.includes(r));
   const bySido = [...Map.groupBy(rows, (r) => r.a.SUBSCRPT_AREA_CODE_NM)].sort((a, b) => b[1].length - a[1].length).map(([s, l]) => `${s} ${l.length}곳`).join(', ');
