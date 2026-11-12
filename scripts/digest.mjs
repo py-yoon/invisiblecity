@@ -5,6 +5,8 @@
 //   node scripts/digest.mjs retrack-week 2026-11-02  RETRACK: 기준일까지 7일 동안 단계가 바뀐 정비사업(월요일 글)
 //   node scripts/digest.mjs gu next              RETRACK 자치구 정비사업 현황: 아직 안 쓴 구 중 사업 많은 순(또는 구 이름)
 //   node scripts/digest.mjs apt next              RETRACK 구별 대장아파트: 이 데이터로 아직 안 쓴 권역(또는 권역 이름)
+//   node scripts/digest.mjs applyhome [날짜]      청약홈: 접수를 마친 아파트 청약 경쟁률·새로 공개된 당첨가점(매일, 이미 쓴 단지는 뺀다)
+//   node scripts/digest.mjs applyhome-week [날짜] 청약홈: 2주 안에 접수하는 아파트 분양 일정(월요일 글)
 //
 // 데이터는 옆 저장소에서 읽는다(경로는 환경 변수로 바꿀 수 있다).
 //   FACTORY_DIR (기본 ../factory-map), RETRACK_DIR (기본 ../seoul-redev)
@@ -331,13 +333,180 @@ function guReport(arg) {
   });
 }
 
+// ── 청약홈: 청약 결과(매일)·분양 일정(주 1회) ─────────────────────────
+// 공공데이터포털 청약홈 분양정보·경쟁률 API. 키는 DATA_GO_KR_KEY 환경 변수.
+// 일반 아파트(APT)만 다룬다. LH 신혼희망타운·공공분양 본청약은 경쟁률 API에 나오지 않는다.
+const APPLY_CAT = '분양·청약';
+async function applyApi(svc, ep, cond) {
+  const key = process.env.DATA_GO_KR_KEY;
+  if (!key) throw new Error('DATA_GO_KR_KEY 환경 변수가 필요하다');
+  const q = Object.entries(cond).map(([k, v]) => `&cond%5B${encodeURIComponent(k)}%5D=${encodeURIComponent(v)}`).join('');
+  const rows = [];
+  for (let page = 1; ; page++) {
+    const u = `https://api.odcloud.kr/api/${svc}/v1/${ep}?serviceKey=${encodeURIComponent(decodeURIComponent(key))}&page=${page}&perPage=500${q}`;
+    let d;
+    for (let i = 0; ; i++) {
+      try { const r = await fetch(u); if (!r.ok) throw new Error(`${ep} HTTP ${r.status}`); d = await r.json(); break; }
+      catch (e) { if (i === 2) throw e; await new Promise((s) => setTimeout(s, 2000)); }
+    }
+    rows.push(...d.data);
+    if (d.currentCount < 500) return rows;
+  }
+}
+const byNo = (svc, ep, no) => applyApi(svc, ep, { 'HOUSE_MANAGE_NO::EQ': no });
+const addDays = (d, n) => new Date(Date.parse(d) + n * 864e5).toISOString().slice(0, 10);
+// 084.9888A → 84A. 글자 없는 주택형이 같은 정수로 겹치면(084.5100·084.9800) 소수 둘째 자리까지 쓴다.
+const tyInt = (t) => t.trim().replace(/^0*(\d+)\.\d+/, '$1');
+const shortTy = (t, all = []) => (all.some((u) => u.trim() !== t.trim() && tyInt(u) === tyInt(t)) ? (+t.trim().replace(/[A-Z]+$/, '')).toFixed(2) : tyInt(t));
+const byTy = (x, y) => tyInt(x).localeCompare(tyInt(y), 'ko', { numeric: true }) || x.localeCompare(y);
+const sigungu = (a) => a.HSSPLY_ADRES.split(/\s+/).slice(0, 2).join(' ');
+const houseName = (a) => a.HOUSE_NM.replace(/\s+/g, ' ').trim();
+const lastGeneralDay = (a) => [a.GNRL_RNK2_ETC_AREA_ENDDE, a.GNRL_RNK2_CRSPAREA_ENDDE, a.GNRL_RNK1_ETC_AREA_ENDDE, a.GNRL_RNK1_CRSPAREA_ENDDE]
+  .filter(Boolean).sort().at(-1);
+// 이미 쓴 단지는 글 끝 주석에 남긴 번호로 걸러 낸다. 하루 이틀 건너뛰어도 빠지는 단지가 없다.
+function postedNos(tag, self) {
+  const set = new Set();
+  for (const f of fs.readdirSync(POSTS).filter((f) => f !== self)) { // 같은 날 글을 다시 만들 때는 그 글을 빼고 본다
+    const m = fs.readFileSync(path.join(POSTS, f), 'utf8').match(new RegExp(`<!-- ${tag}: ([\\d,]+) -->`));
+    m?.[1].split(',').forEach((n) => set.add(n));
+  }
+  return set;
+}
+const won = (man) => (man >= 10000 ? `${Math.floor(man / 10000)}억${man % 10000 ? ` ${num(man % 10000)}만` : ''}` : `${num(man)}만`) + '원';
+
+// 주택형 한 줄: 경쟁률 API 행(순위 × 해당/기타지역)을 묶는다.
+export function typeResult(rows) {
+  const supply = rows[0].SUPLY_HSHLDCO;
+  const sum = (rank) => rows.filter((r) => r.SUBSCRPT_RANK_CODE === rank).reduce((s, r) => s + +r.REQ_CNT, 0);
+  const r1 = sum(1), r2 = sum(2);
+  const local = rows.find((r) => r.SUBSCRPT_RANK_CODE === 1 && r.RESIDE_SECD === '01')?.CMPET_RATE;
+  const status = r1 >= supply ? '1순위 마감' : r1 + r2 >= supply ? '2순위 마감' : `미달 ${supply - r1 - r2}세대`;
+  return { ty: rows[0].HOUSE_TY, supply, r1, r2, rate: supply ? r1 / supply : 0, local: /^\d/.test(local ?? '') ? local : '', status };
+}
+
+async function applyResult(ref) {
+  const done = postedNos('청약결과', `청약-결과-${ref}.md`);
+  const ann = (await applyApi('ApplyhomeInfoDetailSvc', 'getAPTLttotPblancDetail', { 'RCEPT_ENDDE::GTE': addDays(ref, -10) }))
+    .filter((a) => a.HOUSE_SECD === '01' || a.HOUSE_SECD_NM === 'APT')
+    .filter((a) => { const d = lastGeneralDay(a); return d && d >= addDays(ref, -7) && d < ref && !done.has(a.HOUSE_MANAGE_NO); });
+  const items = [];
+  for (const a of ann) {
+    const cmp = await byNo('ApplyhomeInfoCmpetRtSvc', 'getAPTLttotPblancCmpet', a.HOUSE_MANAGE_NO);
+    if (!cmp.length) continue; // 아직 집계 전이거나 경쟁률을 공개하지 않는 공고
+    const mdl = new Map((await byNo('ApplyhomeInfoDetailSvc', 'getAPTLttotPblancMdl', a.HOUSE_MANAGE_NO)).map((m) => [m.HOUSE_TY, m]));
+    const types = [...Map.groupBy(cmp, (r) => r.HOUSE_TY).values()].map(typeResult)
+      .sort((x, y) => byTy(x.ty, y.ty)).map((t) => ({ ...t, top: +(mdl.get(t.ty)?.LTTOT_TOP_AMOUNT ?? 0) }));
+    const supply = types.reduce((s, t) => s + t.supply, 0), r1 = types.reduce((s, t) => s + t.r1, 0);
+    const short = types.filter((t) => t.status.startsWith('미달')).reduce((s, t) => s + +t.status.match(/\d+/)[0], 0);
+    const best = types.reduce((m, t) => (t.rate > m.rate ? t : m));
+    items.push({ a, types, supply, r1, rate: supply ? r1 / supply : 0, short, best });
+  }
+  // 과거 날짜로 만들 때를 빼고 당첨가점은 최근 2주 안에 당첨자를 발표한 단지 가운데 아직 안 쓴 것.
+  const doneScore = postedNos('당첨가점', `청약-결과-${ref}.md`);
+  const scoreAnn = (await applyApi('ApplyhomeInfoDetailSvc', 'getAPTLttotPblancDetail', { 'PRZWNER_PRESNATN_DE::GTE': addDays(ref, -14) }))
+    .filter((a) => a.PRZWNER_PRESNATN_DE <= ref && !doneScore.has(a.HOUSE_MANAGE_NO));
+  const scores = [];
+  for (const a of scoreAnn) {
+    const s = (await byNo('ApplyhomeInfoCmpetRtSvc', 'getAPTLttotPblancScore', a.HOUSE_MANAGE_NO)).filter((r) => r.RESIDE_SECD === '01' && +r.TOP_SCORE > 0);
+    if (s.length) scores.push({ a, rows: s.sort((x, y) => byTy(x.HOUSE_TY, y.HOUSE_TY)) });
+  }
+  if (!items.length && !scores.length) { console.log(`${ref}: 새 청약 결과·당첨가점이 없어 글을 쓰지 않았다`); return; }
+
+  items.sort((x, y) => y.rate - x.rate);
+  const fmtRate = (r) => (r >= 1 ? `${r.toFixed(r >= 100 ? 0 : 1)} 대 1` : r ? `${r.toFixed(2)} 대 1` : '0');
+  const parts = [];
+  const names = items.map((x) => houseName(x.a));
+  parts.push(`${ymd(ref)} 기준으로 새로 나온 아파트 청약 결과를 정리했다. ${items.length ? `일반공급 접수를 마친 **${items.length}곳**의 1순위 경쟁률${scores.length ? `과, 당첨자를 발표한 **${scores.length}곳**의 당첨 가점` : ''}이다.` : `당첨자를 발표한 **${scores.length}곳**의 당첨 가점이다.`} 자료는 청약홈(한국부동산원) 공공데이터다.`);
+  if (items.length) {
+    const top = items[0];
+    parts.push(`가장 경쟁이 치열했던 곳은 ${sigungu(top.a)}의 **${houseName(top.a)}**${/[가-힣]$/.test(houseName(top.a)) && (houseName(top.a).at(-1).charCodeAt(0) - 0xac00) % 28 === 0 ? "다" : "이다"}. 일반공급 ${num(top.supply)}세대에 1순위 ${num(top.r1)}명이 몰려 평균 ${fmtRate(top.rate)}을 기록했다.${items.filter((x) => x.short).length ? ` 반면 ${items.filter((x) => x.short).map((x) => houseName(x.a)).join(', ')} 등 ${items.filter((x) => x.short).length}곳은 2순위까지 받고도 일부 주택형이 미달됐다.` : ''}`);
+    parts.push('## 한눈에 보기\n\n' + table(['단지', '위치', '일반공급', '1순위 접수', '평균 경쟁률', '최고 주택형', '결과'],
+      items.map((x) => [houseName(x.a), sigungu(x.a), `${num(x.supply)}세대`, `${num(x.r1)}명`, fmtRate(x.rate),
+        `${shortTy(x.best.ty, x.types.map((u) => u.ty))} ${fmtRate(x.best.rate)}`, x.short ? `미달 ${num(x.short)}세대` : '순위 내 마감']))
+      + '\n\n평균 경쟁률 = 1순위 접수(해당지역+기타지역) ÷ 일반공급 세대. 특별공급에서 남아 일반공급으로 넘어온 세대가 포함된다.');
+    for (const x of items) {
+      const a = x.a;
+      parts.push([
+        `## ${houseName(a)}`,
+        `- 위치: ${a.HSSPLY_ADRES}\n- 시공: ${a.CNSTRCT_ENTRPS_NM ?? '-'} · 시행: ${a.BSNS_MBY_NM ?? '-'}\n- 총 ${num(a.TOT_SUPLY_HSHLDCO)}세대 · 당첨자 발표 ${md(a.PRZWNER_PRESNATN_DE)} · 입주 예정 ${a.MVN_PREARNGE_YM.slice(0, 4)}년 ${+a.MVN_PREARNGE_YM.slice(4)}월\n- [청약홈 공고 보기](${a.PBLANC_URL})`,
+        table(['주택형', '일반공급', '1순위 접수', '1순위 경쟁률', '해당지역 경쟁률', '2순위 접수', '결과', '분양 최고가'],
+          x.types.map((t) => [shortTy(t.ty, x.types.map((u) => u.ty)), num(t.supply), num(t.r1), fmtRate(t.rate), t.local ? fmtRate(+t.local) : '-', num(t.r2), t.status, t.top ? won(t.top) : '-'])),
+      ].join('\n\n'));
+    }
+  }
+  if (scores.length) {
+    parts.push('## 당첨 가점 공개\n\n당첨자 발표 뒤 공개된 일반공급 가점제 당첨자의 해당지역 점수다(84점 만점).');
+    for (const { a, rows } of scores) {
+      parts.push(`### ${houseName(a)}\n\n${sigungu(a)} · 당첨자 발표 ${md(a.PRZWNER_PRESNATN_DE)}\n\n` +
+        table(['주택형', '최저', '최고', '평균'], rows.map((r) => [shortTy(r.HOUSE_TY, rows.map((q) => q.HOUSE_TY)), r.LWET_SCORE, r.TOP_SCORE, r.AVRG_SCORE])));
+    }
+  }
+  parts.push(`경쟁률·가점은 청약홈 집계 기준이며, 부적격·계약 포기로 실제 계약 결과는 달라질 수 있다. 다가오는 접수 일정은 [분양·청약](/category/분양청약/) 카테고리의 주간 분양 일정 글에 모은다.`);
+  parts.push(`<!-- 청약결과: ${items.map((x) => x.a.HOUSE_MANAGE_NO).join(',') || '0'} -->\n<!-- 당첨가점: ${scores.map((x) => x.a.HOUSE_MANAGE_NO).join(',') || '0'} -->`);
+
+  const lead = items[0] ? `${houseName(items[0].a)} ${fmtRate(items[0].rate)}` : `당첨 가점 ${scores.length}곳`;
+  writePost({
+    slug: `청약-결과-${ref}`,
+    title: `아파트 청약 결과 ${md(ref)} — ${lead}${items.length > 1 ? ` 외 ${items.length - 1}곳` : ''}`,
+    categories: [APPLY_CAT],
+    tags: ['청약', '청약 경쟁률', '분양', '아파트', '청약홈', ...(scores.length ? ['당첨가점'] : []), ...new Set(items.map((x) => x.a.SUBSCRPT_AREA_CODE_NM))],
+    description: `${ymd(ref)} 기준 아파트 청약 결과. ${names.slice(0, 4).join(', ')}${names.length > 4 ? ' 등' : ''}의 주택형별 1순위 경쟁률과 미달 여부${scores.length ? `, ${scores.length}곳의 당첨 가점` : ''}을 정리했다.`,
+    body: parts.join('\n\n'),
+  });
+}
+
+async function applySchedule(ref) {
+  const end = addDays(ref, 13);
+  const ann = (await applyApi('ApplyhomeInfoDetailSvc', 'getAPTLttotPblancDetail', { 'RCEPT_ENDDE::GTE': ref }))
+    .filter((a) => (a.GNRL_RNK1_CRSPAREA_RCPTDE ?? a.RCEPT_BGNDE) <= end)
+    .sort((x, y) => (x.GNRL_RNK1_CRSPAREA_RCPTDE ?? x.RCEPT_BGNDE).localeCompare(y.GNRL_RNK1_CRSPAREA_RCPTDE ?? y.RCEPT_BGNDE));
+  if (!ann.length) { console.log(`${ref}: 2주 안에 접수하는 공고가 없다`); return; }
+  const rows = [];
+  for (const a of ann) {
+    const mdl = await byNo('ApplyhomeInfoDetailSvc', 'getAPTLttotPblancMdl', a.HOUSE_MANAGE_NO);
+    const tops = mdl.map((m) => +m.LTTOT_TOP_AMOUNT).filter(Boolean);
+    const ppy = mdl.filter((m) => +m.LTTOT_TOP_AMOUNT && +m.SUPLY_AR).map((m) => +m.LTTOT_TOP_AMOUNT / (+m.SUPLY_AR / 3.3058));
+    rows.push({ a, tops, ppy, types: [...new Set(mdl.map((m) => tyInt(m.HOUSE_TY).replace(/[A-Z]+$/, '')))].sort((x, y) => x - y).join('·') });
+  }
+  const dr = (b, e) => (!b ? '-' : b === e || !e ? md(b) : `${md(b)}~${md(e)}`);
+  const week2 = addDays(ref, 7);
+  const sec = (label, list) => (list.length ? `## ${label}\n\n` + table(['단지', '위치', '구분', '총 세대', '주택형(㎡)', '특별공급', '1순위', '당첨자 발표', '분양 최고가'],
+    list.map(({ a, tops, types }) => [`[${houseName(a)}](${a.PBLANC_URL})`, sigungu(a), `${a.HOUSE_DTL_SECD_NM}${a.HOUSE_SECD_NM !== 'APT' ? `·${a.HOUSE_SECD_NM}` : ''}`,
+      num(a.TOT_SUPLY_HSHLDCO), types || '-', dr(a.SPSPLY_RCEPT_BGNDE, a.SPSPLY_RCEPT_ENDDE),
+      dr(a.GNRL_RNK1_CRSPAREA_RCPTDE ?? a.RCEPT_BGNDE, a.GNRL_RNK1_ETC_AREA_ENDDE), md(a.PRZWNER_PRESNATN_DE),
+      tops.length ? (Math.min(...tops) === Math.max(...tops) ? won(tops[0]) : `${won(Math.min(...tops))}~${won(Math.max(...tops))}`) : '-'])) : '');
+  const first = rows.filter((r) => (r.a.GNRL_RNK1_CRSPAREA_RCPTDE ?? r.a.RCEPT_BGNDE) < week2);
+  const second = rows.filter((r) => !first.includes(r));
+  const bySido = [...Map.groupBy(rows, (r) => r.a.SUBSCRPT_AREA_CODE_NM)].sort((a, b) => b[1].length - a[1].length).map(([s, l]) => `${s} ${l.length}곳`).join(', ');
+  const total = rows.reduce((s, r) => s + r.a.TOT_SUPLY_HSHLDCO, 0);
+  const seoul = rows.filter((r) => r.a.SUBSCRPT_AREA_CODE_NM === '서울');
+  const parts = [
+    `${ymd(ref)}부터 2주 동안(${md(end)}까지) 청약을 받는 아파트는 **${rows.length}곳, ${num(total)}세대**다(${bySido}). 이미 접수가 시작돼 아직 끝나지 않은 공고도 넣었다. 자료는 청약홈 분양정보 공공데이터다.`,
+    seoul.length ? `서울 단지는 ${seoul.map((r) => `**${houseName(r.a)}**(${sigungu(r.a)}, 1순위 ${md(r.a.GNRL_RNK1_CRSPAREA_RCPTDE ?? r.a.RCEPT_BGNDE)})`).join(', ')}다. 서울 정비사업 단지의 분양 예정과 예상 분양가는 [우리동네 개발사업 정보](https://retrack.invisiblecity.co.kr/price/)에서 볼 수 있다.` : '',
+    sec(`이번 주 (${md(ref)}~${md(addDays(ref, 6))})`, first),
+    sec(`다음 주 (${md(week2)}~${md(end)})`, second),
+    '분양 최고가는 주택형별 공고 금액 중 가장 높은 층·향의 값이다. 구분의 국민은 국민주택(공공), 민영은 민영주택이다. 일정은 공고 변경으로 바뀔 수 있으니 접수 전에 청약홈 공고문을 확인하자. 접수가 끝난 단지의 경쟁률은 매일 올리는 청약 결과 글에 정리한다.',
+  ].filter(Boolean);
+  writePost({
+    slug: `분양-일정-${ref}`,
+    title: `아파트 분양 일정 (${md(ref)}~${md(end)}, ${rows.length}곳 ${num(total)}세대)`,
+    categories: [APPLY_CAT],
+    tags: ['분양 일정', '청약 일정', '분양', '아파트', '청약홈', ...new Set(rows.map((r) => r.a.SUBSCRPT_AREA_CODE_NM))],
+    description: `${ymd(ref)}부터 2주 동안 청약을 받는 아파트 ${rows.length}곳(${bySido})의 특별공급·1순위 접수일, 당첨자 발표일, 분양 최고가.`,
+    body: parts.join('\n\n'),
+  });
+}
+
 const [kind, arg] = process.argv.slice(2);
-if (kind === 'factory' && /^\d{4}-\d{2}-\d{2}$/.test(arg ?? '')) factory(arg);
+const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+if (kind === 'applyhome') await applyResult(arg ?? today());
+else if (kind === 'applyhome-week') await applySchedule(arg ?? today());
+else if (kind === 'factory' && /^\d{4}-\d{2}-\d{2}$/.test(arg ?? '')) factory(arg);
 else if (kind === 'retrack' && /^\d{4}-\d{2}$/.test(arg ?? '')) retrack(arg);
 else if (kind === 'retrack-week' && /^\d{4}-\d{2}-\d{2}$/.test(arg ?? '')) retrackWeek(arg);
 else if (kind === 'apt' && arg) apt(arg);
 else if (kind === 'gu' && arg) guReport(arg);
 else {
-  console.error('사용법: node scripts/digest.mjs factory YYYY-MM-DD | retrack YYYY-MM | retrack-week YYYY-MM-DD | apt 동남권 | gu 영등포구|next');
+  console.error('사용법: node scripts/digest.mjs applyhome [YYYY-MM-DD] | applyhome-week [YYYY-MM-DD] | factory YYYY-MM-DD | retrack YYYY-MM | retrack-week YYYY-MM-DD | apt 동남권 | gu 영등포구|next');
   process.exit(1);
 }
