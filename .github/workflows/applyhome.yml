@@ -1,0 +1,60 @@
+# 청약홈 정기 글: 매일 청약 결과(경쟁률·당첨가점), 월요일엔 2주 분양 일정도.
+# 매일 21:07 KST(12:07 UTC). 그날 오후 발표된 당첨가점과 전날까지 접수를 마친 단지의 경쟁률이 모두 나온 뒤다.
+# 이미 쓴 단지는 글 끝 주석으로 걸러 내므로 하루 건너뛰어도 다음 날 글에 들어간다. 새 단지가 없으면 글을 쓰지 않는다.
+# 수동 실행: Actions > 청약 정기 글 > Run workflow (날짜를 비우면 오늘).
+name: 청약 정기 글
+
+on:
+  schedule:
+    - cron: "7 12 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "기준 날짜 YYYY-MM-DD (비우면 오늘, KST)"
+        required: false
+      week:
+        description: "분양 일정 글도 만들기"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: applyhome
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 청약 결과 글
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: node scripts/digest.mjs applyhome ${{ inputs.date }}
+
+      - name: 분양 일정 글 (월요일)
+        if: ${{ inputs.week || github.event_name == 'schedule' }}
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: |
+          if [ "${{ inputs.week }}" = "true" ] || [ "$(TZ=Asia/Seoul date +%u)" = 1 ]; then
+            node scripts/digest.mjs applyhome-week ${{ inputs.date }}
+          fi
+
+      - name: 커밋·푸시
+        run: |
+          git add src/content/posts
+          if git diff --cached --quiet; then echo "새 글 없음"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "auto: 청약 정기 글 $(TZ=Asia/Seoul date +%F)"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep 10; done
+          exit 1
