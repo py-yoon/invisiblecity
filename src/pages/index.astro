@@ -3,8 +3,10 @@ import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Apps from '../components/Apps.astro';
-import { getPosts, PER_PAGE } from '../lib/site';
-const posts = await getPosts();
+import FeedSection from '../components/FeedSection.astro';
+import { getPosts, isFeed, PER_PAGE } from '../lib/site';
+const all = await getPosts();
+const posts = all.filter((p) => !isFeed(p));
 const SITE = 'https://invisiblecity.co.kr';
 const DESC = '보이지 않는 도시연구소는 도시를 바꾸는 개발사업, 건축, 부동산 제도와 통계를 기록한다. 공장용지 지도, 서울 재개발·재건축 RETRACK, 건축 지도, 전국 기피시설 지도, 세계 최고층 빌딩 도감 SPIRE, 지하 공간 지도 땅 아래 대한민국을 만든다.';
 const jsonld = [{
@@ -20,7 +22,7 @@ const jsonld = [{
 ---
 <Base description={DESC} jsonld={jsonld}>
   <div class="with-sidebar">
-    <div class="content"><h1 class="sr-only">보이지 않는 도시연구소 invisiblecity</h1><Apps /><PostList posts={posts.slice(0, PER_PAGE)} pages={Math.ceil(posts.length / PER_PAGE)} /></div>
+    <div class="content"><h1 class="sr-only">보이지 않는 도시연구소 invisiblecity</h1><Apps /><FeedSection posts={all} /><PostList posts={posts.slice(0, PER_PAGE)} pages={Math.ceil(posts.length / PER_PAGE)} /></div>
     <Sidebar />
   </div>
 </Base>

@@ -1,0 +1,19 @@
+---
+import { type Post, FEED_CATEGORIES, postUrl, categoryUrl, fmtDate } from '../lib/site';
+const { posts } = Astro.props as { posts: Post[] };
+const cols = FEED_CATEGORIES.map((name) => ({ name, items: posts.filter((p) => p.data.categories.includes(name)).slice(0, 5) }));
+---
+<section class="feed" aria-labelledby="feed-title">
+  <h2 id="feed-title">청약·분양</h2>
+  <div class="feed-cols">
+    {cols.map((c) => (
+      <div>
+        <h3><a href={categoryUrl(c.name)}>{c.name}</a></h3>
+        <ul class="recent">
+          {c.items.map((p) => <li><a href={postUrl(p)}>{p.data.title}</a><time datetime={p.data.date.toISOString()}>{fmtDate(p.data.date)}</time></li>)}
+        </ul>
+        <p><a href={categoryUrl(c.name)}>{c.name} 전체 보기 →</a></p>
+      </div>
+    ))}
+  </div>
+</section>

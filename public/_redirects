@@ -437,3 +437,6 @@
 /category/:slug/feed/ /rss.xml 301
 /wp-admin/* /admin/ 302
 /wp-login.php /admin/ 302
+
+# 2026-11-14 분양·청약 카테고리를 청약 결과/분양 일정으로 나눔
+/category/%EB%B6%84%EC%96%91%EC%B2%AD%EC%95%BD/ /category/%EC%B2%AD%EC%95%BD-%EA%B2%B0%EA%B3%BC/ 301

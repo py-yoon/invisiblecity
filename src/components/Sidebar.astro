@@ -1,6 +1,6 @@
 ---
 import SearchForm from './SearchForm.astro';
-import { getPosts, groupBy, postUrl, tagUrl, fmtDate } from '../lib/site';
+import { getPosts, groupBy, isFeed, postUrl, tagUrl, fmtDate } from '../lib/site';
 const posts = await getPosts();
 // 워드프레스 태그 구름: 많이 쓴 45개를 이름순으로, 13px~29px
 const top = groupBy(posts, 'tags').slice(0, 45);
@@ -12,7 +12,7 @@ const tags = top.sort((a, b) => a[0].localeCompare(b[0], 'ko'))
 <aside class="sidebar">
   <h2>Recent Posts</h2>
   <ul class="recent">
-    {posts.slice(0, 5).map((p) => (
+    {posts.filter((p) => !isFeed(p)).slice(0, 5).map((p) => (
       <li><a href={postUrl(p)}>{p.data.title}</a><time datetime={p.data.date.toISOString()}>{fmtDate(p.data.date)}</time></li>
     ))}
   </ul>

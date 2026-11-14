@@ -336,7 +336,8 @@ function guReport(arg) {
 // ── 청약홈: 청약 결과(매일)·분양 일정(주 1회) ─────────────────────────
 // 공공데이터포털 청약홈 분양정보·경쟁률 API. 키는 DATA_GO_KR_KEY 환경 변수.
 // 일반 아파트(APT)만 다룬다. LH 신혼희망타운·공공분양 본청약은 경쟁률 API에 나오지 않는다.
-const APPLY_CAT = '분양·청약';
+const RESULT_CAT = '청약 결과';
+const SCHEDULE_CAT = '분양 일정';
 async function applyApi(svc, ep, cond) {
   const key = process.env.DATA_GO_KR_KEY;
   if (!key) throw new Error('DATA_GO_KR_KEY 환경 변수가 필요하다');
@@ -442,14 +443,14 @@ async function applyResult(ref) {
         table(['주택형', '최저', '최고', '평균'], rows.map((r) => [shortTy(r.HOUSE_TY, rows.map((q) => q.HOUSE_TY)), r.LWET_SCORE, r.TOP_SCORE, r.AVRG_SCORE])));
     }
   }
-  parts.push(`경쟁률·가점은 청약홈 집계 기준이며, 부적격·계약 포기로 실제 계약 결과는 달라질 수 있다. 다가오는 접수 일정은 [분양·청약](/category/분양청약/) 카테고리의 주간 분양 일정 글에 모은다.`);
+  parts.push(`경쟁률·가점은 청약홈 집계 기준이며, 부적격·계약 포기로 실제 계약 결과는 달라질 수 있다. 다가오는 접수 일정은 [분양 일정](/category/분양-일정/) 카테고리의 주간 글에 모은다.`);
   parts.push(`<!-- 청약결과: ${items.map((x) => x.a.HOUSE_MANAGE_NO).join(',') || '0'} -->\n<!-- 당첨가점: ${scores.map((x) => x.a.HOUSE_MANAGE_NO).join(',') || '0'} -->`);
 
   const lead = items[0] ? `${houseName(items[0].a)} ${fmtRate(items[0].rate)}` : `당첨 가점 ${scores.length}곳`;
   writePost({
     slug: `청약-결과-${ref}`,
     title: `아파트 청약 결과 ${md(ref)} — ${lead}${items.length > 1 ? ` 외 ${items.length - 1}곳` : ''}`,
-    categories: [APPLY_CAT],
+    categories: [RESULT_CAT],
     tags: ['청약', '청약 경쟁률', '분양', '아파트', '청약홈', ...(scores.length ? ['당첨가점'] : []), ...new Set(items.map((x) => x.a.SUBSCRPT_AREA_CODE_NM))],
     description: `${ymd(ref)} 기준 아파트 청약 결과. ${names.slice(0, 4).join(', ')}${names.length > 4 ? ' 등' : ''}의 주택형별 1순위 경쟁률과 미달 여부${scores.length ? `, ${scores.length}곳의 당첨 가점` : ''}을 정리했다.`,
     body: parts.join('\n\n'),
@@ -491,7 +492,7 @@ async function applySchedule(ref) {
   writePost({
     slug: `분양-일정-${ref}`,
     title: `아파트 분양 일정 (${md(ref)}~${md(end)}, ${rows.length}곳 ${num(total)}세대)`,
-    categories: [APPLY_CAT],
+    categories: [SCHEDULE_CAT],
     tags: ['분양 일정', '청약 일정', '분양', '아파트', '청약홈', ...new Set(rows.map((r) => r.a.SUBSCRPT_AREA_CODE_NM))],
     description: `${ymd(ref)}부터 2주 동안 청약을 받는 아파트 ${rows.length}곳(${bySido})의 특별공급·1순위 접수일, 당첨자 발표일, 분양 최고가.`,
     body: parts.join('\n\n'),

@@ -72,3 +72,7 @@ export function tocOf(html: string) {
   })).filter((h) => h.text);
   return items.length >= 3 ? items : [];
 }
+
+/** 매일 자동으로 쌓이는 청약 글. 일반 글 목록을 덮지 않게 첫 화면에 따로 보여 준다. */
+export const FEED_CATEGORIES = ['청약 결과', '분양 일정'];
+export const isFeed = (p: Post) => p.data.categories.some((c) => FEED_CATEGORIES.includes(c));

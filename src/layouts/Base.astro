@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import SearchForm from '../components/SearchForm.astro';
-import { SITE_TITLE, SITE_DESC, url, getPosts, groupBy, postUrl, categoryUrl, fmtShortDate } from '../lib/site';
+import { SITE_TITLE, SITE_DESC, url, getPosts, groupBy, isFeed, postUrl, categoryUrl, fmtShortDate } from '../lib/site';
 
 interface Article { published: Date; modified?: Date; section?: string; tags: string[] }
 interface Props { title?: string; description?: string; image?: string; type?: 'website' | 'article'; noindex?: boolean; article?: Article; jsonld?: object[] }
@@ -29,7 +29,8 @@ const SITES: MenuItem[] = [
 ];
 const CATEGORY_GROUPS: [string, string[]][] = [
   ['개발사업', ['도시를 바꾸는 개발사업', '도시개발사업', '산업단지', '지구단위계획', '도시정비사업']],
-  ['부동산·제도', ['분양·청약', '주택사업', '부담금/세금', '부동산', '지식산업센터']],
+  ['청약·분양', ['청약 결과', '분양 일정']],
+  ['부동산·제도', ['주택사업', '부담금/세금', '부동산', '지식산업센터']],
   ['도시·건축', ['해외건축가', '국내건축가', '도시기반시설', '인프라시설', '도시정책/통계', '도시산책']],
 ];
 const posts = await getPosts();
@@ -149,7 +150,7 @@ const menu: [string, MenuItem[]][] = [
         <section>
           <h2>Posts</h2>
           <ul class="footer-posts">
-            {posts.slice(0, 10).map((p) => (
+            {posts.filter((p) => !isFeed(p)).slice(0, 10).map((p) => (
               <li><a href={postUrl(p)}>{p.data.title}</a><time datetime={p.data.date.toISOString()}>{fmtShortDate(p.data.date)}</time></li>
             ))}
           </ul>

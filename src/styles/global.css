@@ -278,3 +278,10 @@ hr { border: 0; border-top: 2px solid var(--rule); margin: 0; }
 
 /* 애드센스 자동광고가 채워지지 않으면 자리도 비우지 않는다(구글 안내 방식). 첫 화면 위 280px 빈칸의 원인이었다. */
 ins.adsbygoogle[data-ad-status="unfilled"], .google-auto-placed:has(> ins.adsbygoogle[data-ad-status="unfilled"]) { display: none !important; }
+
+/* 첫 화면 청약·분양 묶음: 매일 쌓이는 글을 일반 글과 나눈다 */
+.feed { margin: 0 0 1.6em; }
+.feed h2 { font-size: 32px; font-weight: 600; line-height: 1.2; margin: 0 0 16px; padding-top: 1rem; }
+.feed-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25em; }
+.feed h3 { font-size: 22px; font-weight: 700; margin: 0 0 12px; }
+@media (max-width: 600px) { .feed-cols { grid-template-columns: 1fr; } }

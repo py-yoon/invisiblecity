@@ -2,10 +2,10 @@
 import Base from '../../layouts/Base.astro';
 import PostList from '../../components/PostList.astro';
 import Sidebar from '../../components/Sidebar.astro';
-import { getPosts, PER_PAGE } from '../../lib/site';
+import { getPosts, isFeed, PER_PAGE } from '../../lib/site';
 
 export async function getStaticPaths() {
-  const posts = await getPosts();
+  const posts = (await getPosts()).filter((p) => !isFeed(p));
   const pages = Math.ceil(posts.length / PER_PAGE);
   return Array.from({ length: pages - 1 }, (_, i) => i + 2).map((n) => ({
     params: { page: String(n) },
