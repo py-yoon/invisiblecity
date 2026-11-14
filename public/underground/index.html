@@ -256,14 +256,47 @@ document.getElementById('icsites').innerHTML = SITES.map(([k, n, t, h]) => `<li>
 // ── 깊이 눈금: 얕은 곳은 거의 직선, 깊은 곳은 로그처럼 줄어드는 asinh 눈금 ──
 const K = 15, mobile = matchMedia('(max-width:820px)').matches;
 const A = mobile ? 700 : 820, TOP = 40;
-const y = (d) => TOP + A * Math.asinh(Math.max(d, 0) / K);
-const dAt = (py) => K * Math.sinh(Math.max(py - TOP, 0) / A);
-const MAXD = 36000, H = y(MAXD) + 140;
+// base: 고정 눈금. 라벨이 몰린 깊이는 눈금을 늘려(warp) 라벨 점이 정확히 제 깊이에 오게 한다.
+const base = (d) => TOP + A * Math.asinh(Math.max(d, 0) / K);
+const baseInv = (py) => K * Math.sinh(Math.max(py - TOP, 0) / A);
+const PTS = [[TOP, TOP]]; // [고정 눈금 y, 늘린 y]
+const lerp = (v, from, to) => { let k = PTS.length - 1; while (k > 0 && PTS[k][from] > v) k--; const p = PTS[k], n = PTS[k + 1]; return n ? p[to] + (v - p[from]) * (n[to] - p[to]) / (n[from] - p[from]) : p[to] + v - p[from]; };
+const y = (d) => lerp(base(d), 0, 1);
+const dAt = (py) => baseInv(lerp(py, 1, 0));
+const MAXD = 36000;
 const fmt = (d) => d >= 1000 ? (d / 1000).toLocaleString('ko-KR', { maximumFractionDigits: d >= 10000 ? 0 : 1 }) + 'km' : (d < 10 ? d.toFixed(1) : Math.round(d)) + 'm';
 
 const ground = document.getElementById('ground');
-ground.style.height = H + 'px';
 let h = '';
+// 장소 라벨. 지하상가는 한 덩어리로 묶는다.
+const withDepth = P.filter((p) => p.depth != null && !p.shallow).sort((a, b) => a.depth - b.depth);
+const malls = P.filter((p) => p.shallow);
+const entries = [{ group: true, depth: 6, items: malls }, ...withDepth].sort((a, b) => a.depth - b.depth);
+const LX = mobile ? 170 : 186;
+// 라벨을 먼저 그려 실제 높이를 잰 뒤 눈금을 정한다.
+entries.forEach((e) => {
+  if (e.group) {
+    h += `<div class="item" data-group="mall" data-cat="mall" style="--c:${color('mall')}"><span class="dot"></span><div><div class="t">지하상가 ${e.items.length}곳</div><div class="d"><em>지하 1~2층, 약 5~8m</em> · 층수로 어림</div><div class="names">${e.items.map((p) => `<button data-id="${p.id}">${esc(p.name)}${p.routeLen ? ` <small>${p.routeLen >= 1000 ? (p.routeLen / 1000).toFixed(1) + 'km' : p.routeLen + 'm'}</small>` : ''}</button>`).join('')}</div></div></div>`;
+  } else {
+    h += `<div class="item" data-id="${e.id}" data-cat="${e.cat}" style="--c:${color(e.cat)}"><span class="dot"></span><div><div class="t">${esc(e.name)}</div><div class="d"><em>${esc(e.depthText)}</em> · ${esc(e.region)}</div></div></div>`;
+  }
+});
+ground.innerHTML = h;
+const itemEls = [...ground.querySelectorAll('.item')];
+// 같은 깊이끼리 묶어, 묶음 첫 라벨의 점을 그 깊이에 둔다. 앞 묶음과 겹치면 그만큼 눈금을 늘린다.
+const LY = [];
+let bottom = -1e9;
+for (let i = 0; i < entries.length;) {
+  const d = entries[i].depth, b = base(d), last = PTS.at(-1);
+  const Y = Math.max(last[1] + b - last[0], bottom + 14 + 6);
+  if (b > last[0]) PTS.push([b, Y]);
+  let t = Y - 14;
+  for (; i < entries.length && entries[i].depth === d; i++) { LY[i] = t; t += itemEls[i].offsetHeight + 6; }
+  bottom = t;
+}
+const H = y(MAXD) + 140;
+ground.style.height = H + 'px';
+h = '';
 // 지층(어림)
 const STRATA = [
   [0, 3, '#8b5a2b', '흙'], [3, 20, '#d9a441', '모래·자갈·점토'], [20, 60, '#c8693a', '풍화암'],
@@ -284,38 +317,13 @@ S.forEach((s, i) => {
 h += '</div>';
 h += `<div class="lane-note" style="top:${y(64)}px">서울 지하철<br>1~8호선 ${S.filter((s) => s.depth > 0).length}개 역<br><span style="opacity:.8">점 하나가 역 하나</span></div>`;
 
-// 장소 라벨: 실제 깊이에 두되 겹치면 아래로 민다. 지하상가는 한 덩어리로 묶는다.
-const withDepth = P.filter((p) => p.depth != null && !p.shallow).sort((a, b) => a.depth - b.depth);
-const malls = P.filter((p) => p.shallow);
-const entries = [{ group: true, depth: 6, items: malls }, ...withDepth].sort((a, b) => a.depth - b.depth);
-const LX = mobile ? 170 : 186;
-// 라벨을 먼저 그려 실제 높이를 잰 뒤, 실제 깊이에 두되 겹치면 아래로 민다.
-entries.forEach((e) => {
-  if (e.group) {
-    h += `<div class="item" data-group="mall" data-cat="mall" style="--c:${color('mall')}"><span class="dot"></span><div><div class="t">지하상가 ${e.items.length}곳</div><div class="d"><em>지하 1~2층, 약 5~8m</em> · 층수로 어림</div><div class="names">${e.items.map((p) => `<button data-id="${p.id}">${esc(p.name)}${p.routeLen ? ` <small>${p.routeLen >= 1000 ? (p.routeLen / 1000).toFixed(1) + 'km' : p.routeLen + 'm'}</small>` : ''}</button>`).join('')}</div></div></div>`;
-  } else {
-    h += `<div class="item" data-id="${e.id}" data-cat="${e.cat}" style="--c:${color(e.cat)}"><span class="dot"></span><div><div class="t">${esc(e.name)}</div><div class="d"><em>${esc(e.depthText)}</em> · ${esc(e.region)}</div></div></div>`;
-  }
-});
-ground.innerHTML = h;
-const itemEls = [...ground.querySelectorAll('.item')];
-const place = (bs) => { let off = 0, sum = 0; for (const b of bs) { sum += b.ty - off; off += b.h; } return { bs, top: Math.max(sum / bs.length, 0), h: off }; };
-const clusters = [];
 entries.forEach((e, i) => {
-  let c = place([{ i, ty: y(e.depth) - 14, h: itemEls[i].offsetHeight + 6 }]);
-  while (clusters.length && clusters.at(-1).top + clusters.at(-1).h > c.top) c = place([...clusters.pop().bs, ...c.bs]);
-  clusters.push(c);
-});
-const LY = [];
-for (const c of clusters) { let t = c.top; for (const b of c.bs) { LY[b.i] = t; t += b.h; } }
-let leads = '';
-entries.forEach((e, i) => {
-  const el = itemEls[i], ty = y(e.depth), ly = LY[i];
-  el.style.top = ly + 'px';
+  const ty = y(e.depth), ly = LY[i];
+  itemEls[i].style.top = ly + 'px';
   const dy = ly + 14 - ty, len = Math.hypot(LX - 64, dy), ang = Math.atan2(dy, LX - 64) * 180 / Math.PI;
-  leads += `<div class="lead" style="left:64px;top:${ty}px;width:${len}px;transform:rotate(${ang}deg)"></div>`;
+  h += `<div class="lead" style="left:64px;top:${ty}px;width:${len}px;transform:rotate(${ang}deg)"></div>`;
 });
-ground.insertAdjacentHTML('afterbegin', leads);
+ground.insertAdjacentHTML('afterbegin', h);
 const items = [...ground.querySelectorAll('.item')];
 
 // 깊이를 모르는 곳
