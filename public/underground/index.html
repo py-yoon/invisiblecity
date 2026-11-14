@@ -11,7 +11,7 @@
 <meta property="og:image" content="https://invisiblecity.co.kr/underground/og.png">
 <meta property="og:url" content="https://invisiblecity.co.kr/underground/">
 <link rel="canonical" href="https://invisiblecity.co.kr/underground/">
-<meta name="theme-color" content="#14110f">
+<meta name="theme-color" content="#9fd8ff">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-9L5W7TM5G2"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -22,9 +22,9 @@ gtag('config', 'G-9L5W7TM5G2');
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{
-  --bg:#14110f; --panel:rgba(24,20,18,.82); --line:rgba(255,255,255,.10); --text:#efe9e2; --mute:#a69b8f; --dim:#6f655c;
-  --accent:#f7fc84; --pink:#ff8eb5;
-  --c-tr:#5ab0ff; --c-mall:#ffb35c; --c-water:#4fd6c8; --c-cave:#9ad16b; --c-mine:#d9a06b; --c-hist:#c69cff; --c-sci:#ff7b8f;
+  --bg:#fbfaf6; --panel:rgba(255,255,255,.94); --line:rgba(20,18,15,.12); --text:#1b1a17; --mute:#5f5a52; --dim:#948d82;
+  --accent:#ff4a1c; --pink:#ff8eb5;
+  --c-tr:#1a73e8; --c-mall:#f08c00; --c-water:#00a396; --c-cave:#3f9b1f; --c-mine:#a35d1c; --c-hist:#7b4ce0; --c-sci:#e5304f;
   --map-w:min(46vw,760px); --icbar:28px;
 }
 *{box-sizing:border-box}
@@ -34,36 +34,34 @@ a{color:inherit}
 button{font:inherit;color:inherit}
 
 /* 지도: 데스크톱은 오른쪽 고정, 모바일은 위쪽 고정 */
-#mapwrap{position:fixed;top:var(--icbar);right:0;bottom:0;width:var(--map-w);z-index:1;background:#1b1816}
+#mapwrap{position:fixed;top:var(--icbar);right:0;bottom:0;width:var(--map-w);z-index:1;background:#eef0ee;border-left:1px solid var(--line)}
 #map{width:100%;height:100%}
 .ngrid{position:absolute;inset:0}
-/* 네이버 바탕 지도를 어둡게: 타일 이미지만 반전(마커는 그대로) */
-#map img[src*="pstatic.net"],#map img[src*="naver"]{filter:invert(.92) hue-rotate(180deg) brightness(.92) contrast(.9) saturate(.55)}
-.pin{position:absolute;border-radius:50%;background:var(--c);border:1.5px solid #000;box-sizing:border-box;cursor:pointer;transition:box-shadow .15s}
-.pin.near{box-shadow:0 0 0 2.5px #fff}
+.pin{position:absolute;border-radius:50%;background:var(--c);border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35);box-sizing:border-box;cursor:pointer;transition:box-shadow .15s}
+.pin.near{box-shadow:0 0 0 2.5px #1b1a17}
 .pin.sel{box-shadow:0 0 0 3px var(--accent),0 0 14px var(--accent)}
 .bld{width:10px;height:10px;border-radius:2px;background:#fff;border:2px solid var(--c-mall);box-sizing:border-box;cursor:pointer}
 .stm{width:7px;height:7px;border-radius:50%;cursor:pointer;opacity:.9;transition:opacity .25s,transform .25s}
 .stm.past{opacity:.12;transform:scale(.7)}
 .mapbtn{position:absolute;right:10px;bottom:24px;z-index:5;display:flex;flex-direction:column;gap:6px}
-.mapbtn button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:rgba(24,20,18,.9);color:#ddd;font-size:18px;cursor:pointer}
+.mapbtn button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;color:#333;font-size:18px;cursor:pointer}
 
 /* 깊이 기둥 */
 #col{position:relative;margin-right:var(--map-w);min-height:100vh;padding-top:var(--icbar)}
-header.hero{position:relative;padding:56px 32px 40px;background:linear-gradient(#20324a 0%,#3b4f63 55%,#6a7a6a 100%);overflow:hidden}
+header.hero{position:relative;padding:56px 32px 40px;background:linear-gradient(#7cc8ff 0%,#b9e3ff 60%,#e4f4ff 100%);color:#0f2233;overflow:hidden}
 .hero h1{margin:0 0 10px;font-size:clamp(32px,4.4vw,54px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
-.hero p{margin:0;max-width:34em;color:#e8e2d8;font-size:15px;line-height:1.65}
-.hero .stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;font-size:13px;color:#dcd4c8}
-.hero .stats b{display:block;font-size:22px;color:#fff;font-weight:800}
-.hero .go{margin-top:26px;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#fff;opacity:.85}
+.hero p{margin:0;max-width:34em;color:#21384d;font-size:15px;line-height:1.65}
+.hero .stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;font-size:13px;color:#2f4a62}
+.hero .stats b{display:block;font-size:22px;color:#0f2233;font-weight:800}
+.hero .go{margin-top:26px;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#0f2233;font-weight:700}
 .hero .go::after{content:"";width:8px;height:8px;border-right:2px solid;border-bottom:2px solid;transform:rotate(45deg);animation:bob 1.6s infinite}
 @keyframes bob{50%{transform:translateY(4px) rotate(45deg)}}
-.hero .ground{position:absolute;left:0;right:0;bottom:0;height:10px;background:repeating-linear-gradient(90deg,#3d5a2c 0 6px,#4b6b34 6px 12px)}
+.hero .ground{position:absolute;left:0;right:0;bottom:0;height:14px;background:repeating-linear-gradient(90deg,#4caf3a 0 6px,#5cc244 6px 12px)}
 
 /* 필터 띠 */
-.filters{position:sticky;top:var(--icbar);z-index:20;display:flex;gap:10px;align-items:center;padding:10px 16px;background:rgba(20,17,15,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.filters{position:sticky;top:var(--icbar);z-index:20;display:flex;gap:10px;align-items:center;padding:10px 16px;background:rgba(251,250,246,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12.5px;cursor:pointer;user-select:none;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;cursor:pointer;user-select:none;white-space:nowrap}
 .chip i{width:8px;height:8px;border-radius:50%;background:var(--c)}
 .chip[aria-pressed=false]{opacity:.38}
 .chip.st i{border-radius:2px}
@@ -74,77 +72,78 @@ header.hero{position:relative;padding:56px 32px 40px;background:linear-gradient(
 
 /* 땅속 */
 #ground{position:relative;overflow:hidden}
-.stratum{position:absolute;left:0;right:0}
-.stratum span{position:absolute;right:14px;top:10px;font-size:11px;color:rgba(255,255,255,.34);letter-spacing:.04em;text-align:right;max-width:9em;line-height:1.35}
-.tick{position:absolute;left:0;width:64px;height:0;border-top:1px solid rgba(255,255,255,.18)}
-.tick b{position:absolute;left:8px;top:-15px;font-size:11px;font-weight:600;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums}
-.axis{position:absolute;left:64px;top:0;bottom:0;width:1px;background:rgba(255,255,255,.22)}
+.stratum{position:absolute;left:0;right:0;background:color-mix(in srgb,var(--s) 13%,var(--bg))}
+.stratum::before{content:"";position:absolute;left:64px;width:110px;top:0;bottom:0;background:var(--s)}
+.stratum span{position:absolute;right:14px;top:10px;font-size:11px;font-weight:600;color:color-mix(in srgb,var(--s) 70%,#000);letter-spacing:.04em;text-align:right;max-width:9em;line-height:1.35}
+.tick{position:absolute;left:0;width:64px;height:0;border-top:1px solid rgba(0,0,0,.22)}
+.tick b{position:absolute;left:8px;top:-15px;font-size:11px;font-weight:600;color:var(--mute);font-variant-numeric:tabular-nums}
+.axis{position:absolute;left:64px;top:0;bottom:0;width:1px;background:rgba(0,0,0,.35)}
 .lanes{position:absolute;left:72px;top:0;bottom:0;width:96px}
-.lanes .lh{position:absolute;top:6px;width:10px;text-align:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.6)}
-.sdot{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;cursor:pointer;opacity:.9;border:0;padding:0}
-.sdot:hover,.sdot.on{transform:scale(2);z-index:3;box-shadow:0 0 0 2px #fff}
-.lane-note{position:absolute;left:72px;font-size:11px;color:rgba(255,255,255,.55);width:120px;line-height:1.4}
+.lanes .lh{position:absolute;top:6px;width:10px;text-align:center;font-size:9px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.sdot{position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;cursor:pointer;border:1px solid #fff;padding:0}
+.sdot:hover,.sdot.on{transform:scale(2);z-index:3;box-shadow:0 0 0 2px #1b1a17}
+.lane-note{position:absolute;left:72px;font-size:11px;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);width:100px;line-height:1.4}
 
-.lead{position:absolute;height:1px;background:rgba(255,255,255,.28);transform-origin:left center;pointer-events:none}
+.lead{position:absolute;height:1px;background:rgba(0,0,0,.3);transform-origin:left center;pointer-events:none}
 .item{position:absolute;left:186px;right:16px;display:flex;gap:10px;align-items:flex-start;padding:7px 10px 8px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:background .2s,border-color .2s}
-.item:hover{background:rgba(255,255,255,.05)}
-.item.active{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16)}
-.item.sel{border-color:var(--accent);background:rgba(247,252,132,.07)}
-.item .dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--c);box-shadow:0 0 0 3px rgba(0,0,0,.35)}
+.item:hover{background:rgba(255,255,255,.7)}
+.item.active{background:#fff;border-color:var(--line);box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.item.sel{border-color:var(--accent);background:#fff}
+.item .dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--c);box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(0,0,0,.2)}
 .item .t{font-weight:700;font-size:15px;line-height:1.3}
 .item .d{font-size:12px;color:var(--mute);margin-top:1px;line-height:1.4}
 .item .d em{font-style:normal;color:var(--text);font-weight:600}
 .item .names{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:5px}
-.item .names button{font-size:11.5px;padding:2px 7px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer}
+.item .names button{font-size:11.5px;padding:2px 7px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer}
 .item .names button:hover{border-color:var(--c)}
 .item .names small{color:var(--mute);font-size:10.5px}
-.marker-line{position:absolute;left:64px;right:0;border-top:1px dashed rgba(247,252,132,.45)}
-.marker-line span{position:absolute;right:16px;top:4px;font-size:11.5px;color:rgba(247,252,132,.85);text-align:right;max-width:24em}
-.probe{transition:opacity .2s;position:fixed;left:0;right:var(--map-w);top:42vh;height:0;border-top:1px solid rgba(247,252,132,.55);z-index:5;pointer-events:none}
-.probe-info{position:fixed;left:186px;right:calc(var(--map-w) + 16px);top:calc(42vh + 8px);z-index:6;pointer-events:none;font-size:12.5px;line-height:1.55;color:#ddd;display:none}
+.marker-line{position:absolute;left:64px;right:0;border-top:1px dashed color-mix(in srgb,var(--accent) 60%,transparent)}
+.marker-line span{position:absolute;right:16px;top:4px;font-size:11.5px;font-weight:600;color:var(--accent);text-align:right;max-width:24em}
+.probe{transition:opacity .2s;position:fixed;left:0;right:var(--map-w);top:42vh;height:0;border-top:2px solid var(--accent);z-index:5;pointer-events:none}
+.probe-info{position:fixed;left:186px;right:calc(var(--map-w) + 16px);top:calc(42vh + 8px);z-index:6;pointer-events:none;font-size:12.5px;line-height:1.55;color:var(--text);display:none;background:rgba(255,255,255,.9);padding:6px 9px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .probe-info b{color:var(--accent);font-weight:700;margin-right:4px}
 .probe-info span{display:inline-block;margin-right:8px;white-space:nowrap}
 .probe-info span i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
-.probe::before{content:"";position:absolute;left:58px;top:-6px;width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.probe::before{content:"";position:absolute;left:58px;top:-6px;width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px #fff}
 
 /* 지도 밖 목록(깊이를 모르는 곳) */
-section.nodepth{padding:40px 24px 30px;background:#0f0c0b;border-top:1px solid var(--line)}
+section.nodepth{padding:40px 24px 30px;background:#f1eee6;border-top:1px solid var(--line)}
 section.nodepth h2,footer h2{font-size:18px;margin:0 0 6px}
 section.nodepth p.sub{margin:0 0 16px;color:var(--mute);font-size:13px;line-height:1.6}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
-.card{display:flex;gap:9px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);cursor:pointer;text-align:left}
+.card{display:flex;gap:9px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;text-align:left}
 .card:hover{border-color:var(--c)}
 .card .dot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:5px;background:var(--c)}
 .card b{display:block;font-size:14px}
 .card span{font-size:12px;color:var(--mute)}
-footer{padding:30px 24px 60px;background:#0b0908;color:var(--mute);font-size:12.5px;line-height:1.7}
+footer{padding:30px 24px 60px;background:#e9e5db;color:var(--mute);font-size:12.5px;line-height:1.7}
 footer h2{color:var(--text)}
-footer a{color:#cfc6bb}
+footer a{color:var(--text)}
 
 /* 상세 카드 */
-#detail{position:fixed;right:16px;bottom:16px;width:min(380px,calc(var(--map-w) - 32px));max-height:calc(100vh - var(--icbar) - 32px);overflow:auto;z-index:30;background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:16px;padding:16px 18px 18px;box-shadow:0 20px 50px rgba(0,0,0,.45);display:none}
+#detail{position:fixed;right:16px;bottom:16px;width:min(380px,calc(var(--map-w) - 32px));max-height:calc(100vh - var(--icbar) - 32px);overflow:auto;z-index:30;background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:16px;padding:16px 18px 18px;box-shadow:0 16px 40px rgba(0,0,0,.18);display:none}
 #detail.show{display:block}
 #detail .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:22px;color:var(--mute);cursor:pointer;padding:4px 8px}
 #detail .cat{font-size:11.5px;font-weight:700;color:var(--c);letter-spacing:.04em}
 #detail h3{margin:4px 0 2px;font-size:21px;letter-spacing:-.02em}
 #detail .rg{color:var(--mute);font-size:13px}
 #detail .facts{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
-#detail .facts span{font-size:12px;padding:4px 8px;border-radius:7px;background:rgba(255,255,255,.06)}
-#detail .facts .depth{background:rgba(247,252,132,.12);color:var(--accent);font-weight:700}
+#detail .facts span{font-size:12px;padding:4px 8px;border-radius:7px;background:rgba(0,0,0,.05)}
+#detail .facts .depth{background:color-mix(in srgb,var(--accent) 12%,#fff);color:#c42f08;font-weight:700}
 #detail dl.mall{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:0 0 12px;font-size:13px;line-height:1.5}
 #detail dl.mall dt{color:var(--mute);font-weight:600}
 #detail dl.mall dd{margin:0}
 #detail dl.mall small{color:var(--dim)}
-#detail p{margin:0;font-size:14px;line-height:1.7;color:#e3dcd3}
+#detail p{margin:0;font-size:14px;line-height:1.7;color:#2a2824}
 #detail .src{margin-top:12px;font-size:11.5px;color:var(--dim);line-height:1.6;word-break:break-all}
 #detail .src a{color:var(--mute)}
-#detail .chk{margin-top:10px;font-size:11.5px;color:#e0b070}
-.open-yes{color:#9ad16b}.open-part{color:#e0c060}.open-no{color:#ff8f8f}.open-soon{color:#8ab8ff}
+#detail .chk{margin-top:10px;font-size:11.5px;color:#b06a00}
+.open-yes{color:#2e8a12}.open-part{color:#a87a00}.open-no{color:#d0302a}.open-soon{color:#1a6fd6}
 
-.tip{position:fixed;z-index:40;pointer-events:none;background:rgba(15,12,11,.94);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;line-height:1.45;display:none;max-width:220px}
+.tip{position:fixed;z-index:40;pointer-events:none;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.14);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;line-height:1.45;display:none;max-width:220px}
 .tip b{font-size:13px}
 
-.pin-label{background:none;border:0;box-shadow:none;color:#fff;font-weight:700;font-size:12px;text-shadow:0 1px 3px #000,0 0 6px #000;white-space:nowrap}
+.pin-label{background:none;border:0;box-shadow:none;color:#1b1a17;font-weight:700;font-size:12px;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 6px #fff;white-space:nowrap}
 .pin-label::before{display:none}
 
 /* 공통 띠(invisiblecity/shared/icbar.mjs 생성본) */
@@ -180,6 +179,7 @@ footer a{color:#cfc6bb}
   .item{left:170px;right:8px}
   .lanes{width:88px}
   .stratum span{display:none}
+  .stratum::before{width:100px}
   #detail{left:8px;right:8px;bottom:8px;width:auto;max-height:52vh}
 }
 </style>
@@ -266,10 +266,10 @@ ground.style.height = H + 'px';
 let h = '';
 // 지층(어림)
 const STRATA = [
-  [0, 3, '#4a3a2a', '흙'], [3, 20, '#3f342a', '모래·자갈·점토'], [20, 60, '#352e29', '풍화암'],
-  [60, 1500, '#2a2726', '단단한 암반<br>화강암·편마암'], [1500, 32000, '#221d1f', '지각 깊은 곳<br>(온도는 1km에 약 25℃씩 오른다)'], [32000, MAXD * 2, '#4a1a12', '맨틀'],
+  [0, 3, '#8b5a2b', '흙'], [3, 20, '#d9a441', '모래·자갈·점토'], [20, 60, '#c8693a', '풍화암'],
+  [60, 1500, '#7f8c99', '단단한 암반<br>화강암·편마암'], [1500, 32000, '#4f5b78', '지각 깊은 곳<br>(온도는 1km에 약 25℃씩 오른다)'], [32000, MAXD * 2, '#e2401f', '맨틀'],
 ];
-for (const [a, b, c, t] of STRATA) h += `<div class="stratum" style="top:${y(a)}px;height:${Math.min(y(b), H) - y(a)}px;background:${c}"><span>${t}</span></div>`;
+for (const [a, b, c, t] of STRATA) h += `<div class="stratum" style="top:${y(a)}px;height:${Math.min(y(b), H) - y(a)}px;--s:${c}"><span>${t}</span></div>`;
 h += '<div class="axis"></div>';
 for (const d of [0, 5, 10, 20, 30, 40, 50, 60, 80, 100, 150, 200, 300, 500, 1000, 2000, 5000, 10000, 20000, 30000]) h += `<div class="tick" style="top:${y(d)}px"><b>${d === 0 ? '0m' : '−' + fmt(d)}</b></div>`;
 for (const m of M) h += `<div class="marker-line" style="top:${y(m.depth)}px"><span>${esc(m.text)}</span></div>`;
@@ -282,7 +282,7 @@ S.forEach((s, i) => {
   h += `<button class="sdot" data-s="${i}" style="top:${y(s.depth)}px;left:${(s.line - 1) * (mobile ? 11 : 12) + 5}px;background:${LINE_COLORS[s.line]}" aria-label="${esc(s.name)} ${s.line}호선 ${s.depth}m"></button>`;
 });
 h += '</div>';
-h += `<div class="lane-note" style="top:${y(64)}px">서울 지하철<br>1~8호선 ${S.filter((s) => s.depth > 0).length}개 역<br><span style="color:var(--dim)">점 하나가 역 하나</span></div>`;
+h += `<div class="lane-note" style="top:${y(64)}px">서울 지하철<br>1~8호선 ${S.filter((s) => s.depth > 0).length}개 역<br><span style="opacity:.8">점 하나가 역 하나</span></div>`;
 
 // 장소 라벨: 실제 깊이에 두되 겹치면 아래로 민다. 지하상가는 한 덩어리로 묶는다.
 const withDepth = P.filter((p) => p.depth != null && !p.shallow).sort((a, b) => a.depth - b.depth);
@@ -299,12 +299,19 @@ entries.forEach((e) => {
 });
 ground.innerHTML = h;
 const itemEls = [...ground.querySelectorAll('.item')];
-let last = -1e9, leads = '';
+const place = (bs) => { let off = 0, sum = 0; for (const b of bs) { sum += b.ty - off; off += b.h; } return { bs, top: Math.max(sum / bs.length, 0), h: off }; };
+const clusters = [];
 entries.forEach((e, i) => {
-  const el = itemEls[i], ty = y(e.depth);
-  const ly = Math.max(ty - 14, last + 6);
+  let c = place([{ i, ty: y(e.depth) - 14, h: itemEls[i].offsetHeight + 6 }]);
+  while (clusters.length && clusters.at(-1).top + clusters.at(-1).h > c.top) c = place([...clusters.pop().bs, ...c.bs]);
+  clusters.push(c);
+});
+const LY = [];
+for (const c of clusters) { let t = c.top; for (const b of c.bs) { LY[b.i] = t; t += b.h; } }
+let leads = '';
+entries.forEach((e, i) => {
+  const el = itemEls[i], ty = y(e.depth), ly = LY[i];
   el.style.top = ly + 'px';
-  last = ly + el.offsetHeight;
   const dy = ly + 14 - ty, len = Math.hypot(LX - 64, dy), ang = Math.atan2(dy, LX - 64) * 180 / Math.PI;
   leads += `<div class="lead" style="left:64px;top:${ty}px;width:${len}px;transform:rotate(${ang}deg)"></div>`;
 });
@@ -368,7 +375,7 @@ const mallLines = [], routeLines = {};
 const routeBounds = (p) => { const b = new NV.LatLngBounds(); p.route.flat().forEach(([la, ln]) => b.extend(LL(la, ln))); return b; };
 for (const p of P) for (const seg of p.route || []) {
   const draw = (w, c, o, dash) => new NV.Polyline({ map, path: seg.map(([la, ln]) => LL(la, ln)), strokeColor: c, strokeWeight: w, strokeOpacity: o, strokeStyle: dash ? 'shortdash' : 'solid', strokeLineCap: dash ? 'butt' : 'round', strokeLineJoin: 'round', clickable: true, zIndex: 40 });
-  const halo = draw(9, '#000', .45), line = draw(5, color(p.cat), .95, p.routeDash);
+  const halo = draw(9, '#fff', .9), line = draw(5, color(p.cat), .95, p.routeDash);
   for (const l of [halo, line]) NV.Event.addListener(l, 'click', () => select(p.id, true));
   NV.Event.addListener(line, 'mouseover', (e) => showTip(`<b>${esc(p.name)}</b><br>${esc(p.span || '')}${p.routeLen ? ' · 약 ' + p.routeLen.toLocaleString() + 'm' : ''}`, e.domEvent));
   NV.Event.addListener(line, 'mouseout', hideTip);
