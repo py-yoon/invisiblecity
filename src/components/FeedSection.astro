@@ -1,5 +1,5 @@
 ---
-import { type Post, FEED_CATEGORIES, postUrl, categoryUrl, fmtDate } from '../lib/site';
+import { type Post, FEED_CATEGORIES, postUrl, categoryUrl, fmtDate, url } from '../lib/site';
 const { posts } = Astro.props as { posts: Post[] };
 const cols = FEED_CATEGORIES.map((name) => ({ name, items: posts.filter((p) => p.data.categories.includes(name)).slice(0, 5) }));
 ---
@@ -12,7 +12,7 @@ const cols = FEED_CATEGORIES.map((name) => ({ name, items: posts.filter((p) => p
         <ul class="recent">
           {c.items.map((p) => <li><a href={postUrl(p)}>{p.data.title}</a><time datetime={p.data.date.toISOString()}>{fmtDate(p.data.date)}</time></li>)}
         </ul>
-        <p><a href={categoryUrl(c.name)}>{c.name} 전체 보기 →</a></p>
+        <p><a href={url(`/${c.name.replace(' ', '-')}/`)}>최신 {c.name} 모아 보기 →</a> · <a href={categoryUrl(c.name)}>지난 글</a></p>
       </div>
     ))}
   </div>

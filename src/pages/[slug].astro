@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import { getPosts, postSlug, postUrl, categoryUrl, categorySlug, tagUrl, fmtDate, withBase, url, tocOf } from '../lib/site';
+import { getPosts, postSlug, postUrl, categoryUrl, categorySlug, tagUrl, fmtDate, withBase, url, tocOf, HUBS, hubOf } from '../lib/site';
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -12,9 +12,16 @@ export async function getStaticPaths() {
       props: { kind: 'post' as const, post, newer: posts[i - 1], older: posts[i + 1] },
     })),
     ...pages.map((page) => ({ params: { slug: page.id }, props: { kind: 'page' as const, page } })),
+    ...HUBS.map((hub) => {
+      const list = posts.filter((p) => hubOf(p) === hub);
+      return { params: { slug: hub.slug }, props: { kind: 'hub' as const, hub, latest: list.slice(0, hub.take), older: list.slice(hub.take, hub.take + 20) } };
+    }).filter((h) => h.props.latest.length),
   ];
 }
 const props = Astro.props;
+const hub = props.kind === 'post' ? hubOf(props.post) : undefined;
+// 고정 페이지에 글 여러 편을 이어 붙일 때 글마다 h2 제목을 달고, 본문 소제목은 한 단계씩 내린다
+const demote = (h: string) => h.replace(/<(\/?)h([2-5])\b/g, (_, sl, n) => `<${sl}h${+n + 1}`);
 const html = props.kind === 'post' ? withBase(props.post.rendered?.html ?? '') : '';
 const toc = tocOf(html);
 
@@ -55,7 +62,7 @@ const updated = props.kind === 'post' && props.post.data.updated && fmtDate(prop
   ? fmtDate(props.post.data.updated) : null;
 ---
 {props.kind === 'post' ? (
-  <Base title={props.post.data.title} description={props.post.data.description} image={props.post.data.cover && url(props.post.data.cover)} type="article" article={article} jsonld={jsonld}>
+  <Base title={props.post.data.title} description={props.post.data.description} image={props.post.data.cover && url(props.post.data.cover)} type="article" article={article} jsonld={jsonld} noindex={!!hub}>
     <article class="single">
       <h1 class="entry-title">{props.post.data.title}</h1>
       <p class="entry-dateline">
@@ -64,6 +71,7 @@ const updated = props.kind === 'post' && props.post.data.updated && fmtDate(prop
         {updated && <span class="updated"> · 수정 {updated}</span>}
         {props.post.data.draft && <span class="draft-badge">초안</span>}
       </p>
+      {hub && <p class="hub-note">이 글은 그날 기준의 기록이다. 최신 내용은 <a href={url(`/${hub.slug}/`)}>{hub.title}</a>에서 볼 수 있다.</p>}
       {toc.length > 0 && (
         <nav class="toc" aria-label="목차">
           <p>목차</p>
@@ -90,6 +98,25 @@ const updated = props.kind === 'post' && props.post.data.updated && fmtDate(prop
         {props.newer ? <a href={postUrl(props.newer)} title={props.newer.data.title}>다음</a> : <span />}
       </nav>
       <hr />
+    </article>
+  </Base>
+) : props.kind === 'hub' ? (
+  <Base title={props.hub.title} description={props.hub.description}>
+    <article class="single">
+      <h1 class="entry-title">{props.hub.title}</h1>
+      <p class="entry-dateline">갱신 <time datetime={props.latest[0].data.date.toISOString()}>{fmtDate(props.latest[0].data.date)}</time></p>
+      <p>{props.hub.description}</p>
+      {props.latest.map((p) => (
+        props.hub.take > 1
+          ? <section><h2><a href={postUrl(p)}>{p.data.title}</a></h2><div class="entry-content" set:html={demote(withBase(p.rendered?.html ?? ''))} /></section>
+          : <div class="entry-content" set:html={withBase(p.rendered?.html ?? '')} />
+      ))}
+      {props.older.length > 0 && (
+        <>
+          <h2>지난 기록</h2>
+          <ul class="recent">{props.older.map((p) => <li><a href={postUrl(p)}>{p.data.title}</a> <time datetime={p.data.date.toISOString()}>{fmtDate(p.data.date)}</time></li>)}</ul>
+        </>
+      )}
     </article>
   </Base>
 ) : (

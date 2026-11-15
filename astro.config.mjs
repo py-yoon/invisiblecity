@@ -27,7 +27,9 @@ export default defineConfig({
       // public/ 아래 정적 앱 페이지는 Astro가 모르니 직접 넣는다.
       customPages: [new URL('underground/', SITE + BASE).href],
       // 워드프레스(Rank Math) 사이트맵처럼 글·페이지·카테고리만. 태그·목록 쪽수는 색인은 허용하되 사이트맵에는 넣지 않는다.
-      filter: (page) => !/\/(search|admin|tags|categories)\/$|\/tag\/|\/page\/\d+\/$/.test(page),
+      // 날짜별 자동 글(청약 결과·분양 일정·산업용지 공고)은 noindex라 빼고, 고정 페이지(/청약-결과/ 등)만 넣는다. site.ts HUBS와 같은 규칙.
+      filter: (page) => !/\/(search|admin|tags|categories)\/$|\/tag\/|\/page\/\d+\/$/.test(page)
+        && !/\/(청약-결과|분양-일정|산업용지-공급-공고)-\d{4}-/.test(decodeURI(page)),
       serialize(item) {
         const info = postInfo.get(new URL(item.url).pathname.slice(base.length));
         if (info?.lastmod) item.lastmod = new Date(info.lastmod).toISOString();

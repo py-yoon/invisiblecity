@@ -443,7 +443,7 @@ async function applyResult(ref) {
         table(['주택형', '최저', '최고', '평균'], rows.map((r) => [shortTy(r.HOUSE_TY, rows.map((q) => q.HOUSE_TY)), r.LWET_SCORE, r.TOP_SCORE, r.AVRG_SCORE])));
     }
   }
-  parts.push(`경쟁률·가점은 청약홈 집계 기준이며, 부적격·계약 포기로 실제 계약 결과는 달라질 수 있다. 다가오는 접수 일정은 [분양 일정](/category/분양-일정/) 카테고리의 주간 글에 모은다.`);
+  parts.push(`경쟁률·가점은 청약홈 집계 기준이며, 부적격·계약 포기로 실제 계약 결과는 달라질 수 있다. 다가오는 접수 일정은 [아파트 분양 일정](/분양-일정/)에 모은다.`);
   parts.push(`<!-- 청약결과: ${items.map((x) => x.a.HOUSE_MANAGE_NO).join(',') || '0'} -->\n<!-- 당첨가점: ${scores.map((x) => x.a.HOUSE_MANAGE_NO).join(',') || '0'} -->`);
 
   const lead = items[0] ? `${houseName(items[0].a)} ${fmtRate(items[0].rate)}` : `당첨 가점 ${scores.length}곳`;
