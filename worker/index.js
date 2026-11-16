@@ -1,14 +1,13 @@
 // invisiblecity.co.kr Worker: 블로그 정적 파일은 그대로 내보내고(ASSETS),
-// /nimby/·/factory/·/architect/ 아래 요청만 각 앱으로 넘겨 같은 도메인에서 보이게 한다.
+// /nimby/·/factory/ 아래 요청만 각 앱(같은 계정의 정적 Worker)으로 넘겨 같은 도메인에서 보이게 한다.
 const APPS = [
-  // SPIRE(/spire)는 2026-11-16부터 이 Worker 를 거치지 않는다: worlds-tallest Worker 의 경로 라우트가 정적 파일로 바로 내보낸다.
+  // SPIRE(/spire)와 건축, 걷다(/architect)는 2026-11-16부터 이 Worker 를 거치지 않는다:
+  // 각자의 Worker(worlds-tallest, archi2)가 경로 라우트로 바로 받는다.
   // 기피시설 지도(ghmun-nimby-map)는 루트에서 도는 정적 사이트라 /nimby 를 떼고 넘긴다.
   // 2026-11-16 Vercel 정지로 Cloudflare Worker(ghmun-nimby-map)로 옮겼다. binding 이 있으면 origin 은 주소 계산용 자리표시다.
   { prefix: '/nimby', origin: 'https://ghmun-nimby-map.internal', binding: 'NIMBY', keepPrefix: false },
   // 공장용지 지도(factory-map)도 루트에서 도는 정적 사이트다.
   { prefix: '/factory', origin: 'https://factory-map.internal', binding: 'FACTORY', keepPrefix: false },
-  // 건축, 걷다(archi2)는 Next.js basePath가 /architect 라서 경로를 그대로 넘긴다.
-  { prefix: '/architect', origin: 'https://archi2-lovat.vercel.app', keepPrefix: true },
 ];
 
 export default {
