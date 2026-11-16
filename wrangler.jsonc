@@ -4,7 +4,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "invisiblecity",
   "compatibility_date": "2026-10-01",
-  // Worker 코드(worker/index.js)는 아래 run_worker_first 에 적은 경로에서만 돈다: /spire·/nimby·/factory·/architect 프록시, /retrack 리다이렉트.
+  // Worker 코드(worker/index.js)는 아래 run_worker_first 에 적은 경로에서만 돈다: /nimby·/factory·/architect 프록시, /retrack 리다이렉트.
   // 나머지(블로그 글·이미지·_redirects·404)는 Worker 를 거치지 않고 정적 파일로 바로 나간다 — 무료 한도(하루 Worker 호출 10만 건)에 안 잡힌다.
   // 그래서 http→https 와 www→apex 는 Worker 가 아니라 Cloudflare 도메인 설정(Always Use HTTPS, Redirect Rule)이 맡는다.
   "main": "worker/index.js",
@@ -25,10 +25,11 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    // "/spire*" 처럼 쓰면 /spire-세계-최고층-빌딩-도감 같은 글 주소까지 잡히므로 정확한 경로와 그 아래(/*)만 적는다.
+    // "/nimby*" 처럼 쓰면 같은 글자로 시작하는 글 주소까지 잡히므로 정확한 경로와 그 아래(/*)만 적는다.
+    // /spire 는 여기 없다: worlds-tallest Worker 의 경로 라우트(invisiblecity.co.kr/spire/*)가 먼저 받는다.
     "run_worker_first": [
-      "/spire", "/spire/*", "/nimby", "/nimby/*", "/factory", "/factory/*",
-      "/architect", "/architect/*", "/retrack", "/retrack/*", "/a063e951082ad4c6/*"
+      "/nimby", "/nimby/*", "/factory", "/factory/*",
+      "/architect", "/architect/*", "/retrack", "/retrack/*"
     ],
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"

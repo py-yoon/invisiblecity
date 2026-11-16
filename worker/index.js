@@ -1,8 +1,7 @@
 // invisiblecity.co.kr Worker: 블로그 정적 파일은 그대로 내보내고(ASSETS),
-// /spire/·/nimby/·/factory/·/architect/ 아래 요청만 각 Vercel 프로젝트로 넘겨 같은 도메인에서 보이게 한다.
+// /nimby/·/factory/·/architect/ 아래 요청만 각 앱으로 넘겨 같은 도메인에서 보이게 한다.
 const APPS = [
-  // SPIRE(worlds-tallest)는 Next.js basePath가 /spire 라서 경로를 그대로 넘긴다.
-  { prefix: '/spire', origin: 'https://worlds-tallest.vercel.app', keepPrefix: true },
+  // SPIRE(/spire)는 2026-11-16부터 이 Worker 를 거치지 않는다: worlds-tallest Worker 의 경로 라우트가 정적 파일로 바로 내보낸다.
   // 기피시설 지도(ghmun-nimby-map)는 루트에서 도는 정적 사이트라 /nimby 를 떼고 넘긴다.
   // 2026-11-16 Vercel 정지로 Cloudflare Worker(ghmun-nimby-map)로 옮겼다. binding 이 있으면 origin 은 주소 계산용 자리표시다.
   { prefix: '/nimby', origin: 'https://ghmun-nimby-map.internal', binding: 'NIMBY', keepPrefix: false },
@@ -10,9 +9,6 @@ const APPS = [
   { prefix: '/factory', origin: 'https://factory-map.internal', binding: 'FACTORY', keepPrefix: false },
   // 건축, 걷다(archi2)는 Next.js basePath가 /architect 라서 경로를 그대로 넘긴다.
   { prefix: '/architect', origin: 'https://archi2-lovat.vercel.app', keepPrefix: true },
-  // SPIRE의 Vercel Web Analytics는 basePath와 상관없이 루트의 이 경로로 스크립트·이벤트를 보낸다.
-  // (Vercel이 프로젝트마다 정하는 경로. 바뀌면 SPIRE 페이지 HTML의 /…/script.js 주소로 갱신)
-  { prefix: '/a063e951082ad4c6', origin: 'https://worlds-tallest.vercel.app', keepPrefix: true },
 ];
 
 export default {
