@@ -13,6 +13,11 @@
     { "pattern": "invisiblecity.co.kr", "custom_domain": true },
     { "pattern": "www.invisiblecity.co.kr", "custom_domain": true }
   ],
+  // /nimby·/factory 는 같은 계정의 정적 Worker 를 직접 부른다(공개 주소 없음).
+  "services": [
+    { "binding": "NIMBY", "service": "ghmun-nimby-map" },
+    { "binding": "FACTORY", "service": "factory-map" }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",

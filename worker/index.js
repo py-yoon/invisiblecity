@@ -4,9 +4,10 @@ const APPS = [
   // SPIRE(worlds-tallest)는 Next.js basePath가 /spire 라서 경로를 그대로 넘긴다.
   { prefix: '/spire', origin: 'https://worlds-tallest.vercel.app', keepPrefix: true },
   // 기피시설 지도(ghmun-nimby-map)는 루트에서 도는 정적 사이트라 /nimby 를 떼고 넘긴다.
-  { prefix: '/nimby', origin: 'https://ghmun-nimby-map.vercel.app', keepPrefix: false },
+  // 2026-11-16 Vercel 정지로 Cloudflare Worker(ghmun-nimby-map)로 옮겼다. binding 이 있으면 origin 은 주소 계산용 자리표시다.
+  { prefix: '/nimby', origin: 'https://ghmun-nimby-map.internal', binding: 'NIMBY', keepPrefix: false },
   // 공장용지 지도(factory-map)도 루트에서 도는 정적 사이트다.
-  { prefix: '/factory', origin: 'https://factory-map.vercel.app', keepPrefix: false },
+  { prefix: '/factory', origin: 'https://factory-map.internal', binding: 'FACTORY', keepPrefix: false },
   // 건축, 걷다(archi2)는 Next.js basePath가 /architect 라서 경로를 그대로 넘긴다.
   { prefix: '/architect', origin: 'https://archi2-lovat.vercel.app', keepPrefix: true },
   // SPIRE의 Vercel Web Analytics는 basePath와 상관없이 루트의 이 경로로 스크립트·이벤트를 보낸다.
@@ -32,13 +33,16 @@ export default {
     if (!app.keepPrefix && url.pathname === app.prefix) {
       return Response.redirect(`${url.origin}${app.prefix}/${url.search}`, 301);
     }
-    const path = app.keepPrefix ? url.pathname : url.pathname.slice(app.prefix.length);
+    let path = app.keepPrefix ? url.pathname : url.pathname.slice(app.prefix.length);
+    // 정적 Worker 는 주소를 Vercel 때와 같게 두려고(.html 그대로) html_handling 을 꺼 두었다. 폴더 주소만 여기서 index.html 로 잇는다.
+    if (app.binding && path.endsWith('/')) path += 'index.html';
     const upstream = new URL(path + url.search, app.origin);
 
     const headers = new Headers(request.headers);
     headers.set('x-forwarded-host', url.host);
     headers.set('x-forwarded-proto', 'https');
-    const res = await fetch(upstream, {
+    // binding 이 있는 앱은 같은 계정의 다른 Worker 를 서비스 바인딩으로 직접 부른다(wrangler.jsonc services).
+    const res = await (app.binding ? env[app.binding] : globalThis).fetch(upstream, {
       method: request.method,
       headers,
       body: ['GET', 'HEAD'].includes(request.method) ? undefined : request.body,
