@@ -11,7 +11,9 @@
   "preview_urls": false,
   "routes": [
     { "pattern": "invisiblecity.co.kr", "custom_domain": true },
-    { "pattern": "www.invisiblecity.co.kr", "custom_domain": true }
+    { "pattern": "www.invisiblecity.co.kr", "custom_domain": true },
+    // 옛 기피시설 지도 주소. worker 가 /nimby/ 로 보낸다(예전에는 Vercel 이 하던 리다이렉트).
+    { "pattern": "nimby.invisiblecity.co.kr", "custom_domain": true }
   ],
   // /nimby·/factory 는 같은 계정의 정적 Worker 를 직접 부른다(공개 주소 없음).
   "services": [

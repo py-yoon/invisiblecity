@@ -18,6 +18,10 @@ const APPS = [
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // 옛 주소 nimby.invisiblecity.co.kr → /nimby/ (경로는 그대로 붙인다)
+    if (url.hostname === 'nimby.invisiblecity.co.kr') {
+      return Response.redirect(`https://invisiblecity.co.kr/nimby${url.pathname}${url.search}`, 308);
+    }
     // http → https, www → apex 를 한 번에 301로 맞춘다(검색엔진이 주소 하나만 보게).
     if (url.protocol === 'http:' || url.hostname === 'www.invisiblecity.co.kr') {
       return Response.redirect(`https://invisiblecity.co.kr${url.pathname}${url.search}`, 301);
