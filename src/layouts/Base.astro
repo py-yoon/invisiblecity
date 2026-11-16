@@ -1,7 +1,8 @@
 ---
 import '../styles/global.css';
 import SearchForm from '../components/SearchForm.astro';
-import { SITE_TITLE, SITE_DESC, url, getPosts, groupBy, isFeed, postUrl, categoryUrl, fmtShortDate } from '../lib/site';
+import { SITE_TITLE, SITE_DESC, url, getPosts, groupBy, isFeed, hubLinker, categoryUrl, fmtShortDate } from '../lib/site';
+const postUrl = await hubLinker();
 
 interface Article { published: Date; modified?: Date; section?: string; tags: string[] }
 interface Props { title?: string; description?: string; image?: string; type?: 'website' | 'article'; noindex?: boolean; article?: Article; jsonld?: object[] }

@@ -1,5 +1,6 @@
 ---
-import { type Post, postUrl, fmtDate, url, excerptOf } from '../lib/site';
+import { type Post, hubLinker, fmtDate, url, excerptOf } from '../lib/site';
+const postUrl = await hubLinker();
 interface Props { posts: Post[]; page?: number; pages?: number; basePath?: string }
 const { posts, page = 1, pages = 1, basePath = '/' } = Astro.props;
 const pageHref = (n: number) => url(n === 1 ? basePath : `${basePath}page/${n}/`);

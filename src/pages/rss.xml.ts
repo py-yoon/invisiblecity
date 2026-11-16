@@ -1,9 +1,10 @@
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
-import { getPosts, postUrl, SITE_TITLE, SITE_DESC } from '../lib/site';
+import { getPosts, postUrl, hubOf, SITE_TITLE, SITE_DESC } from '../lib/site';
 
 export async function GET(context: APIContext) {
-  const posts = await getPosts();
+  // 날짜별 자동 글(noindex)은 피드에 싣지 않는다.
+  const posts = (await getPosts()).filter((p) => !hubOf(p));
   return rss({
     title: SITE_TITLE,
     description: SITE_DESC,

@@ -84,3 +84,10 @@ export const HUBS = [
   { slug: '산업용지-공급-공고', prefix: '산업용지-공급-공고-', take: 1, title: '지금 접수 중인 산업용지 공급 공고', description: '신청을 받고 있는 산업단지 산업용지 분양·매각 공고와 LH 산업시설·자족시설용지 공고의 접수 기간, 면적, ㎡당 가격. 공장용지 지도 자료로 2주마다 갱신한다.' },
 ] as const;
 export const hubOf = (p: Post) => HUBS.find((h) => postSlug(p).startsWith(h.prefix) && /^\d{4}-/.test(postSlug(p).slice(h.prefix.length)));
+/** 목록에서 쓸 글 주소. 고정 페이지에 지금 실려 있는 날짜별 글은 고정 페이지로 보낸다(내부 링크를 색인되는 쪽에 모은다). */
+export async function hubLinker() {
+  const posts = await getPosts();
+  const live = new Map<string, string>();
+  for (const h of HUBS) for (const p of posts.filter((x) => hubOf(x) === h).slice(0, h.take)) live.set(p.id, url(`/${h.slug}/`));
+  return (p: Post) => live.get(p.id) ?? postUrl(p);
+}

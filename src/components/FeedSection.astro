@@ -1,5 +1,6 @@
 ---
-import { type Post, FEED_CATEGORIES, postUrl, categoryUrl, fmtDate, url } from '../lib/site';
+import { type Post, FEED_CATEGORIES, hubLinker, categoryUrl, fmtDate, url } from '../lib/site';
+const postUrl = await hubLinker();
 const { posts } = Astro.props as { posts: Post[] };
 const cols = FEED_CATEGORIES.map((name) => ({ name, items: posts.filter((p) => p.data.categories.includes(name)).slice(0, 5) }));
 ---

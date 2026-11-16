@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import PostList from '../../components/PostList.astro';
 import Sidebar from '../../components/Sidebar.astro';
-import { getPosts, groupBy, tagSlug } from '../../lib/site';
+import { getPosts, groupBy, tagSlug, hubOf } from '../../lib/site';
 
 export async function getStaticPaths() {
   return groupBy(await getPosts(), 'tags').map(([name, posts]) => ({
@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 }
 const { name, posts } = Astro.props;
 ---
-<Base noindex={posts.length < 2} title={`태그: ${name}`} description={`${name}  글 ${posts.length}편`}>
+<Base noindex={posts.length < 2 || posts.every((p) => hubOf(p))} title={`태그: ${name}`} description={`${name}  글 ${posts.length}편`}>
   <div class="with-sidebar">
     <div class="content">
       <h1 class="archive-title">태그: {name}</h1>
