@@ -25,6 +25,10 @@ export default {
     if (url.pathname === '/retrack' || url.pathname.startsWith('/retrack/')) {
       return Response.redirect(`https://retrack.invisiblecity.co.kr${url.pathname.slice('/retrack'.length) || '/'}${url.search}`, 301);
     }
+    // 경로 라우트는 ?뒤까지 맞춰 보기 때문에 /architect?lang=en, /spire?fbclid=… 처럼 딱 그 경로에 ?가 붙은 주소는
+    // 각 Worker 의 라우트에 안 걸리고 여기로 온다. 서비스 바인딩으로 그 Worker 에 그대로 넘긴다.
+    if (url.pathname === '/architect') return env.ARCHI.fetch(request);
+    if (url.pathname === '/spire') return env.SPIRE.fetch(request);
     const app = APPS.find((a) => url.pathname === a.prefix || url.pathname.startsWith(a.prefix + '/'));
     if (!app) return env.ASSETS.fetch(request);
 
