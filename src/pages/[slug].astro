@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import shopData from '../data/shop.json';
 import { getPosts, postSlug, postUrl, categoryUrl, categorySlug, tagUrl, fmtDate, withBase, url, tocOf, HUBS, hubOf } from '../lib/site';
 
 export async function getStaticPaths() {
@@ -19,7 +20,9 @@ export async function getStaticPaths() {
   ];
 }
 const props = Astro.props;
-const hub = props.kind === 'post' ? hubOf(props.post) : undefined;
+// 쿠팡 파트너스 링크: 글 slug → 책 목록. 상품이 내려가면 src/data/shop.json 에서 바꾼다.
+const shop: { name: string; url: string }[] = props.kind === 'post' ? (shopData as Record<string, { name: string; url: string }[]>)[postSlug(props.post)] ?? [] : [];
+const hub =props.kind === 'post' ? hubOf(props.post) : undefined;
 // 고정 페이지에 글 여러 편을 이어 붙일 때 글마다 h2 제목을 달고, 본문 소제목은 한 단계씩 내린다
 const demote = (h: string) => h.replace(/<(\/?)h([2-5])\b/g, (_, sl, n) => `<${sl}h${+n + 1}`);
 const html = props.kind === 'post' ? withBase(props.post.rendered?.html ?? '') : '';
@@ -79,6 +82,13 @@ const updated = props.kind === 'post' && props.post.data.updated && fmtDate(prop
         </nav>
       )}
       <div class="entry-content" data-pagefind-body set:html={html} />
+      {shop.length > 0 && (
+        <aside class="shop" aria-label="관련 책">
+          <p><strong>관련 책</strong></p>
+          <ul>{shop.map((b) => <li><a href={b.url} target="_blank" rel="sponsored nofollow noopener">{b.name}</a></li>)}</ul>
+          <p style="font-size:.8em;opacity:.7">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+        </aside>
+      )}
       <hr />
       <div class="entry-meta">
         <p class="author">Wanbo</p>
