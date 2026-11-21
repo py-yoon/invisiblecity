@@ -1,6 +1,6 @@
 #!/bin/zsh
-# 정기 글 초안 자동 작성 (launchd: kr.co.invisiblecity.posts, 매일 22:00 한 번)
-# 월·수·금 글을 draft: true 초안으로 만들어 커밋·푸시한다. 그날 못 돌았으면(맥이 꺼져 있었으면) 다음 날 22:00에 보충한다.
+# 정기 글 자동 게시 (launchd: kr.co.invisiblecity.posts, 매일 22:00 한 번)
+# 월·수·금 글을 만들어 바로 게시(커밋·푸시 → Workers Builds 배포)한다. 2026-11-21부터 초안 단계 없음. 그날 못 돌았으면(맥이 꺼져 있었으면) 다음 날 22:00에 보충한다.
 # 이틀 넘게 밀린 슬롯은 만들지 않고 알림만 보낸다.
 #   월: 매달 첫 월요일 = 지난달 재개발 단계 변화(retrack) / 그 밖 = 자치구 정비사업 현황(gu next)
 #   수: 홀수 주 = 서울 대장아파트(apt next) / 짝수 주 = 산업용지 공급 공고(factory)
@@ -15,7 +15,8 @@ BLOG="$PWD"
 export FACTORY_DIR="${FACTORY_DIR:-$HOME/.factory-map-sync}"
 export RETRACK_DIR="${RETRACK_DIR:-$HOME/.retrack-sync}"
 export ARCHI_DIR="${ARCHI_DIR:-$HOME/.archi2-sync}"
-export DRAFT=1
+export DRAFT=0
+NOTES=docs/architect-map-notes.md   # 건축가 글 끝 HTML 주석(지도 데이터 메모)을 옮겨 두는 곳
 STATE="$BLOG/.state"; mkdir -p "$STATE"
 DRY="${DRY:-0}"
 
@@ -68,8 +69,8 @@ write_architect() {
 invisiblecity 블로그의 정기 글 한 편을 쓴다. 건축가 정보(JSON): $pick  (분류: $cat)
 1. $ARCHI_DIR/src/data/architects.ts 에서 이 건축가의 항목(id 기준)을 읽고, $ARCHI_DIR/src/data/architectures.ts 에서 이 건축가의 건물 가운데 '건축, 걷다' 지도에 올라 있는 것을 찾는다. 지도에 있는 건물 3~5곳을 고른다.
 2. 문체와 구성은 $BLOG/src/content/posts/국내-건축가-조병수.md 를 따른다(~다 체, 소제목 ## 건물별, '같이 보면', '참고'). 이 파일은 읽기만 하고 고치지 않는다.
-3. 사실은 웹 검색으로 확인한다(건축가 약력, 건물 준공 연도·위치·수상). 확인 못 한 것은 쓰지 않거나 '확인되지 않았다'고 적는다. 지도 데이터와 웹이 다르면 웹을 확인해 맞는 쪽을 쓰고, 틀린 지도 데이터는 글 맨 끝 HTML 주석으로 남긴다.
-4. 파일: $BLOG/src/content/posts/<slug>.md. slug 는 '국내-건축가-이름' 또는 '해외-건축가-이름'(한글, 하이픈). 프런트매터는 title, slug, date(지금 KST, ISO 8601), draft: true, categories: ["$cat"], tags, description(150자 안팎)을 갖는다.
+3. 사실은 웹 검색으로 확인한다(건축가 약력, 건물 준공 연도·위치·수상). 확인 못 한 것은 쓰지 않는다. 이 글은 사람 검토 없이 바로 게시된다. 지도 데이터와 웹이 다르면 웹을 확인해 맞는 쪽을 쓰고, 틀린 지도 데이터는 글 맨 끝 HTML 주석으로 남긴다.
+4. 파일: $BLOG/src/content/posts/<slug>.md. slug 는 '국내-건축가-이름' 또는 '해외-건축가-이름'(한글, 하이픈). 프런트매터는 title, slug, date(지금 KST, ISO 8601), categories: ["$cat"], tags, description(150자 안팎)을 갖는다.
 5. 제목에 콜론(:)을 쓰지 않는다. 제목에서 나눌 때는 앞뒤로 공백 한 칸씩 둔 ' - ' 를 쓴다(예: '국내 건축가 조병수 - 땅을 파고 들어간 집'). 금지: em dash(—), 훈계조 마무리, 과장. 다른 파일은 만들거나 고치지 않는다. 끝나면 파일 경로만 출력한다.
 P
 )
@@ -77,12 +78,23 @@ P
     --allowedTools "Read Write Edit Glob Grep WebSearch WebFetch" --max-turns 60 || return 1
 }
 
+# 글 안의 HTML 주석(작성·지도 데이터 메모)은 페이지 소스에 노출되므로 $NOTES 로 옮기고 본문에서 지운다.
+move_notes() {
+  node -e '
+    const fs=require("fs");const [f,notes]=process.argv.slice(1);let t=fs.readFileSync(f,"utf8");
+    const cs=t.match(/<!--[\s\S]*?-->/g); if(!cs) process.exit(0);
+    const slug=f.split("/").pop().replace(/\.md$/,"");
+    fs.appendFileSync(notes,"\n## "+slug+"\n\n"+cs.map(c=>c.replace(/^<!--\s*|\s*-->$/g,"")).join("\n\n")+"\n");
+    t=t.replace(/\n*<!--[\s\S]*?-->\n*/g,"\n").replace(/\n+$/,"\n"); fs.writeFileSync(f,t);
+  ' "$1" "$NOTES"
+}
+
 validate() {   # 프런트매터 필수 값 점검. 실패하면 사이트 빌드가 깨질 수 있어 올리지 않는다.
   node -e '
     const fs=require("fs");const f=process.argv[1];const t=fs.readFileSync(f,"utf8");
     const m=t.match(/^---\n([\s\S]*?)\n---\n/); if(!m) throw new Error("프런트매터 없음");
     for(const k of ["title","slug","date","categories","tags","description"]) if(!new RegExp("^"+k+":","m").test(m[1])) throw new Error(k+" 없음");
-    if(!/^draft: true$/m.test(m[1])) throw new Error("draft: true 아님");
+    if(/^draft:\s*true/m.test(m[1])) throw new Error("draft: true 가 남아 있음");
     if(t.includes("—")) throw new Error("em dash 포함");
     if(/^title:.*[:：]/m.test(t.split("\n---")[0].replace(/^title: /m,"title: ").replace(/^---\n/,""))) throw new Error("제목에 콜론 포함");
     if(t.split("\n").length<30) throw new Error("본문이 너무 짧음");
@@ -116,9 +128,10 @@ for s in $slots; do
     if validate "$f"; then
       if [ "$DRY" = 1 ]; then echo "DRY: $f"
       else
-        git add "$f" && git commit -qm "정기 글 초안: $(grep -m1 '^title:' "$f" | cut -c8- | tr -d '"' | cut -c1-40)
+        move_notes "$f"
+        git add "$f" "$NOTES" && git commit -qm "정기 글: $(grep -m1 '^title:' "$f" | cut -c8- | tr -d '"' | cut -c1-40)
 
-Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>" && git push -q && echo "pushed $NEWPOST" && notify "초안 올라옴: $NEWPOST 읽어 보고 게시하세요"
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>" && git push -q && echo "pushed $NEWPOST" && notify "게시됨: $NEWPOST"
       fi
       touch "$STATE/$d-$k"
     else

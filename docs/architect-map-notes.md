@@ -51,3 +51,11 @@
 - 환기미술관 culturalSignificance: 1994 김수근문화상 건축 본상(한·일). editorial의 '브라보마이라이프는 … 김수근 건축상' 인용문은 출처 표기라 그대로 둠.
 - 진해 기적의 도서관: representativeWorksInKorea는 화면에 쓰이지 않는 필드이고 실제 정기용 작품이라 그대로 둠.
 - 전라남도·광주광역시 주소 53곳 → 전남광주통합특별시(특별법 부칙 제21446호, 2026-07-01 설치). 문화재 지정 명칭(전라남도 기념물 등)과 태그는 그대로.
+
+## 국내-건축가-최욱
+
+지도 데이터(archi2 architectures.ts) 확인 메모
+- gapado-artist-residence: periodDetail·description이 "원오원 아키텍스가 2018년 ... 설계"로 적혀 있으나, 웹 자료로는 가파도 프로젝트는 2012년 시작, 2018년 4월은 AiR 입주 시작 시점. AiR가 물에 잠겼던 지하 구조물을 고친 시설이라는 점도 지도 데이터에 없음.
+- hyundai-card-design-library-choi-wook: 중정을 "ㄷ자"로 적었으나 장소 소개 자료에는 "ㅁ자형 중정"으로 나옴. 2026년 3월 30일부터 임시 휴관이라는 visitingInfo.hours, 원설계가 유태용의 서미갤러리(2000)라는 내용은 웹에서 확인하지 못함.
+- sulwhasoo-house-bukchon-choi-wook: 휴무일(매주 월요일, 공휴일)은 웹에서 확인하지 못함.
+- choi-wook(architects.ts): awards에 "한국건축가협회상 베스트 7", "김수근문화상", "서울시 건축상"이 있으나 웹에서 확인하지 못함. 웹으로 확인된 수상은 2014 김종성 건축상, 현대카드 디자인 라이브러리 2013 DFAA 대상.

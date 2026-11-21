@@ -19,9 +19,9 @@ pnpm convert [백업폴더]   # 워드프레스 백업에서 글·이미지 다�
 invisiblecity.co.kr·www가 이 Worker에 연결되어 있다. `_redirects`가 옛 워드프레스 주소를 넘겨준다.
 (2026-10-31까지 쓰던 GitHub Pages 미리보기는 BASE=/invisiblecity/ 로 빌드했고, 지금은 껐다.)
 
-## 정기 글 초안 자동 작성 (월·수·금)
+## 정기 글 자동 게시 (월·수·금)
 
-`scripts/weekly-post.sh` 가 매일 22:00(맥 launchd, `kr.co.invisiblecity.posts`)에 한 번 돌아 그날이 월·수·금이면 `draft: true` 초안을 커밋·푸시한다. 그날 못 돌았으면(맥이 꺼져 있었으면) 다음 날 22:00에 보충하고, 이틀 넘게 밀린 슬롯은 건너뛰며 알림만 보낸다. 초안은 운영 사이트에 안 나오니 읽어 보고 `draft: true` 줄을 지워 게시한다.
+`scripts/weekly-post.sh` 가 매일 22:00(맥 launchd, `kr.co.invisiblecity.posts`)에 한 번 돌아 그날이 월·수·금이면 글을 만들어 바로 게시(커밋·푸시 → Workers Builds 배포)한다(2026-11-21부터 초안 단계 없음). 그날 못 돌았으면(맥이 꺼져 있었으면) 다음 날 22:00에 보충하고, 이틀 넘게 밀린 슬롯은 건너뛰며 알림만 보낸다. 글 끝 HTML 주석(지도 데이터 메모)은 페이지 소스에 드러나지 않게 `docs/architect-map-notes.md` 로 옮긴 뒤 올린다.
 
 - 월: 매달 첫 월요일 지난달 재개발 단계 변화 / 그 밖의 월요일 자치구 정비사업 현황(`gu next`)
 - 수: 홀수 주 서울 대장아파트(`apt next`) / 짝수 주 산업용지 공급 공고
